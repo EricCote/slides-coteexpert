@@ -77,13 +77,14 @@ Multiple courses
 - URL are defined in a Standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
 - URL are split in different parts
 
-<p>
+<div>
   <span className='color1 hover-bold'>https</span> ://
   <span className='color2 hover-bold'>server.com</span>
   <span className='color3 hover-bold'>/simple/doc</span> ?
   <span className='color4 hover-bold'>p1=a&p2=b</span>
   <span className='color5 hover-bold'>#frag</span>
-</p>
+</div>
+
 <table>
   <thead>
     <tr>
@@ -404,7 +405,7 @@ Old route components, not supporting the new route props. (Compatible with V5.)
 
 Create the router with a JS array describing routes:
 
-<div style={{ fontSize: '12px' }}>
+<div style={{ height:"500px", overflowY:"scroll" }}>
 
 ```jsx
 createBrowserRouter([
@@ -467,7 +468,16 @@ createBrowserRouter(
 
 ### Nested routes
 
-<iframe src='https://remix.run/_docs/routing' width='100%' height='710' />
+<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>console.log(e.target.parentElement.scrollTop=105)}>
+
+<iframe
+  src='https://remix.run/_docs/routing'
+  scrolling='no'
+  width='100%'
+  height='800'
+  style={{ overflow: 'hidden' }}
+/>
+</div>
 
 </Slide>
 <Slide>

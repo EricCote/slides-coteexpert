@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import mdx from '@mdx-js/rollup';
 import remarkGfm from 'remark-gfm';
 import rehypePrism from '@mapbox/rehype-prism';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,5 +14,10 @@ export default defineConfig({
     },
     react(),
   ],
-  resolve: { preserveSymlinks: true },
+  resolve: {
+    preserveSymlinks: true,
+    alias: {
+      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+    },
+  },
 });

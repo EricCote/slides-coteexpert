@@ -74,13 +74,13 @@ Offre de la formation depuis 2018.
 - Les URL sont définis dans un standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
 - On sépare le URL en différentes parties:
 
-<p>
+<div>
   <span className='color1 hover-bold'>https</span> ://
   <span className='color2 hover-bold'>server.com</span>
   <span className='color3 hover-bold'>/simple/doc</span> ?
   <span className='color4 hover-bold'>p1=a&p2=b</span>
   <span className='color5 hover-bold'>#frag</span>
-</p>
+</div>
 <table>
   <thead>
     <tr>
@@ -400,7 +400,7 @@ Anciens composants racines, ne supportant pas les nouvelles props des routes. (C
 
 On génère le router avec un tableau JS décrivant les routes:
 
-<div style={{ fontSize: '14px' }}>
+<div style={{ height:"500px", overflowY:"scroll" }}>
 
 ```jsx
 createBrowserRouter([
@@ -463,7 +463,16 @@ createBrowserRouter(
 
 ### Routes imbriquées
 
-<iframe src='https://remix.run/_docs/routing' width='100%' height='710' />
+<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>console.log(e.target.parentElement.scrollTop=105)}>
+
+<iframe
+  src='https://remix.run/_docs/routing'
+  scrolling='no'
+  width='100%'
+  height='800'
+  style={{ overflow: 'hidden' }}
+/>
+</div>
 
 </Slide>
 <Slide>
