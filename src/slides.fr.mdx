@@ -2,7 +2,7 @@ import Slide from './components/Slide';
 
 <Slide>
 
-# React Router: l'état des lieux
+# Fondements de React
 
 Présentation de Éric Côté
 
@@ -51,479 +51,332 @@ Offre de la formation depuis 2018.
 </Slide>
 <Slide>
 
-### 3 parties:
+### Présentations
 
-1. Le routage, à la base
-2. Présentation de React Router
-3. Utiliser le Routage URL plutôt que l'État
-
-</Slide>
-<Slide>
-
-### Pourquoi le routage?
-
-- Dans un SPA (Single Page App), on configure le serveur web de façon différente:
-- Toutes les requêtes non-trouvées retournent `index.html` plutôt qu'une erreur **404**
-- C'est le rôle de la programation javascript de déterminer quoi afficher, d'après le contenu dans la barre d'adresse
+- Nom
+- Travail (compagnie, poste, type de travail)
+- Expérience en technologie
+- Type de PC (Mac, Windows, Linux)
+- Langages de programmation (JavaScript? Python? autre?)
+- Expérience Web (Débutant? Avancé?)
+- Expérience avec une technologie SPA (Aucune? React? Angular? Vue? Svelte?)
+- Expérience à batir un service Backend (ASP.NET Web API? Azure Functions? Python Flask? AWS Lambda? Autre?)
+- Attentes pour la formation (Que désirez-vous bâtir?)
 
 </Slide>
 <Slide>
 
-### Comment décortiquer le URL?
+### Qu’est-ce que React?
 
-- Les URL sont définis dans un standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
-- On sépare le URL en différentes parties:
-
-<div>
-  <span className='color1 hover-bold'>https</span> ://
-  <span className='color2 hover-bold'>server.com</span>
-  <span className='color3 hover-bold'>/simple/doc</span> ?
-  <span className='color4 hover-bold'>p1=a&p2=b</span>
-  <span className='color5 hover-bold'>#frag</span>
-</div>
-<table>
-  <thead>
-    <tr>
-      <th>Part</th>
-      <th>Standard Name</th>
-      <th>JavaScript Name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className='color1'>
-      <td>https</td>
-      <td>scheme</td>
-      <td>protocol</td>
-    </tr>
-    <tr className='color2'>
-      <td>server.com</td>
-      <td>authority</td>
-      <td>host || hostName</td>
-    </tr>
-    <tr className='color3'>
-      <td>/simple/doc</td>
-      <td>path</td>
-      <td>pathname</td>
-    </tr>
-    <tr className='color4'>
-      <td>p1=a&amp;p2=b</td>
-      <td>query</td>
-      <td>search || searchParams</td>
-    </tr>
-    <tr className='color5'>
-      <td>frag</td>
-      <td>fragment</td>
-      <td>hash</td>
-    </tr>
-  </tbody>
-</table>
+- “Une bibliothèque JavaScript pour créer des interfaces utilisateurs”
+- Modèle déclaratif où les vues sont décrites en JSX
+- Découpage en composants réutilisables
+- Permet le développement de SPA (Single Page Apps)
+- Nécessite de convertir le JSX en JavaScript
+- Il faut donc utiliser une boîte à outil ou un Framework
 
 </Slide>
 <Slide>
 
-### Comment ça marche?
+### Historique de React
 
-Dans le protocole http[s], on combine le `path` et le `query` de la requête.
-
-ex:<span className='color1'> `GET /doc/path?p1=a&p2=b HTTP/1.1` </span>
-
-Le Fragment (hash) n'est pas envoyé avec la requête. Il reste sur le client. Le fragment agit différemment dépendant du média.
-
-| Media                                                    |                                                                                                                                                   |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <span className='color2'>`document.pdf#page=4`</span>    | Aller page 4                                                                                                                                      |
-| <span className='color3'>`intro.mp4#t=43`</span>         | Aller seconde 43                                                                                                                                  |
-| <span className='color4'>`document.html#location`</span> | Aller à la _location_ <br /> <span className='color5'>`<h3 id="location">`</span> ou <br /> <span className='color3'>`<a name="location">`</span> |
+- Créé en 2011 par Jordan Walke chez Faceboook
+- Utilisé en 2012 pour réécrire Instagram.
+- 2013: React devient Open Source
+- 2015: React-Native permet de développer des apps mobiles
+- 2017: Sortie majeure de React 16
+- 2020: Sortie majeure de React 17
+- 2022: Sortie majeure de React 18 (permet le “concurrent mode”)
 
 </Slide>
 <Slide>
 
-### Rendu conditionnel en React
+### React vient en différentes saveurs
 
-Avec du JavaScript, on peut changer le rendu de react. On afficher le composant en fonction de la page demandée.
+- Plusieurs versions de rendu
+  - React DOM génère du HTML (Le plus populaire)
+  - React PDF génère des documents PDF
+  - React Docx génère des documents Word
+  - React Native génère des applications mobiles et tablettes (Android et iOS)
+  - React TV génère des application télés
+  - React VR génère des interfaces pour réalité virtuelle
+  - React Unity génère des scènes 3D
 
-```js
-const page = window.location.pathname;
+https://github.com/chentsulin/awesome-react-renderer
 
-switch (page) {
-  case '/index':
-  case '/':
-  case '':
-    return <Index />;
-  case '/about':
-    return <About />;
-  case '/contact':
-    return <Contact />;
-  default:
-    return <>404 Error, Cannot find {page}</>;
-}
+</Slide>
+<Slide>
+
+### Bons points de React
+
+- **Rétro-compatible** les nouvelles versions évitent de briser le code existant.
+- **Populaire** utilisé par une grande majorité d'applications. Facile de trouver de l'aide.
+- **Sans opinion** React se fout du routage, du chargement de données, des styles, etc.
+- **SSR** Compatible avec le Server-Side Rendering
+- **SSG** Compatible avec le Static-Site Generation
+
+</Slide>
+<Slide>
+  ## Mauvais points de React
+
+- **Facile de faire du mauvais code** Il est facile de faire du code spaghetti en React
+- **Certaines composantes ne sont pas compatibles antérieures ou postérieures** Il faut alors se mettre à jour
+- **Il faut se faire des opinions** Il faut choisir un biblothèque de routage, une autre de chargement, une autre pour le caching, une autre pour les syles... C'est fatiguant!
+- **Pas de conventions** Chaque application React a sa propre approche pour résoudre les problèmes
+
+</Slide>
+<Slide>
+### Boîte à outils de React
+
+- Il existe de nombreux outils pour générer une application React
+- À une certaine époque, on devait générer l'outillage nous-même:
+  - Gestionnaire de paquets/Package Manager (npm, yarn, pnpm)
+  - Compilateur (Babel, Typescript, swc)
+  - Bundler (WebPack, Parcel, esbuild, swc)
+  - Minifieur (terser, swc)
+  - Serveur Web (express)
+  - Linter pour valider (ESLint)
+  - Environnement de tests (Jest, Cypress)
+  - MonoRepo (Nx, Turborepo)
+
+</Slide>
+<Slide>
+
+### Boites à outils clé en main
+
+- Aujourd'hui, on peut prendre des outils simples, ou des Framework évolués:
+  - Create-React-App
+  - Vite
+  - Gatsby
+  - Next js
+  - Remix
+  - T3
+
+</Slide>
+<Slide>
+
+### Environnement VS Code
+
+- Voici les extensions utiles:
+
+  - **ESLint** (dbaeumer.vscode-eslint): valide le code et les règles
+  - **Prettier** (esbenp.prettier-vscode): formatte le code
+  - **Simple React Snippets** (burkeholland.simple-react-snippets): insère des snippets de code
+    - Snippets utiles:
+      - **imr, imrs, imrse:** import React, \{useState, useEffect\}
+      - **ffc, sfc:** Créer composants react
+      - **uef, usf:** useEffect, useState
+
+</Slide>
+<Slide>
+
+## Configurations VS Code (1/2)
+
+- Configurations utiles
+- Utilisez `cmd-,` (commande-virgule) pour aller en mode 'settings'
+
+  - **Editor:** Tab Size: 2 ou 4
+  - **Editor:** Default Formatter: Prettier - `esbenp.prettier-vscode`
+  - **Editor:** Format On Save: true
+  - **Prettier:** Jsx Single Quote: true
+  - **Prettier:** Single Quote: true
+  - **Emmet:** Include Language: `"javascript": "javascriptreact"`
+
+</Slide>
+<Slide>
+
+## Configurations VS Code (2/2)
+
+- **MacOS seulement:** ajoutez Code dans le "path" du terminal et des lignes de commandes
+
+  - il faut aller dans la commande d'édition
+
+```
+Shift-Command-P
+Shell Command: Install 'code' command in PATH
+```
+
+- Quittez `code` et fermez toutes fenêtres de terminal
+  - Les prochaines fenêtres de terminal auront le "path" bien configuré
+
+</Slide>
+<Slide>
+
+### Nouveau projet Vite
+
+Pour créer un nouveau dossier qui contient un nouveau projet nommé _monweb_:
+
+```bash
+> npm create vite@latest monweb -- --template react-swc
+```
+
+Alternative: On pourrait démarrer **vite** en mode interactif, avec une série de questions:
+
+```bash
+> npm create vite@latest
+```
+
+On se déplace vers le nouveau dossier et on peut ouvrir code dans le dossier courant (Le point (.) représente le dossier courant)
+
+```bash
+> cd monweb
+> code .
 ```
 
 </Slide>
 <Slide>
 
-### Mais...
+## Anatomie du projet vite:
 
-<div >
-<img  src='/img/AngryCat.jpeg' style={{ marginInlineStart: 30, width: 300, float: 'right' }} />
+**Fichiers:**
 
-Le menu possède des liens réguliers: `<a href="page1">Page un</a>`
+- **index.html** : Page d'accueil en html, vide
+- **vite.config.js** : configurations pour vite
+- **package.json** : configurations pour npm
+- **package-lock.json** : référence npm des dépendances et sous-dépendances avec versions. **Ne pas toucher.** Utilisez _npm_ pour mettre à jour.
 
-À chaque clic, on fait un appel réseau pour (re)télécharger l'application pour la énième fois.
+**Dossiers:**
 
-Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas.
-
-</div>
-
-</Slide>
-<Slide>
-
-# 3 approches pour gérer la Navigation SPA
-
-1. Hash
-2. History API
-3. Navigation Api
-
-<img
-  src='/img/spa-day.jpeg'
-  style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
-/>
+- **node_modules** : contient les dépendances et sous-dépendances. **Ne pas toucher.** Utilisez `npm install` ou `npm update` pour rafraîchir.
+- **src**: contient les fichiers .js, .css et .svg qui sont compilés par Vite.
+- **public**: contient les fichiers qui sont inclus sans être modifiés par Vite. (png, pdf, etc)
 
 </Slide>
 <Slide>
 
-# Hash navigation
+### Démarrer le projet en mode dev
 
-<div>
+Les commandes suivantes doivent être lancées à la racine du projet. (La racine du projet, c'est où se trouve le fichier `package.json`)
 
-<img
-  src='/img/homer-question.png'
-  style={{ marginInlineEnd: 30, width: 300, float: 'left' }}
-/>
+Si ce n'est pas déjà fait, installez de les dépendances du projet:
 
-Le changement de hash ne provoque pas d'appel réseau.
-
-Si le hash ne réfère pas à un id, alors rien n'arrive sur le navigateur...
-
-Pour avoir un résultat visuel, il faut faire un re-rendu quand le hash change.
-
-Comment faire pour générer un re-rendu en React????
-
-</div>
-
-</Slide>
-<Slide>
-
-### State à la rescousse
-
-Modifier l'état (le state) provoque un changement.
-
-Il faut créer un gestionnaire d'événement (event handler) sur le changement de hash. Ceci appelle du code pour modifier le state.
-
-```js
-window.addEventListener('hashchange', (evt) => {
-  setCurrentPage(window.location.hash);
-});
+```bash
+npm install
 ```
 
-Ceci modifiant le DOM, il faut donc lier le gestionnaire d'événement dans un `useEffect(..., [])`.
+Lancez le projet en mode dev:
+
+```bash
+npm run dev
+```
+
+Ceci démarre un serveur web en mode dev. Lancez votre navigateur vers l'url suivant: http://localhost:5173
 
 </Slide>
 <Slide>
 
-### Mais...
+### Fast Refresh (Hot Module Reload, HMR)
 
-<div>
-<img
-  src='/img/hashpath.jpeg'
-  style={{ marginInlineStart: 30, marginBottom: 30, width: 300, float: 'right' }}
-/>
-
-Les gens préfèrent les liens avec un _path_ (`/`), SANS le _hash_ (`#`).
-
-Un lien avec path permet d'être compatible avec les outils React que:
-
-- **SSG** (Static-Side Generation)
-- **SSR** (Server-Side Rendering)
-
-Voir _NextJS_, _Remix_ et _Gatsby_.
-
-(**Note:** certains prétendent que les engins de recherche favorisent les _path_ plutôt que les _hash_, mais d'autres prétendent que ce n'est pas le cas.)
-
-</div>
+- Modifiez `src/app.jsx` et sauvegardez,
+  - Vous verrez la mise-à-jour se faire automatiquement dans le navigateur, sans avoir besoin de cliquer sur _rafraîchir_.
+- Cela s'appelle _Fast Refresh_ (ainsi que _Hot Reload_)
+- Parfois, le _Fast Refresh_ échoue et il faut rafraîchir le navigateur manuellement en cliquant sur `refresh`
+- _Fast Refresh_ n'est disponible qu'avec le mode dev.
 
 </Slide>
 <Slide>
 
-### History API
+### JSX
 
-- Permet l'accès à l'historique de session du navigateur: back(), forward(), go(-5),
-- Permet de modifier l'historique (pushState(), popState event, etc)
-- Il faut gérer le bouton 'back' avec un gestionnaire d'événement suivant:
+- JSX : _JavaScript eXtension_
+- Le JSX ressemble beaucoup à du HTML
+- JSX est bien plus strict
+- Utilisez le convertisseur suivant:
+  https://transform.tools/html-to-jsx
+
+</Slide>
+<Slide>
+
+### JSX dans les coulises
+
+JSX est écrit par un programmeur:
 
 ```js
-useEffect(() => {
-  //handle the Back button!
-  window.addEventListener('popstate', (evt) => {
-    setCurrentPage(evt.state); //change state to re-render the right page
-  });
-}, []); //bind this event on the first render.
+<h3 title='alarme'>L'alarme sonne à {alarmTime}</h3>
+```
+
+JSX est compilé par Babel (ou swc, etc):
+
+```js
+React.createElement('h3', { title: 'alarme' }, "L'alarme sonne à ", alarmTime);
 ```
 
 </Slide>
 <Slide>
-
-### History API gérer le click des hyperliens
-
-- Il faut mettre un événement clic sur tous les hyperliens pour modifier leur comportement et provoquer un re-rendu
-- En général, on encapsule ce comportement dans un composant `<Link to="/path" />`
-- Voici à quoi ressemble le gestionnaire d'événement _click_ `<Link to="/path" />`:
+### JSX dans les coulisses
+ 
+Après exécution, cela génère un **élément React** (un simple objet JS):
 
 ```js
-function clickHandler(evt, link) {
-  //create a url object from the link href
-  const url = new URL(link.href);
-
-  evt.preventDefault(); //cancel the navigation
-  //Add destination in history
-  window.history.pushState(url.pathname, '', url.pathname);
-  setCurrentPage(url.pathname); //set State to re-render the app.
-}
-```
-
-</Slide>
-<Slide>
-### Navigation API
-
-- Nouvel API, conçu pour les applis SPA.
-- Expérimental sur _Chrome_, _Edge_, _Opera_ et _Chromium_
-- Sera disponible sur _Firefox_ et _Safari_, dans le futur
-- Simplifie le _History API_ pour le SPA. Aucun besoin de programmer les clics des liens.
-
-<img
-  src='/img/new-shiny.jpeg'
-  width='300'
-  style={{ marginLeft: 'auto', marginRight: 'auto' }}
-/>
-
-</Slide>
-<Slide>
-
-### Exemple du Navigation API
-
-Le code ressemble à celui où on attache un gestionnaire d'événement sur le changement du hash, mais c'est sur la navigation globale. Ca se nomme _navigate_.
-
-Le code pourra tenter _d'intercepter_ le changement du URL, et exécute du code pour provoquer un re-rendu (setState).
-
-```js
-window.navigation.addEventListener('navigate', (evt) => {
-  if (!evt.canIntercept) return; //is it a local page that we can intercept?
-  evt.intercept({
-    handler: () => {
-      setCurrentPage(new URL(evt.destination.url).pathname);
-    },
-  });
-});
-```
-
-</Slide>
-<Slide>
-
-### Qu'est-ce que **React Router**
-
-<div>
-
-<img
-  src='/img/trends.png'
-  style={{ width: '50%', float: 'Right', marginLeft: 50 }}
-/>
-
-La librairie React la plus populaire pour le routage. Plus populaire que:
-
-- TailwindCSS
-- Next.js
-- Material-UI
-- Angular(!)
-
-La moitié des programmes React utilisent une forme de React-Router
-
-(Notons que beaucoup d'apps utilisent l'ancienne version 5 de React-Router)
-
-</div>
-
-</Slide>
-<Slide>
-
-### Où utiliser React Router?
-
-- Create-React-App (n'est plus recommandé)
-- Vite
-- Remix (intégré par défaut)
-- Preact
-
----
-
-**Invalide:** ces librairies incluent leur propre engin de routage
-
-- Next.js
-- Gatsby
-
-Même sur ces boîtes à outils, l'influence de React Router se fait sentir.
-
-</Slide>
-<Slide>
-
-### Composants de base
-
-### `<RouterProvider router={router} />`
-
-Composant racine qui gère les routes, l'état (state), les contextes et les re-rendus pour React Router.
-
-### `<Link to="about">About Us</Link>`
-
-Composant génèrant des hyperliens, qui possédent des événements clics prenant en charge le History API.
-
----
-
-Anciens composants racines, ne supportant pas les nouvelles props des routes. (Compatible avec V5.)
-
-- ~`<BrowserRouter>`~,
-- ~`<MemoryRouter>`~,
-- ~`<HashRouter>`~,
-- ~`<NativeRouter>`~,
-- ~`<StaticRouter>`~,
-
-</Slide>
-<Slide>
-
-### Comment générer le router?
-
-On génère le router avec un tableau JS décrivant les routes:
-
-<div style={{ height:"500px", overflowY:"scroll" }}>
-
-```jsx
-createBrowserRouter([
-  {
-    path: '/',
-    element: <Root />,
-    children: [
-      {
-        path: 'about',
-        element: <About />,
-      },
-      {
-        path: 'contact',
-        element: <Contact />,
-      },
-      {
-        element: <AuthLayout />,
-        children: [
-          {
-            path: 'login',
-            element: <Login />,
-          },
-          {
-            path: 'logout',
-            element: <Logout />,
-          },
-        ],
-      },
-    ],
+{
+  type: 'h3',
+  props: {
+    title: 'alarme',
+    children: ["L'alarme sonne à ", alarmTime],
   },
-]);
-```
-
-</div>
-
-</Slide>
-<Slide>
-
-### Génération des routes avec JSX
-
-Permet de travailler avec une approche similaire à V4-V5
-
-```js
-createBrowserRouter(
-  createRoutesFromElements(
-    <Route path='/' element={<Root />}>
-      <Route path='about' element={<About />} />
-      <Route path='contact' element={<Contact />} />
-      <Route element={<AuthLayout />}>
-        <Route path='login' element={<Login />} />
-        <Route path='logout' element={<Logout />} />
-      </Route>
-    </Route>
-  )
-);
-```
-
-</Slide>
-<Slide>
-
-### Routes imbriquées
-
-<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>console.log(e.target.parentElement.scrollTop=105)}>
-
-<iframe
-  src='https://remix.run/_docs/routing'
-  scrolling='no'
-  width='100%'
-  height='800'
-  style={{ overflow: 'hidden' }}
-/>
-</div>
-
-</Slide>
-<Slide>
-
-### Remplacer l'état avec le routage
-
-Pour la plupart des apps, c'est la recommendation. Le routage a plus flexibilité que l'état.
-
-Le bouton back permet alors de retourner à un url (état) précédent.
-
-On peut aussi partager cet url, ou créer un favori ou un raccourci.
-
-</Slide>
-<Slide>
-
-### Segments Dynamiques
-
-```js
-<Route path='projects/:projectId/tasks/:taskId' />
-```
-
-on utilise la prop nommée `params` (pour les _loaders_ et les _actions_)
-
-On peut aussi utiliser `useParams()` et `useMatch()`
-
-```js
-function Task() {
-  const params = useParams();
-  params.projectId; // abc
-  params.taskId; // 3
-}
-```
-
-</Slide>
-<Slide>
-
-### Data loading
-
-Routes ont une prop `loader` permettant de charger les données de manière asynchrone...
-
-Sans `loader`, on pourrait charger en utilisant `useEffect`. Dans ce cas là, il faut gérer l'état de chargement (i.e.: ajouter l'état `isLoading`)
-
-Si on utilise `loader`, il y a beaucoup de fonctionnalités fournies par React Router
-
-```js
-loader = async function ({ request }) {
-  const res = await fetch('/api/user.json');
-  const user = await res.json();
-  return user;
+  key: null,
+  ref: null,
+  $$typeof: Symbol.for('react.element'),
 };
 ```
+
+L'ensemble des éléments React génère une arborescence nommée **Virtual DOM**.
+
+</Slide>
+<Slide>
+
+### Compiler le projet
+
+Les navigateurs ne peuvent pas utiliser de JSX, il faut donc compiler (transpiler) le JSX vers JS.
+
+On utilise la commande suivante:
+
+```bash
+npm run build
+```
+
+Il y a un nouveau dossier nommé "dist". C'est ce petit dossier qu'il faut distribuer.
+
+Pour démarrer un serveur web pour tester le contenu de `dist`:
+
+```bash
+npm run preview
+```
+
+On peut alors naviguer vers http://localhost:4173
+
+</Slide>
+<Slide>
+
+### Déployer le projet
+
+Il suffit d'utiliser n'importe quel hébergeur web statique et de copier le contenu du dossier `dist`.
+
+Si vous ne savez pas quel hébergeur utiliser, nous recommandons Netlify (gratuit).
+
+</Slide>
+<Slide>
+
+### Devoir #1
+
+- Créer une nouvelle application React
+- Consultez la documentation de Vite pour créer une application React avec SWC
+- Modifiez le contenu du JSX généré dans app.js. Faites une page simple de bienvenue avec votre nom complet.
+- Utilisez https://transform.tools/html-to-jsx pour convertir votre html
+- Testez votre application avec la commande `npm run dev`
+- Naviguez vers: `http://localhost:5173`
+- Créez votre application "finale" avec la commande `npm run build`
+- Ceci va créer un nouveau dossier `dist`
+- Validez votre application "finale" avec la commande `npm run preview`
+- Naviguez vers: `http://localhost:4173`
+- Déployez le dossier `dist` vers un hébergeur de site web statique et partagez à vos amis.
+- Si vous n'avez pas d'hébergeur, nous vous recommandons Netlify (gratuit).
+
+</Slide>
+<Slide>
+
+</Slide>
+<Slide>
 
 </Slide>
 <Slide>
