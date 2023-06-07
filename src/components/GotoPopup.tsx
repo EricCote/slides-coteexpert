@@ -1,5 +1,11 @@
+// This creates a "goto" popup when the user presses the letter G.
+// The popup prompts a slide number, and navigates to it.
+
 import { FormEvent, RefObject, useEffect, useRef, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+
+//this flag will only register the event handler once when in StrictMode (dev mode)
+let isEventRegistered = false;
 
 function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
@@ -16,13 +22,22 @@ function GotoPopup() {
     setShow(false);
   }
 
+  function handleKeyDown(evt: KeyboardEvent) {
+    if (evt.key === 'g') {
+      evt.preventDefault();
+      setShow(!txtNombre.current);
+    }
+  }
+
   useEffect(() => {
-    window.addEventListener('keypress', (evt: KeyboardEvent) => {
-      if (evt.key === 'g') {
-        evt.preventDefault();
-        setShow(!txtNombre.current);
-      }
-    });
+    if (!isEventRegistered) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    isEventRegistered = true;
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      isEventRegistered = false;
+    };
   }, []);
 
   //If we've just started re-rendering after starting to show the popup, set the focus.

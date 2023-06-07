@@ -1,13 +1,10 @@
-import Slide from '../components/Slide';
-
-<Slide>
-
 # React Router: l'état des lieux
 
-Présentation de Éric Côté
+Présentation par Éric Côté
 
-</Slide>
-<Slide>
+[React Academy](https://www.reactAcademy.live/)
+
+---
 
 ### Eric Côté
 
@@ -15,17 +12,16 @@ Présentation de Éric Côté
   src='https://www.reactacademy.live/static/20616643d8afc491bd4c1817ae69db63/5a6cd/Eric_Cote.webp'
   alt='Eric Côté'
   title='Eric Côté'
-  width='500px'
+  width='400px'
 />
 
 - Débute avec les machines 8 bits (Commodore 64)
-- Formateur informatique depuis 2001 (.NET, C#, Sql Server, Azure)
+- Formateur informatique depuis 2001 (.NET, C#, ASP.NET MVC, Sql Server, Azure)
 - Formateur en développement Open Source depuis 2018
   - Javascript, TypeScript, React, GitHub, REST, Node, Express, Next, Remix, etc.
 - Formateur-Propriétaire de React Academy Live
 
-</Slide>
-<Slide>
+---
 
 ### React Academy Live
 
@@ -48,8 +44,7 @@ Offre de la formation depuis 2018.
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### 3 parties:
 
@@ -57,8 +52,7 @@ Offre de la formation depuis 2018.
 2. Présentation de React Router
 3. Utiliser le Routage URL plutôt que l'État
 
-</Slide>
-<Slide>
+---
 
 ### Pourquoi le routage?
 
@@ -66,8 +60,7 @@ Offre de la formation depuis 2018.
 - Toutes les requêtes non-trouvées retournent `index.html` plutôt qu'une erreur **404**
 - C'est le rôle de la programation javascript de déterminer quoi afficher, d'après le contenu dans la barre d'adresse
 
-</Slide>
-<Slide>
+---
 
 ### Comment décortiquer le URL?
 
@@ -118,8 +111,7 @@ Offre de la formation depuis 2018.
   </tbody>
 </table>
 
-</Slide>
-<Slide>
+---
 
 ### Comment ça marche?
 
@@ -135,8 +127,7 @@ Le Fragment (hash) n'est pas envoyé avec la requête. Il reste sur le client. L
 | <span className='color3'>`intro.mp4#t=43`</span>         | Aller seconde 43                                                                                                                                  |
 | <span className='color4'>`document.html#location`</span> | Aller à la _location_ <br /> <span className='color5'>`<h3 id="location">`</span> ou <br /> <span className='color3'>`<a name="location">`</span> |
 
-</Slide>
-<Slide>
+---
 
 ### Rendu conditionnel en React
 
@@ -159,8 +150,7 @@ switch (page) {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Mais...
 
@@ -175,8 +165,7 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 # 3 approches pour gérer la Navigation SPA
 
@@ -189,8 +178,7 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
   style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
 />
 
-</Slide>
-<Slide>
+---
 
 # Hash navigation
 
@@ -211,8 +199,7 @@ Comment faire pour générer un re-rendu en React????
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### State à la rescousse
 
@@ -228,8 +215,7 @@ window.addEventListener('hashchange', (evt) => {
 
 Ceci modifiant le DOM, il faut donc lier le gestionnaire d'événement dans un `useEffect(..., [])`.
 
-</Slide>
-<Slide>
+---
 
 ### Mais...
 
@@ -252,8 +238,7 @@ Voir _NextJS_, _Remix_ et _Gatsby_.
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### History API
 
@@ -270,8 +255,7 @@ useEffect(() => {
 }, []); //bind this event on the first render.
 ```
 
-</Slide>
-<Slide>
+---
 
 ### History API gérer le click des hyperliens
 
@@ -291,8 +275,8 @@ function clickHandler(evt, link) {
 }
 ```
 
-</Slide>
-<Slide>
+---
+
 ### Navigation API
 
 - Nouvel API, conçu pour les applis SPA.
@@ -306,8 +290,7 @@ function clickHandler(evt, link) {
   style={{ marginLeft: 'auto', marginRight: 'auto' }}
 />
 
-</Slide>
-<Slide>
+---
 
 ### Exemple du Navigation API
 
@@ -326,8 +309,7 @@ window.navigation.addEventListener('navigate', (evt) => {
 });
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Qu'est-ce que **React Router**
 
@@ -351,8 +333,7 @@ La moitié des programmes React utilisent une forme de React-Router
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Où utiliser React Router?
 
@@ -361,7 +342,7 @@ La moitié des programmes React utilisent une forme de React-Router
 - Remix (intégré par défaut)
 - Preact
 
----
+<hr />
 
 **Invalide:** ces librairies incluent leur propre engin de routage
 
@@ -370,8 +351,7 @@ La moitié des programmes React utilisent une forme de React-Router
 
 Même sur ces boîtes à outils, l'influence de React Router se fait sentir.
 
-</Slide>
-<Slide>
+---
 
 ### Composants de base
 
@@ -383,7 +363,7 @@ Composant racine qui gère les routes, l'état (state), les contextes et les re-
 
 Composant génèrant des hyperliens, qui possédent des événements clics prenant en charge le History API.
 
----
+<hr />
 
 Anciens composants racines, ne supportant pas les nouvelles props des routes. (Compatible avec V5.)
 
@@ -393,8 +373,7 @@ Anciens composants racines, ne supportant pas les nouvelles props des routes. (C
 - ~`<NativeRouter>`~,
 - ~`<StaticRouter>`~,
 
-</Slide>
-<Slide>
+---
 
 ### Comment générer le router?
 
@@ -436,8 +415,7 @@ createBrowserRouter([
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Génération des routes avec JSX
 
@@ -458,12 +436,11 @@ createBrowserRouter(
 );
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Routes imbriquées
 
-<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>console.log(e.target.parentElement.scrollTop=105)}>
+<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>(e.target.parentElement.scrollTop=105)}>
 
 <iframe
   src='https://remix.run/_docs/routing'
@@ -474,8 +451,7 @@ createBrowserRouter(
 />
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Remplacer l'état avec le routage
 
@@ -485,8 +461,7 @@ Le bouton back permet alors de retourner à un url (état) précédent.
 
 On peut aussi partager cet url, ou créer un favori ou un raccourci.
 
-</Slide>
-<Slide>
+---
 
 ### Segments Dynamiques
 
@@ -506,8 +481,7 @@ function Task() {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Data loading
 
@@ -525,8 +499,7 @@ loader = async function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Loader est futé
 
@@ -548,8 +521,7 @@ loader = function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 # Params sont accesibles
 
@@ -567,8 +539,7 @@ function Team() {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Obtenir l'état de chargement
 
@@ -582,8 +553,7 @@ Trois états possibles:
 **submitting** "action" est appelé en utilisant POST, PUT, PATCH, ou DELETE
 **loading** "loader" est appelé pour chager des données (via GET)
 
-</Slide>
-<Slide>
+---
 
 ### Attendre les données: patienter? ou afficher une icone d'attente?
 
@@ -595,8 +565,7 @@ Si on utilise `defer({data})`, on peut alors utiliser `<Suspense fallback={plach
 
 <img src='/img/wait.gif' width='100px' />
 
-</Slide>
-<Slide>
+---
 
 ### Modifier des données
 
@@ -616,8 +585,7 @@ action = async function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Prochain événement
 
@@ -641,8 +609,7 @@ Caching
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ## Questions?
 
@@ -650,5 +617,3 @@ Caching
   src='/img/job.jpeg'
   style={{ marginLeft: 'auto', marginRight: 'auto', width: '50%' }}
 />
-
-</Slide>

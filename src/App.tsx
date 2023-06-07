@@ -1,16 +1,16 @@
-import '~bootstrap/dist/css/bootstrap.css';
-import './App.css';
-import SlidesEn from './decks/slides.en.mdx';
-import SlidesFr from './decks/slides.fr.mdx';
+import '~bootstrap/dist/css/bootstrap.min.css';
+import '~prism-themes/themes/prism-coldark-dark.min.css';
+import './components/slides.css';
+
 import ThemeProvider from './components/dark-mode/ThemeProvider';
-import GotoPopup from './components/GotoPopup';
+
+import { RouterProvider } from 'react-router-dom';
+import router from './router';
 
 export default function App() {
-  const lang = location.pathname === '/fr' ? 'fr' : 'en';
   return (
     <ThemeProvider theme='auto'>
-      <GotoPopup />
-      <article>{lang === 'fr' ? <SlidesFr /> : <SlidesEn />}</article>
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }

@@ -1,13 +1,10 @@
-import Slide from '../components/Slide';
-
-<Slide>
-
 # Fondements de React
 
-Présentation de Éric Côté
+Présentation par Éric Côté
 
-</Slide>
-<Slide>
+[React Academy](https://www.reactAcademy.live/)
+
+---
 
 ### Eric Côté
 
@@ -15,17 +12,16 @@ Présentation de Éric Côté
   src='https://www.reactacademy.live/static/20616643d8afc491bd4c1817ae69db63/5a6cd/Eric_Cote.webp'
   alt='Eric Côté'
   title='Eric Côté'
-  width='500px'
+  width='400px'
 />
 
-- Débute avec les machines 8 bits (Commodore 64)
-- Formateur informatique depuis 2001 (.NET, C#, Sql Server, Azure)
-- Formateur en développement Open Source depuis 2018
+- Got started on 8-bits machines (Commodore 64)
+- Technical trainer since 2001 (.NET, C#, ASP.NET MVC, Sql Server, Azure)
+- Training on Open Source dev technologies since 2018
   - Javascript, TypeScript, React, GitHub, REST, Node, Express, Next, Remix, etc.
-- Formateur-Propriétaire de React Academy Live
+- Trainer-Owner of React Academy Live
 
-</Slide>
-<Slide>
+---
 
 ### React Academy Live
 
@@ -48,8 +44,7 @@ Offre de la formation depuis 2018.
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Présentations
 
@@ -63,8 +58,7 @@ Offre de la formation depuis 2018.
 - Expérience à batir un service Backend (ASP.NET Web API? Azure Functions? Python Flask? AWS Lambda? Autre?)
 - Attentes pour la formation (Que désirez-vous bâtir?)
 
-</Slide>
-<Slide>
+---
 
 ### Qu’est-ce que React?
 
@@ -75,8 +69,7 @@ Offre de la formation depuis 2018.
 - Nécessite de convertir le JSX en JavaScript
 - Il faut donc utiliser une boîte à outil ou un Framework
 
-</Slide>
-<Slide>
+---
 
 ### Historique de React
 
@@ -88,8 +81,7 @@ Offre de la formation depuis 2018.
 - 2020: Sortie majeure de React 17
 - 2022: Sortie majeure de React 18 (permet le “concurrent mode”)
 
-</Slide>
-<Slide>
+---
 
 ### React vient en différentes saveurs
 
@@ -104,8 +96,7 @@ Offre de la formation depuis 2018.
 
 https://github.com/chentsulin/awesome-react-renderer
 
-</Slide>
-<Slide>
+---
 
 ### Bons points de React
 
@@ -115,17 +106,17 @@ https://github.com/chentsulin/awesome-react-renderer
 - **SSR** Compatible avec le Server-Side Rendering
 - **SSG** Compatible avec le Static-Site Generation
 
-</Slide>
-<Slide>
-  ## Mauvais points de React
+---
+
+## Mauvais points de React
 
 - **Facile de faire du mauvais code** Il est facile de faire du code spaghetti en React
 - **Certaines composantes ne sont pas compatibles antérieures ou postérieures** Il faut alors se mettre à jour
 - **Il faut se faire des opinions** Il faut choisir un biblothèque de routage, une autre de chargement, une autre pour le caching, une autre pour les syles... C'est fatiguant!
 - **Pas de conventions** Chaque application React a sa propre approche pour résoudre les problèmes
 
-</Slide>
-<Slide>
+---
+
 ### Boîte à outils de React
 
 - Il existe de nombreux outils pour générer une application React
@@ -139,8 +130,7 @@ https://github.com/chentsulin/awesome-react-renderer
   - Environnement de tests (Jest, Cypress)
   - MonoRepo (Nx, Turborepo)
 
-</Slide>
-<Slide>
+---
 
 ### Boites à outils clé en main
 
@@ -152,8 +142,7 @@ https://github.com/chentsulin/awesome-react-renderer
   - Remix
   - T3
 
-</Slide>
-<Slide>
+---
 
 ### Environnement VS Code
 
@@ -167,8 +156,7 @@ https://github.com/chentsulin/awesome-react-renderer
       - **ffc, sfc:** Créer composants react
       - **uef, usf:** useEffect, useState
 
-</Slide>
-<Slide>
+---
 
 ## Configurations VS Code (1/2)
 
@@ -182,8 +170,7 @@ https://github.com/chentsulin/awesome-react-renderer
   - **Prettier:** Single Quote: true
   - **Emmet:** Include Language: `"javascript": "javascriptreact"`
 
-</Slide>
-<Slide>
+---
 
 ## Configurations VS Code (2/2)
 
@@ -199,8 +186,7 @@ Shell Command: Install 'code' command in PATH
 - Quittez `code` et fermez toutes fenêtres de terminal
   - Les prochaines fenêtres de terminal auront le "path" bien configuré
 
-</Slide>
-<Slide>
+---
 
 ### Nouveau projet Vite
 
@@ -223,8 +209,7 @@ On se déplace vers le nouveau dossier et on peut ouvrir code dans le dossier co
 > code .
 ```
 
-</Slide>
-<Slide>
+---
 
 ## Anatomie du projet vite:
 
@@ -241,8 +226,7 @@ On se déplace vers le nouveau dossier et on peut ouvrir code dans le dossier co
 - **src**: contient les fichiers .js, .css et .svg qui sont compilés par Vite.
 - **public**: contient les fichiers qui sont inclus sans être modifiés par Vite. (png, pdf, etc)
 
-</Slide>
-<Slide>
+---
 
 ### Démarrer le projet en mode dev
 
@@ -262,8 +246,7 @@ npm run dev
 
 Ceci démarre un serveur web en mode dev. Lancez votre navigateur vers l'url suivant: http://localhost:5173
 
-</Slide>
-<Slide>
+---
 
 ### Fast Refresh (Hot Module Reload, HMR)
 
@@ -273,8 +256,7 @@ Ceci démarre un serveur web en mode dev. Lancez votre navigateur vers l'url sui
 - Parfois, le _Fast Refresh_ échoue et il faut rafraîchir le navigateur manuellement en cliquant sur `refresh`
 - _Fast Refresh_ n'est disponible qu'avec le mode dev.
 
-</Slide>
-<Slide>
+---
 
 ### JSX
 
@@ -284,8 +266,7 @@ Ceci démarre un serveur web en mode dev. Lancez votre navigateur vers l'url sui
 - Utilisez le convertisseur suivant:
   https://transform.tools/html-to-jsx
 
-</Slide>
-<Slide>
+---
 
 ### JSX dans les coulises
 
@@ -301,10 +282,10 @@ JSX est compilé par Babel (ou swc, etc):
 React.createElement('h3', { title: 'alarme' }, "L'alarme sonne à ", alarmTime);
 ```
 
-</Slide>
-<Slide>
+---
+
 ### JSX dans les coulisses
- 
+
 Après exécution, cela génère un **élément React** (un simple objet JS):
 
 ```js
@@ -322,8 +303,7 @@ Après exécution, cela génère un **élément React** (un simple objet JS):
 
 L'ensemble des éléments React génère une arborescence nommée **Virtual DOM**.
 
-</Slide>
-<Slide>
+---
 
 ### Compiler le projet
 
@@ -345,8 +325,7 @@ npm run preview
 
 On peut alors naviguer vers http://localhost:4173
 
-</Slide>
-<Slide>
+---
 
 ### Déployer le projet
 
@@ -354,8 +333,7 @@ Il suffit d'utiliser n'importe quel hébergeur web statique et de copier le cont
 
 Si vous ne savez pas quel hébergeur utiliser, nous recommandons Netlify (gratuit).
 
-</Slide>
-<Slide>
+---
 
 ### Devoir #1
 
@@ -372,130 +350,7 @@ Si vous ne savez pas quel hébergeur utiliser, nous recommandons Netlify (gratui
 - Déployez le dossier `dist` vers un hébergeur de site web statique et partagez à vos amis.
 - Si vous n'avez pas d'hébergeur, nous vous recommandons Netlify (gratuit).
 
-</Slide>
-<Slide>
-
-</Slide>
-<Slide>
-
-</Slide>
-<Slide>
-
-### Loader est futé
-
-Si on retourne la promesse de `fetch()`, le `loader` appellera `res.json()` automatiquement.
-
-```js
-loader = function ({ request }) {
-  return fetch('/api/user.json');
-};
-```
-
-Si on navigue vers une autre page, le chargment sera automatiquement annulé si on prend la peine d'attacher le signal d'annulation.
-
-```js
-loader = function ({ request }) {
-  return fetch('/api/user.json', {
-    signal: request.signal,
-  });
-};
-```
-
-</Slide>
-<Slide>
-
-# Params sont accesibles
-
-```js
-loader = function ({ request, params }) {
-  return fetch(`/api/teams/${params.teamId}`);
-};
-```
-
-Pour accéder les données du composant, `useLoaderData()`
-
-```js
-function Team() {
-  const team = useLoaderData();
-}
-```
-
-</Slide>
-<Slide>
-
-### Obtenir l'état de chargement
-
-```js
-const navigation = useNavigation();
-const state = navigation.state;
-```
-
-Trois états possibles:
-**idle** Pas de chargement.
-**submitting** "action" est appelé en utilisant POST, PUT, PATCH, ou DELETE
-**loading** "loader" est appelé pour chager des données (via GET)
-
-</Slide>
-<Slide>
-
-### Attendre les données: patienter? ou afficher une icone d'attente?
-
-Par défaut, on attend les données quand on charge
-
-Si on utilise `defer({data})`, on peut alors utiliser `<Suspense fallback={plachoder} >` ainsi que `<Await resolve={data} > ` functionality
-
-**Suspense** affiche un _fallback_ tant que **Await** n'est pas _résolu_.
-
-<img src='/img/wait.gif' width='100px' />
-
-</Slide>
-<Slide>
-
-### Modifier des données
-
-Route `loader` décrit une fonction pour charger les données
-
-Route `action` décrit une function pour modifier les données. On utilise un "html Form" pour passer ces changements.
-La fonction action peut utiliser `request.formData()` pour lire les données "envoyées" dans le formulaire.
-
-```js
-action = async function ({ request }) {
-  const formData = await request.formData();
-  const newPerson = await createPerson({
-    name: formData.get('name'),
-    email: formData.get('email'),
-  });
-  return redirect(`/person/{newPerson.id}`);
-};
-```
-
-</Slide>
-<Slide>
-
-### Prochain événement
-
-<div>
-<img
-  src='/img/debug.jpeg'
-  style={{ float: 'right'}}
-/>
-
-Remix
-
-Next
-
-Testing
-
-Security
-
-Caching
-
-???
-
-</div>
-
-</Slide>
-<Slide>
+---
 
 ## Questions?
 
@@ -503,5 +358,3 @@ Caching
   src='/img/job.jpeg'
   style={{ marginLeft: 'auto', marginRight: 'auto', width: '50%' }}
 />
-
-</Slide>

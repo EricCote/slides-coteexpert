@@ -1,13 +1,10 @@
-import Slide from '../components/Slide';
-
-<Slide>
-
 # React Router: State of Routing
 
-Presentation by Éric Côté
+Presentation by Eric Cote
 
-</Slide>
-<Slide>
+[React Academy](https://www.reactAcademy.live/)
+
+---
 
 ### Eric Côté
 
@@ -15,17 +12,16 @@ Presentation by Éric Côté
   src='https://www.reactacademy.live/static/20616643d8afc491bd4c1817ae69db63/5a6cd/Eric_Cote.webp'
   alt='Eric Côté'
   title='Eric Côté'
-  width='500px'
+  width='400px'
 />
 
 - Got started on 8-bits machines (Commodore 64)
-- Technical trainer since 2001 (.NET, C#, Sql Server, Azure)
+- Technical trainer since 2001 (.NET, C#, ASP.NET MVC Sql Server, Azure)
 - Training on Open Source dev technologies since 2018
   - Javascript, TypeScript, React, GitHub, REST, Node, Express, Next, Remix, etc.
 - Trainer-Owner of React Academy Live
 
-</Slide>
-<Slide>
+---
 
 ### React Academy Live
 
@@ -51,8 +47,8 @@ Multiple courses
 **New:** We are now building all samples on **TypeScript** (instead of JS)
 
 </div>
-</Slide>
-<Slide>
+
+---
 
 ### 3 parts:
 
@@ -60,8 +56,7 @@ Multiple courses
 2. Introducing React Router
 3. Working with URL Routing instead of State
 
-</Slide>
-<Slide>
+---
 
 ### Why Routing?
 
@@ -69,8 +64,7 @@ Multiple courses
 - All unresolved queries will return `index.html` instead of a **404** error
 - The JavaScript code will determine what to show, according to the content on the address bar.
 
-</Slide>
-<Slide>
+---
 
 ### Anatomy of an URL
 
@@ -122,8 +116,7 @@ Multiple courses
   </tbody>
 </table>
 
-</Slide>
-<Slide>
+---
 
 ### How this works
 
@@ -139,8 +132,7 @@ The _request_ never sends the Fragment (hash). It always stays with the client. 
 | <span className='color3'>`intro.mp4#t=43`</span>         | Goto 43 seconds                                                                                                                                         |
 | <span className='color4'>`document.html#location`</span> | Goto _location_ definition: <br /> <span className='color5'>`<h3 id="location">`</span> or <br /> <span className='color3'>`<a name="location">`</span> |
 
-</Slide>
-<Slide>
+---
 
 ### React conditional rendering
 
@@ -163,8 +155,7 @@ switch (page) {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### But...
 
@@ -178,8 +169,8 @@ With each click, there's a network call to re-get the application, for the nth t
 To avoid this, we have to replace the regular links with links that won't do network calls.
 
 </div>
-</Slide>
-<Slide>
+
+---
 
 # 3 ways to 'navigate' a SPA
 
@@ -192,8 +183,7 @@ To avoid this, we have to replace the regular links with links that won't do net
   style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
 />
 
-</Slide>
-<Slide>
+---
 
 # Hash navigation
 
@@ -214,8 +204,7 @@ How to do a re-render in React?
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### State to the rescue
 
@@ -231,8 +220,7 @@ window.addEventListener('hashchange', (evt) => {
 
 This modifies the DOM (an effect!), so wrap this in a `useEffect(..., [])`.
 
-</Slide>
-<Slide>
+---
 
 ### But...
 
@@ -255,8 +243,7 @@ See _NextJS_, _Remix_ and _Gatsby_.
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### History API
 
@@ -273,8 +260,7 @@ useEffect(() => {
 }, []); //bind this event on the first render.
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Hyperlink clicks with History API
 
@@ -295,8 +281,7 @@ function clickHandler(evt, link) {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Navigation API
 
@@ -311,8 +296,7 @@ function clickHandler(evt, link) {
   style={{ marginLeft: 'auto', marginRight: 'auto' }}
 />
 
-</Slide>
-<Slide>
+---
 
 ### Navigation API Example
 
@@ -331,8 +315,7 @@ window.navigation.addEventListener('navigate', (evt) => {
 });
 ```
 
-</Slide>
-<Slide>
+---
 
 ### What is **React Router**
 
@@ -356,8 +339,7 @@ Half of React programs use a version of React-Router
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Where can I use React Router?
 
@@ -366,7 +348,7 @@ Half of React programs use a version of React-Router
 - Remix (integrated)
 - Preact
 
----
+<hr />
 
 **Invalid:** These tools use their own routing engine
 
@@ -375,8 +357,7 @@ Half of React programs use a version of React-Router
 
 Even there, the influence of React Router will be felt... Eventually
 
-</Slide>
-<Slide>
+---
 
 ### Basic components
 
@@ -388,7 +369,7 @@ Root component that manages routes, state, context and re-renders.
 
 Hyperlink Component, with click events that make this compatible to the history API.
 
----
+<hr />
 
 Old route components, not supporting the new route props. (Compatible with V5.)
 
@@ -398,8 +379,7 @@ Old route components, not supporting the new route props. (Compatible with V5.)
 - ~`<NativeRouter>`~,
 - ~`<StaticRouter>`~,
 
-</Slide>
-<Slide>
+---
 
 ### Creating the router?
 
@@ -441,8 +421,7 @@ createBrowserRouter([
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Creating routes with JSX
 
@@ -463,12 +442,11 @@ createBrowserRouter(
 );
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Nested routes
 
-<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>console.log(e.target.parentElement.scrollTop=105)}>
+<div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>(e.target.parentElement.scrollTop=105)}>
 
 <iframe
   src='https://remix.run/_docs/routing'
@@ -479,8 +457,7 @@ createBrowserRouter(
 />
 </div>
 
-</Slide>
-<Slide>
+---
 
 ### Replace state with URL Routing
 
@@ -490,8 +467,7 @@ Back button allows you to go to a previous url.
 
 You can also bookmark and share an url.
 
-</Slide>
-<Slide>
+---
 
 ### Dynamic segments
 
@@ -511,8 +487,7 @@ function Task() {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Data loading
 
@@ -530,8 +505,7 @@ loader = async function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Loader is smart
 
@@ -553,8 +527,7 @@ loader = function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 # Params are available
 
@@ -572,8 +545,7 @@ function Team() {
 }
 ```
 
-</Slide>
-<Slide>
+---
 
 ### Get the loading state
 
@@ -587,8 +559,7 @@ Three states possible:
 **submitting** "action" called using POST, PUT, PATCH, or DELETE
 **loading** "loader" called to render the next page (using GET)
 
-</Slide>
-<Slide>
+---
 
 ### Waiting for data: wait, or display placeholder
 
@@ -600,8 +571,7 @@ Using `defer({data})`, we can enable `<Suspense fallback={plachoder} >` and `<Aw
 
 <img src='/img/wait.gif' width='100px' />
 
-</Slide>
-<Slide>
+---
 
 ### Modifying Data
 
@@ -621,8 +591,7 @@ action = async function ({ request }) {
 };
 ```
 
-</Slide>
-<Slide>
+---
 
 ### What should we cover in a future event?
 
@@ -646,8 +615,7 @@ Caching
 
 </div>
 
-</Slide>
-<Slide>
+---
 
 ## Questions?
 
@@ -655,5 +623,3 @@ Caching
   src='/img/job.jpeg'
   style={{ marginLeft: 'auto', marginRight: 'auto', width: '50%' }}
 />
-
-</Slide>

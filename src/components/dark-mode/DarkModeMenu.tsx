@@ -1,3 +1,5 @@
+//This will display a dark mode dropdown menu
+
 import { NavDropdown } from 'react-bootstrap';
 import { useTheme, useThemeList } from './ThemeProvider';
 
