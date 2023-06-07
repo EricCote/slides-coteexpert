@@ -1,3 +1,5 @@
+//This file is only used when deployed on Azure Static Web Apps.
+
 {
   "trailingSlash": "auto",
   "navigationFallback": {
