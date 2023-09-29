@@ -6,7 +6,7 @@ import { LocalTheme } from '../components/dark-mode/ThemeProvider';
 export default function Menu() {
   let location = useLocation();
   return (
-    <LocalTheme theme='dark'>
+    <LocalTheme theme='auto'>
       <Navbar expand='lg' bg='body' className='mb-4'>
         <Container>
           <Navbar.Brand as='h4'>
