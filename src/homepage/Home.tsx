@@ -15,6 +15,13 @@ const decks = [
     language: 'fr',
   },
   {
+    route: 'remix',
+    title: 'Intro à Remix',
+    description: 'Intro éclair à Remix',
+    language: 'fr',
+  },
+
+  {
     route: 'react-router',
     title: 'React Router',
     description: 'Introducing React Router',
