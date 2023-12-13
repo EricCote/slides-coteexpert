@@ -33,6 +33,12 @@ const decks = [
     description: 'Introduction à React Router',
     language: 'fr',
   },
+  {
+    route: 'react-pdf',
+    title: 'Générer pdf avec React',
+    description: "C'est possible de générer des pdf avec React",
+    language: 'fr',
+  },
 ];
 
 const languages = [
@@ -55,7 +61,7 @@ export default function Home() {
               .map((deck) => (
                 <>
                   <h5>
-                    <Link to={`${lang.shortName}/${deck.route}`}>
+                    <Link to={`decks/${lang.shortName}/${deck.route}`}>
                       {deck.title}
                     </Link>
                   </h5>

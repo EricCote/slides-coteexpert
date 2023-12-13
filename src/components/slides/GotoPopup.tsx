@@ -11,6 +11,8 @@ function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
   const txtNombre = useRef<HTMLInputElement>();
 
+  let options = { capture: true };
+
   function handleClose() {
     setShow(false);
   }
@@ -18,24 +20,28 @@ function GotoPopup() {
   function GotoPage(evt: FormEvent) {
     evt.preventDefault();
     const page = txtNombre.current!.value;
-    window.location.hash = `#${page}`;
     setShow(false);
+    location.hash = `#${page}`;
   }
 
   function handleKeyDown(evt: KeyboardEvent) {
-    if (evt.key === 'g') {
+    if ((evt.metaKey || evt.ctrlKey) && evt.key == 'g') {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
       evt.preventDefault();
+
       setShow(!txtNombre.current);
     }
   }
 
   useEffect(() => {
     if (!isEventRegistered) {
-      window.addEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown, options);
+      window.addEventListener('keydown', handleKeyDown, options);
+      isEventRegistered = true;
     }
-    isEventRegistered = true;
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown, options);
       isEventRegistered = false;
     };
   }, []);

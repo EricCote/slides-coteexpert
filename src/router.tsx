@@ -1,14 +1,65 @@
 import Home from './homepage/Home';
 
-import RouterEn from './decks/react-router.en.mdx';
-import RouterFr from './decks/react-router.fr.mdx';
-import FundamentalsFr from './decks/fundmentals.fr.mdx';
-import FundamentalsEn from './decks/fundmentals.en.mdx';
-import TestEn from './decks/test.en.mdx';
-import RemixFr from './decks/remix.fr.mdx';
-
-import GotoPopup from './components/GotoPopup';
+import Sandpack from './components/Sandpack';
+import Diagram from './components/slides/Diagram';
+import Illustration from './components/slides/Illustration';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useMemo } from 'react';
+import GotoPopup from './components/slides/GotoPopup';
+
+import Status from './decks/react-pdf.fr.mdx';
+
+const components = {
+  Sandpack,
+  Diagram,
+  Illustration,
+  TwoColumns({ className, children, style }: any) {
+    return (
+      <aside
+        className={className}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          columnGap: 10,
+          ...style,
+        }}
+      >
+        {children}
+      </aside>
+    );
+  },
+  wrapper({ children }: any) {
+    //layout function for mdx.
+    useEffect(() => {
+      //This will add slide numbers, from 1 to x
+      let results = document.querySelectorAll('article>*');
+      results.forEach((slide, idx) => {
+        slide.id = (idx + 1).toString();
+      });
+      if (location.hash) {
+        location.assign(location.hash);
+      }
+    });
+    return (
+      <>
+        <GotoPopup />
+        <>{children}</>
+      </>
+    );
+  },
+
+  Hint({ toggle, children }: any) {
+    let { lang } = useParams();
+    lang = lang ?? 'en';
+    toggle = toggle ?? lang === 'fr' ? 'Indice' : 'Hint';
+    return (
+      <details>
+        <summary className='btn-link link-info'>{toggle}</summary>
+        {children}
+      </details>
+    );
+  },
+};
 
 const router = createBrowserRouter([
   {
@@ -25,25 +76,23 @@ const router = createBrowserRouter([
       {
         index: false,
         element: (
-          <>
-            <GotoPopup />
-            <article>
-              <Outlet />
-            </article>
-          </>
+          <article>
+            <Outlet />
+          </article>
         ),
         children: [
           {
-            path: '/:lang?',
+            path: 'status',
+            element: <Status components={components} />,
+          },
+          {
+            path: 'decks/:lang/',
             element: <Language />,
             children: [
-              { path: 'en/test', element: <TestEn /> },
-              { path: 'en/test', element: <TestEn /> },
-              { path: 'en/fundamentals', element: <FundamentalsEn /> },
-              { path: 'fr/fundamentals', element: <FundamentalsFr /> },
-              { path: 'en/react-router', element: <RouterEn /> },
-              { path: 'fr/react-router', element: <RouterFr /> },
-              { path: 'fr/remix', element: <RemixFr /> },
+              {
+                path: ':id',
+                element: <MyLoader />,
+              },
             ],
           },
         ],
@@ -53,6 +102,21 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
+
+function MyLoader() {
+  const { id, lang } = useParams();
+
+  const MyMdx = useMemo(
+    () => lazy(() => import(`./decks/${id}.${lang}.mdx`)),
+    [id, lang]
+  );
+
+  return (
+    <Suspense fallback={<div>Page is Loading...</div>}>
+      <MyMdx components={components} />
+    </Suspense>
+  );
+}
 
 function Language() {
   // Get the lang param from the URL.

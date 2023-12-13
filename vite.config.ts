@@ -2,9 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import mdx from '@mdx-js/rollup';
 import remarkGfm from 'remark-gfm';
-import rehypePrism from '@mapbox/rehype-prism';
 import path from 'path';
-import { rehypeSimpleSlides } from './src/components/rehype-simple-slides';
+import remarkFrontmatter from 'remark-frontmatter';
+import rehypePrism from './src/components/Codeblock-prism/rehype-prism';
+import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,7 +13,7 @@ export default defineConfig({
     {
       enforce: 'pre',
       ...mdx({
-        remarkPlugins: [remarkGfm],
+        remarkPlugins: [remarkGfm, remarkFrontmatter],
         rehypePlugins: [
           rehypePrism,
           [
