@@ -64,8 +64,9 @@ article {
 }
 
 article::-webkit-scrollbar {
-  background: transparent; /* Chrome/Safari/Webkit */
-  width: 0px;
+  /* background: transparent; /* Chrome/Safari/Webkit */
+  visibility: hidden;
+  /* width: 0px; */ /* Ca enlève le scrollbar, mais désative la navigation par clavier  */
 }
 
 .disable-scrollbars {
