@@ -1,6 +1,6 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
- */
+
 
 import {
   useRef,
@@ -106,7 +106,7 @@ export function NavigationBar({
      * when the iframe loads.
      *
      * Plus, it should only prompt if there's any file changes
-     */
+    // * / 
     if (
       sandpack.editorState === 'dirty' &&
       confirm('Reset all your edits too?')
@@ -203,3 +203,5 @@ export function NavigationBar({
     </div>
   );
 }
+
+ */

@@ -7,8 +7,9 @@ import remarkFrontmatter from 'remark-frontmatter';
 import rehypePrism from './src/components/Codeblock-prism/rehype-prism';
 import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides';
 
-// https://vitejs.dev/config/
+// https://vitejs.dev/config
 export default defineConfig({
+  // build: { chunkSizeWarningLimit: 700 },
   plugins: [
     {
       enforce: 'pre',

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
- */
+ 
 import { memo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import {
@@ -130,3 +130,5 @@ const Editor = memo(function Editor({
     />
   );
 });
+
+*/
