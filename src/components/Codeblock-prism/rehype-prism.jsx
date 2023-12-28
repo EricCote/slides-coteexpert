@@ -4,10 +4,12 @@ import { visit } from 'unist-util-visit';
 import { toString as nodeToString } from 'hast-util-to-string';
 import { refractor } from 'refractor';
 import jsx from 'refractor/lang/jsx';
+import razor from 'refractor/lang/cshtml';
 import rangeParser from 'parse-numeric-range';
 import addMarkers from './addMarkers';
 
 refractor.register(jsx);
+refractor.register(razor);
 
 // will colorize code samples
 export default function rehypePrism(options) {
