@@ -8,38 +8,41 @@ import rehypePrism from './src/components/Codeblock-prism/rehype-prism';
 import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides';
 
 // https://vitejs.dev/config
-export default defineConfig({
-  // build: { chunkSizeWarningLimit: 700 },
-  plugins: [
-    {
-      enforce: 'pre',
-      ...mdx({
-        remarkPlugins: [remarkGfm, remarkFrontmatter],
-        rehypePlugins: [
-          rehypePrism,
-          [
-            rehypeSimpleSlides,
-            {
-              slideSeparators: ['hr'],
-              slideType: 'section',
-              slideClass: null,
-            },
+export default defineConfig(
+  /* ({ command }) => ( */ {
+    build: { chunkSizeWarningLimit: 700 },
+    plugins: [
+      {
+        enforce: 'pre',
+        ...mdx({
+          // development: command === 'serve',
+          remarkPlugins: [remarkGfm, remarkFrontmatter],
+          rehypePlugins: [
+            rehypePrism,
+            [
+              rehypeSimpleSlides,
+              {
+                slideSeparators: ['hr'],
+                slideType: 'section',
+                slideClass: null,
+              },
+            ],
           ],
-        ],
-      }),
+        }),
+      },
+      react(),
+    ],
+    server: {
+      headers: {
+        // 'Content-Security-Policy': `object-src * ; img-src *`,
+      },
     },
-    react(),
-  ],
-  server: {
-    headers: {
-      // 'Content-Security-Policy': `object-src * ; img-src *`,
+    resolve: {
+      preserveSymlinks: true,
+      alias: {
+        '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+        '~prism-themes': path.resolve(__dirname, 'node_modules/prism-themes'),
+      },
     },
-  },
-  resolve: {
-    preserveSymlinks: true,
-    alias: {
-      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
-      '~prism-themes': path.resolve(__dirname, 'node_modules/prism-themes'),
-    },
-  },
-});
+  }
+);
