@@ -11,7 +11,7 @@ export default function Menu() {
         <Container>
           <Navbar.Brand as='h4'>
             <Link to='/' className='text-decoration-none'>
-              React Academy
+              AFI Expertise - Côté Expert
             </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />

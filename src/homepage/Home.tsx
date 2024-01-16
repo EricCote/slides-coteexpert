@@ -3,40 +3,28 @@ import Menu from './Menu';
 
 const decks = [
   {
-    route: 'fundamentals',
-    title: 'React Fundamentals',
-    description: 'Your first steps with React',
+    route: 'AspNetWebApi/api1',
+    title: 'Web API',
+    description: 'Your first steps with .NET Web APIs',
     language: 'en',
   },
   {
-    route: 'fundamentals',
-    title: 'Fondements de React',
-    description: 'Vos premiers pas en React',
+    route: 'AspNetWebApi/api1',
+    title: 'API Web',
+    description: "Vos premiers pas avec les Web API d'ASP.NET",
     language: 'fr',
   },
   {
-    route: 'remix',
-    title: 'Intro à Remix',
-    description: 'Intro éclair à Remix',
+    route: 'Blazor/blazor1',
+    title: 'Intro à Blazor',
+    description: 'Premiers pas avec Blazor',
     language: 'fr',
   },
 
   {
-    route: 'react-router',
-    title: 'React Router',
-    description: 'Introducing React Router',
-    language: 'en',
-  },
-  {
-    route: 'react-router',
-    title: 'Routage React',
-    description: 'Introduction à React Router',
-    language: 'fr',
-  },
-  {
-    route: 'react-pdf',
-    title: 'Générer pdf avec React',
-    description: "C'est possible de générer des pdf avec React",
+    route: 'fundamentals',
+    title: 'Intro à React',
+    description: 'Premiers pas avec React',
     language: 'fr',
   },
 ];
@@ -51,7 +39,7 @@ export default function Home() {
   return (
     <>
       <Menu />
-      <h1 className='my-5'>Simple MDX Slides</h1>
+      <h1 className='my-5'>Diapositives</h1>
       {languages.map((lang) => (
         <>
           <div>

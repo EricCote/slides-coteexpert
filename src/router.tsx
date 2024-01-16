@@ -7,7 +7,7 @@ import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/Blazor/blazor1.fr.mdx';
+import Status from './decks/AspNetWebApi/api1.fr.mdx';
 
 const components = {
   Sandpack,
@@ -93,6 +93,10 @@ const router = createBrowserRouter([
                 path: ':id',
                 element: <MyLoader />,
               },
+              {
+                path: ':subject/:id',
+                element: <MyLoader />,
+              },
             ],
           },
         ],
@@ -104,12 +108,14 @@ const router = createBrowserRouter([
 export default router;
 
 function MyLoader() {
-  const { id, lang } = useParams();
+  const { subject, id, lang } = useParams();
 
-  const MyMdx = useMemo(
-    () => lazy(() => import(`./decks/${id}.${lang}.mdx`)),
-    [id, lang]
-  );
+  let file = `./decks/${id}.${lang}.mdx`;
+  if (subject) {
+    file = `./decks/${subject}/${id}.${lang}.mdx`;
+  }
+
+  const MyMdx = useMemo(() => lazy(() => import(file)), [id, subject, lang]);
 
   return (
     <Suspense fallback={<div>Page is Loading...</div>}>
