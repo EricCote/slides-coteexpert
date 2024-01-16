@@ -115,7 +115,10 @@ function MyLoader() {
     file = `./decks/${subject}/${id}.${lang}.mdx`;
   }
 
-  const MyMdx = useMemo(() => lazy(() => import(file)), [id, subject, lang]);
+  const MyMdx = useMemo(
+    () => lazy(() => import(/* @vite-ignore */ file)),
+    [id, subject, lang]
+  );
 
   return (
     <Suspense fallback={<div>Page is Loading...</div>}>
