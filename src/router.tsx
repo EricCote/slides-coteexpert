@@ -90,11 +90,11 @@ const router = createBrowserRouter([
             element: <Language />,
             children: [
               {
-                path: ':id',
+                path: ':doc',
                 element: <MyLoader />,
               },
               {
-                path: ':subject/:id',
+                path: ':subject/:doc',
                 element: <MyLoader />,
               },
             ],
@@ -108,16 +108,18 @@ const router = createBrowserRouter([
 export default router;
 
 function MyLoader() {
-  const { subject, id, lang } = useParams();
-
-  let file = `./decks/${id}.${lang}.mdx`;
-  if (subject) {
-    file = `./decks/${subject}/${id}.${lang}.mdx`;
-  }
+  const { subject, doc, lang } = useParams();
 
   const MyMdx = useMemo(
-    () => lazy(() => import(/* @vite-ignore */ file)),
-    [id, subject, lang]
+    () =>
+      lazy(() => {
+        if (subject) {
+          return import(`./decks/${subject}/${doc}.${lang}.mdx`);
+        } else {
+          return import(`./decks/${doc}.${lang}.mdx`);
+        }
+      }),
+    [subject, doc, lang]
   );
 
   return (
