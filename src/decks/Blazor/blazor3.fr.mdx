@@ -22,10 +22,10 @@
 - Chaque composant consiste d'un un mélange de HTML et C#
   - Utilise la syntaxe Razor
 - Le code est délimité par la directive `@code`
-- D'autres directives existent:
-  - Accéder aux variables
-  - Lier des valeurs
-  - Personaliser un rendu
+  - D'autres directives existent:
+    - Accéder aux variables
+    - Lier des valeurs
+    - Personaliser un rendu
 - Quand le fichier `.razor` est compilé, le HTML et C# génèrent une classe.
 
 ---
@@ -34,11 +34,13 @@
 
 - Razor est aussi utilisé par les vues MVC
 - Utilise l'extension `.cshtml` (plutôt que `.razor`)
-- En razor, il n'y a pas de distinction entre une vue et un controleur.
+- En Razor, il n'y a pas de distinction entre une vue et un controleur.
 
 ---
 
 ## Exemple d'un composant Blazor
+
+<div style={{fontSize:'.8em'}}>
 
 ```razor
 @page "/index"
@@ -48,15 +50,17 @@
 <p>@welcomeMessage</p>
 
 @code {
-  private string welcomeMessage = "However you like your pizzas, we can deliver them blazing fast!";
+  private string welcomeMessage = "However you like 'em!";
 }
 ```
 
-le code initialise une variable `welcomeMessage`
+</div >
+
+La section `@code` initialise une variable `welcomeMessage`
 
 ---
 
-## Créer des composants Blazor
+## Créer une app Blazor
 
 D'abord créer une app blazor
 
@@ -83,7 +87,7 @@ dotnet new razorcomponent -n PizzaBrowser -o Pages -f net8.0
 
 <hr />
 
-Pour démarrer visual studio code:
+Pour démarrer Visual Studio Code:
 
 ```bash
 code .
@@ -118,5 +122,13 @@ Le point indique le dossier courant.
 ## Composition d'un composant
 
 - Des balises HTML tel que `<h1>` ou `<p>`
-- Directive `@page` pour indiquer la le gabarit de routage
+- Directive `@page` pour indiquer le gabarit de routage
 - Directive `@code` pour indiquer un block C#
+- Directive d'accès au membre (`@welcomeMessage`) pour accéder à des données
+
+---
+
+## Pratique
+
+- La compagnie "Blazing Pizza" désire une app pour la livraison de pizza.
+- Il y a déjà des artifacts (images, css) provenant de l'ancien site web.
