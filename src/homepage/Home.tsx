@@ -15,9 +15,9 @@ const decks = [
     language: 'fr',
   },
   {
-    route: 'Blazor/blazor1',
-    title: 'Intro à Blazor',
-    description: 'Premiers pas avec Blazor',
+    route: 'Blazor/blazor-menu',
+    title: 'Blazor',
+    description: 'Formation Blazor 2024',
     language: 'fr',
   },
 

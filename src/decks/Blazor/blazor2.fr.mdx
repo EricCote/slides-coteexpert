@@ -131,6 +131,34 @@ OU
 
 - **Visual Studio Code**
   - Installer aussi **.NET SDK** (Ce qui inclut ASP.NET, C# et Blazor)
+  - Extensions VS Code: C# Dev Kit...
+
+---
+
+## Comment travailler avec VS Code
+
+- Installer `C# Dev Kit`
+- Configurer les paramètres de VS Code avec <kbd>ctrl-,</kbd>
+  - Text Editor: Tab Size: 2
+  - Text Editor: Formatting: Format On Save: true
+  - Extensions: C#: OmniSharp: Format: Enable: true
+
+---
+
+## Comment travailler avec VS Code
+
+- <kbd>Ctrl-Shift-B</kbd> pour faire un build
+- Le build est configuré dans le fichier `.vscode/tasks.json`
+
+<hr />
+
+- <kbd>F5</kbd> pour démarrer le déboggage.
+- Le débogage est configuré dans le fichier `.vscode/launch.json`
+
+<hr />
+
+- Allez en mode commande avec <kbd>Ctrl-Shift-P</kbd>
+- Utilisez la commande : "DOTNET: Generate Assets for Build and Debug" pour générer ces fichiers
 
 ---
 
@@ -160,13 +188,29 @@ dotnet dev-certs https --trust
 
 ---
 
-## créer un projet blazor
+## Créer un projet blazor
 
-Dans un nouveau dossier avec le nom du projet, on lance la commande suivante:
+Dans un dossier vide, on lance la commande suivante:
 
 ```bash
 dotnet new blazor -f net8.0
 ```
+
+Si on veut créer un nouveau dossier:
+
+```bash
+dotnet new blazor -o MonDossier --no-https true -f net8.0
+```
+
+`--output MonDossier` est le dossier de sortie (output)
+`--no-https true` désactive le port https
+`--framework net8.0` pour choisir la version .NET
+
+```bash
+dotnet new blazor --help
+```
+
+---
 
 Pour exécuter en mode "hot-reload":
 
@@ -342,6 +386,31 @@ Welcome to your new app.
 
 ## Lab 1: Composant Todo
 
+{/* prettier-ignore */}
+{/*
+
+## Créer dossier
+
+Créer un dossier `projets` sur le disque D:
+
+```bash
+d:
+mkdir projets
+```
+
+Se déplacer dans le dossier `projets` et démarrer VS Code:
+
+```bash
+cd projets
+code .
+```
+
+Le point (.) signifie d'ouvrir le dossier courant.
+
+---
+
+{/*  */}
+
 ## Ajouter une page Todo
 
 ```bash
@@ -355,6 +424,11 @@ dotnet new razorcomponent --name Todo --output Components/Pages
 ```
 
 Le nom d'un composant Blazor doit commencer par une **majuscule**. Le nom du fichier généré sera `Todo.razor`.
+
+<hr />
+
+En VS2022, on utilise le menu contextuel pour ajouter la page Todo dans le dossier
+`Components/Pages`
 
 ---
 
@@ -396,7 +470,7 @@ Ajoutons une directive `@page` pour le routage:
 
 ## Créer une classe TodoItem
 
-Dans la racine du projet, on ajoute un fichier `TodoItem.cs`. Ajoutez les code suivant:
+Dans la racine du projet, on ajoute un fichier classe `TodoItem.cs`. Ajoutez les code suivant:
 
 ```cs
 
@@ -459,7 +533,7 @@ Modifions la page `todo.razor`
 
 ---
 
-## Gérer le click du bouton
+## Gérer le clic du bouton
 
 ```razor {2, 7-10}
 <input placeholder="Something todo" />
@@ -534,12 +608,15 @@ dotnet run
 
 ## Rendre la liste éditable
 
-```razor {5-6}
+On modifie le contenu des `li`
+
+```razor {5-7}
 <ul>
     @foreach (var todo in todos)
     {
         <li class="list-unstyled">
-            <input type="checkbox" @bind="todo.IsDone" class="form-check-input align-text-bottom d-inline-block" />
+            <input type="checkbox" @bind="todo.IsDone"
+                   class="form-check-input align-text-bottom d-inline-block" />
             <input @bind="todo.Title" class="form-control w-lg-25 d-inline" />
         </li>
     }
@@ -549,6 +626,8 @@ dotnet run
 ---
 
 ## Ajouter le nombre de todo dans le titre
+
+On modifie la balise `h3` existante
 
 ```razor
 <h3>Todo (@todos.Count(todo => !todo.IsDone))</h3>

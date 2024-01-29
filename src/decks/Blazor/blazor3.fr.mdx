@@ -1,4 +1,4 @@
-# Blazor et les données
+# Interagir avec Blazor
 
 {/* from https://learn.microsoft.com/en-us/training/modules/interact-with-data-blazor-web-apps/ */}
 
@@ -40,7 +40,7 @@
 
 ## Exemple d'un composant Blazor
 
-<div style={{fontSize:'.8em'}}>
+<div style={{fontSize: ".8em"}}>
 
 ```razor
 @page "/index"
@@ -123,12 +123,241 @@ Le point indique le dossier courant.
 
 - Des balises HTML tel que `<h1>` ou `<p>`
 - Directive `@page` pour indiquer le gabarit de routage
-- Directive `@code` pour indiquer un block C#
-- Directive d'accès au membre (`@welcomeMessage`) pour accéder à des données
+- Directives `@code` pour indiquer un bloc C#
+- Directives d'accès au membre (`@welcomeMessage`) pour accéder à des données
 
 ---
 
-## Pratique
+## Lab 1a
 
 - La compagnie "Blazing Pizza" désire une app pour la livraison de pizza.
 - Il y a déjà des artifacts (images, css) provenant de l'ancien site web.
+
+En partant de notre dossier `projets`:
+
+<div style={{ fontSize: '.75em' }}>
+
+```bash
+git clone https://github.com/MicrosoftDocs/mslearn-interact-with-data-blazor-web-apps.git BlazingPizza
+```
+
+</div>
+
+Ceci créé un dossier BlazingPizza. Exécutez le projet et visonnez la page d'accueil (très simple).
+
+---
+
+## Lab 1b
+
+`Pages/Index.razor` permet de choisir et modifier des pizzas. Ceci correpond au URL racine (/).
+
+`PizzaSpecial` est une classe pour stocker les infos de nos pizza. Voir le fichier dans `Model\PizzaSpecial.cs`.
+
+Le code de “Pizza Special` est affiché dans la prochaine diapo.
+
+---
+
+## PizzaSpecial.cs
+
+```csharp
+namespace BlazingPizza;
+
+/// <summary>
+/// Represents a pre-configured template for a pizza a user can order
+/// </summary>
+public class PizzaSpecial
+{
+  public int Id { get; set; }
+  public string Name { get; set; }
+  public decimal BasePrice { get; set; }
+  public string Description { get; set; }
+  public string ImageUrl { get; set; }
+  public string GetFormattedBasePrice() => BasePrice.ToString("0.00");
+}
+```
+
+---
+
+## Lab 1c
+
+Dans `Pages/Index.razor`, sous le titre `<h1></h1>`, ajoutons du code :
+
+<div style={{ fontSize: '.75em' }}>
+
+```csharp
+@code {
+    List<PizzaSpecial> specials = new();
+
+    protected override void OnInitialized()
+    {
+        specials.AddRange(new List<PizzaSpecial>
+        {
+            new PizzaSpecial { Name = "The Baconatorizor", BasePrice =  11.99M, Description = "It has EVERY kind of bacon", ImageUrl="img/pizzas/bacon.jpg"},
+            new PizzaSpecial { Name = "Buffalo chicken", BasePrice =  12.75M, Description = "Spicy chicken, hot sauce, and blue cheese, guaranteed to warm you up", ImageUrl="img/pizzas/meaty.jpg"},
+            new PizzaSpecial { Name = "Veggie Delight", BasePrice =  11.5M, Description = "It's like salad, but on a pizza", ImageUrl="img/pizzas/salad.jpg"},
+            new PizzaSpecial { Name = "Margherita", BasePrice =  9.99M, Description = "Traditional Italian pizza with tomatoes and basil", ImageUrl="img/pizzas/margherita.jpg"},
+            new PizzaSpecial { Name = "Basic Cheese Pizza", BasePrice =  11.99M, Description = "It's cheesy and delicious. Why wouldn't you want one?", ImageUrl="img/pizzas/cheese.jpg"},
+            new PizzaSpecial { Name = "Classic pepperoni", BasePrice =  10.5M, Description = "It's the pizza you grew up with, but Blazing hot!", ImageUrl="img/pizzas/pepperoni.jpg" }
+        });
+    }
+}
+```
+
+</div>
+
+Si on exécute, rien n'a changé. Ce code ne modifie pas l'affichage (pour le moment)
+
+---
+
+## Lab 1d
+
+Dans `Pages/Index.razor`, remplaçons les balises `<h1></h1>` par ces balises:
+
+<div style={{ fontSize: '.8em' }}>
+
+```razor
+<div class="main">
+  <h1>Blazing Pizzas</h1>
+  <ul class="pizza-cards">
+    @if (specials != null)
+    {
+      @foreach (var special in specials)
+      {
+        <li style="background-image: url('@special.ImageUrl')">
+          <div class="pizza-info">
+              <span class="title">@special.Name</span>
+                  @special.Description
+                <span class="price">@special.GetFormattedBasePrice()</span>
+          </div>
+        </li>
+      }
+    }
+  </ul>
+</div>
+```
+
+</div>
+
+---
+
+## Lab 1e: Exécuter le résultat
+
+Le code précédent permet de boucler (`@foreach`) et de générer autant de `<li>` qu'il y a de pizzas.
+
+<img
+  src='https://learn.microsoft.com/en-us/training/aspnetcore/interact-with-data-blazor-web-apps/media/3-blazing-pizzas.png'
+  width='60%'
+/>
+
+Fin du lab 1!!!
+
+---
+
+## Données et Blazor
+
+Dans le lab précédent, les données étaient dans le code. C'est une mauvaise pratique.
+
+Vaut mieux se connecter sur des sources de données que de "hardcoder" les données. C'est plus flexible pour les modifications du futur.
+
+---
+
+## Obtenir des données
+
+On peut obtenir des données de différentes sources:
+
+- Base de données relationnelle
+- Base de données NoSQL
+- Services Web
+
+On peut utiliser différentes technologies pour se connecter:
+
+- Entity Framework
+- ODBC
+- HTTP Client
+
+---
+
+## Structure DTO
+
+Voici une structure pour transférer les données des pizzas:
+
+```csharp
+namespace BlazingPizza.Data;
+
+public class Pizza
+{
+    public int PizzaId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public decimal Price { get; set; }
+    public bool Vegetarian { get; set; }
+    public bool Vegan { get; set; }
+}
+```
+
+Ceci correspond à la structure des données sockées dans la BD. Notons le nom du namespace (`Data`).
+
+---
+
+## Service de Données
+
+```csharp
+namespace BlazingPizza.Data;
+
+public class PizzaService
+{
+    public Task<Pizza[]> GetPizzasAsync()
+    {
+    // Call your data access technology here
+    }
+}
+```
+
+Un appel Asynchrone pour retourner une collection de pizzas. (Le code async permet de ne pas bloquer)
+
+---
+
+## Ajouter le service dans notre app
+
+On enregistre le service dans la section `Add Services to the container section` dans `Program.cs`. Ceci ajoute de l'injection de dépendence.
+
+```csharp
+...
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+// Register the pizzas service
+builder.Services.AddSingleton<PizzaService>();
+...
+```
+
+---
+
+## Consommer le service pour obtenir des données
+
+Imaginons une composante dans laquelle on veut ajouter des données
+
+```razor
+@page "/pizzas"
+
+<h1>Choose your pizza</h1>
+
+<p>We have all these delicious recipes:</p>
+```
+
+---
+
+## Injecter le service
+
+On ajoute ces directives sous `@page`. On reçoit via l'injection de dépendance
+
+```razor
+@using BlazingPizza.Data
+@inject PizzaService PizzaSvc
+```
+
+Les composants et les services ne partagent pas les mêmes namespaces. C'est pour cela `@using`
+
+`@inject`permet d'obtenir une instance du type. `PizzaService` est le type, `PizzaSvc`` est l'instance
+
+## Substituer la méthode OnInitializedAsync
