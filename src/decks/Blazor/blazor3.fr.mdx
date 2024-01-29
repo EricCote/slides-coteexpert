@@ -360,4 +360,34 @@ Les composants et les services ne partagent pas les mêmes namespaces. C'est pou
 
 `@inject`permet d'obtenir une instance du type. `PizzaService` est le type, `PizzaSvc`` est l'instance
 
+---
+
 ## Substituer la méthode OnInitializedAsync
+
+Cet événement est lancé APRÈS l'initialisation et APRÈS avoir reçu les paramètres, mais AVANT le rendu et l'affichage à l'usager. C'est défini dans le composant de de base de Blazor.
+
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    \\ Call the service here
+}
+```
+
+---
+
+## Appeler le sevice pour obtenir données
+
+```csharp
+private Pizza[] todaysPizzas;
+
+protected override async Task OnInitializedAsync()
+{
+    todaysPizzas = await PizzaSvc.GetPizzasAsync();
+}
+```
+
+---
+
+## Afficher les donnéesß
+
+ß
