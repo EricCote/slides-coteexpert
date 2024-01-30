@@ -8,8 +8,10 @@
 
 :root {
   --bs-font-sans-serif: Avenir Next, system-ui;
-  /* scrollbar-color: transparent transparent;
-  scrollbar-width: thin; */
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Border-box all the things */
