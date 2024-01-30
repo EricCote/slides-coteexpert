@@ -8,6 +8,8 @@
 
 :root {
   --bs-font-sans-serif: Avenir Next, system-ui;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
 }
 
 /* Border-box all the things */
@@ -16,10 +18,10 @@
 }
 
 /* Cover the whole screen */
-html,
+/* html,
 body {
   block-size: 100%;
-}
+} */
 
 h1 {
   font-size: 3.2em;
@@ -76,37 +78,6 @@ article::-webkit-scrollbar {
 
 /* These are the slides */
 article > * {
-  /* Fill the scroll container */
-  flex: 0 0 100%;
-  /* Scroll to the start of the slide */
-  scroll-snap-align: start;
-  /* Increment the slide counter */
-  counter-increment: slide;
-}
-
-/* This is the counter */
-article > ::before {
-  /* Display the counter */
-  content: counter(slide);
-}
-
-/* This is a cover layout for the first slide */
-article > .first-slide {
-  display: grid;
-  place-content: center;
-  text-align: center;
-  padding-inline: 4rem;
-  font-size: clamp(1rem, 1rem + 2vw, 3rem);
-  line-height: 1.3;
-}
-
-:root {
-  scrollbar-color: transparent transparent;
-  scrollbar-width: thin;
-}
-
-/* Make each slide a vertical flex layout */
-article > * {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -119,10 +90,19 @@ article > * {
   row-gap: 1rem;
   padding: 2rem;
   font-size: 1.5rem;
+
+  /* Fill the scroll container */
+  flex: 0 0 100%;
+  /* Scroll to the start of the slide */
+  scroll-snap-align: start;
+  /* Increment the slide counter */
+  counter-increment: slide;
 }
 
-/* Style the slide counter */
+/* This is the counter */
 article > ::before {
+  /* Display the counter */
+  content: counter(slide);
   position: absolute;
   inset-block-start: 1rem;
   inset-inline-end: 1rem;
@@ -136,12 +116,22 @@ article > ::before {
   clip-path: circle();
 }
 
+/* This is a cover layout for the first slide */
+article > .first-slide {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding-inline: 4rem;
+  font-size: clamp(1rem, 1rem + 2vw, 3rem);
+  line-height: 1.3;
+}
+
 /* Remove margin for slide content */
 article > * > * {
   margin: 0;
 }
 
-/* For all none cover layouts set the heading size */
+/* For all non-cover layouts set the heading size */
 article > * + * > :first-child {
   font-size: 1.5em;
 }

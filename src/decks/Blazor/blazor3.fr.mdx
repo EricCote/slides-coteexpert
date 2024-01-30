@@ -364,7 +364,7 @@ Les composants et les services ne partagent pas les mêmes namespaces. C'est pou
 
 ## Substituer la méthode OnInitializedAsync
 
-Cet événement est lancé APRÈS l'initialisation et APRÈS avoir reçu les paramètres, mais AVANT le rendu et l'affichage à l'usager. C'est défini dans le composant de de base de Blazor.
+Cet événement est lancé APRÈS l'initialisation et APRÈS avoir reçu les paramètres, mais AVANT le rendu et l'affichage à l'usager. C'est défini dans la classe de base pour tout composant Blazor.
 
 ```csharp
 protected override async Task OnInitializedAsync()
@@ -375,7 +375,7 @@ protected override async Task OnInitializedAsync()
 
 ---
 
-## Appeler le sevice pour obtenir données
+## Appeler le service pour obtenir des données
 
 ```csharp
 private Pizza[] todaysPizzas;
@@ -389,3 +389,62 @@ protected override async Task OnInitializedAsync()
 ---
 
 ## Afficher les données
+
+Valider si on a des données à afficher:
+
+```razor
+@if (todaysPizzas == null)
+{
+    <p>Nous obtenons les données</p>
+}
+else
+{
+    <!-- Ce contenu affiche quand les données sont chargées -->
+}
+```
+
+On peut faire des `else if` supplémentaires pour afficher d'autres types de blocs.
+
+Alternativement, la directive `@switch` peut être utilisée pour des blocs multiples.
+
+---
+
+## Afficher une collection
+
+`@foreach` boucle à travers les données.
+
+```razor
+<table>
+ <tbody>
+  @foreach (var pizza in todaysPizzas)
+  {
+   <tr>
+    <td>@pizza.Name</td>
+    <td>@pizza.Description</td>
+    <td>@pizza.Vegetarian</td>
+    <td>@pizza.Vegan</td>
+    <td>@pizza.Price</td>
+   </tr>
+  }
+ </tbody>
+</table>
+```
+
+---
+
+## Boucler les données
+
+On peut afficher les données dans:
+
+- une table
+- une liste à puce
+- une structure visuelle élaborée
+
+On peut boucler de différentes manières:
+
+- `@for`
+- `@foreach`
+- `@while`
+- `@do  ... while`
+
+---
