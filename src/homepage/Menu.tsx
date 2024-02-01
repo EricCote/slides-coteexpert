@@ -9,9 +9,13 @@ export default function Menu() {
     <LocalTheme theme='auto'>
       <Navbar expand='lg' bg='body' className='mb-4'>
         <Container>
-          <Navbar.Brand as='h4'>
-            <Link to='/' className='text-decoration-none'>
-              AFI Expertise - Côté Expert
+          <Navbar.Brand as='h1'>
+            <Link
+              to='/'
+              className='text-decoration-none'
+              style={{ fontSize: '3rem' }}
+            >
+              AFI-Expertise - Côté Expert
             </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />

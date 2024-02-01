@@ -29,7 +29,7 @@ function elementsToSimpleSlides(rootNode: Root, options: Options) {
     )
   ) {
     let firstSlide = '';
-    if ((rootNode.children[0] as Element).tagName === 'h1')
+    if (rootNode.children.filter((elem) => (elem as Element).tagName === 'h1'))
       firstSlide = 'first-slide';
     // if not, lets add the initial slide
     slides.push({

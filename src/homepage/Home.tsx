@@ -1,33 +1,9 @@
 import { Link } from 'react-router-dom';
 import Menu from './Menu';
+import { Fragment } from 'react';
+import slidedecks from '../slidedecks.json';
 
-const decks = [
-  {
-    route: 'AspNetWebApi/api1',
-    title: 'Web API',
-    description: 'Your first steps with .NET Web APIs',
-    language: 'en',
-  },
-  {
-    route: 'AspNetWebApi/api1',
-    title: 'API Web',
-    description: "Vos premiers pas avec les Web API d'ASP.NET",
-    language: 'fr',
-  },
-  {
-    route: 'Blazor/blazor-menu',
-    title: 'Blazor',
-    description: 'Formation Blazor 2024',
-    language: 'fr',
-  },
-
-  {
-    route: 'fundamentals',
-    title: 'Intro à React',
-    description: 'Premiers pas avec React',
-    language: 'fr',
-  },
-];
+const decks = slidedecks;
 
 const languages = [
   { language: 'Français', shortName: 'fr' },
@@ -39,26 +15,26 @@ export default function Home() {
   return (
     <>
       <Menu />
-      <h1 className='my-5'>Diapositives</h1>
+      <h1 className='my-5'>React Slides</h1>
       {languages.map((lang) => (
-        <>
+        <Fragment key={lang.shortName}>
           <div>
             <h3>{lang.language}</h3>
             {decks
               .filter((deck) => deck.language === lang.shortName)
               .map((deck) => (
-                <>
-                  <h5>
+                <Fragment key={deck.route}>
+                  <h5 className='my-0'>
                     <Link to={`decks/${lang.shortName}/${deck.route}`}>
                       {deck.title}
                     </Link>
                   </h5>
                   <p>{deck.description}</p>
-                </>
+                </Fragment>
               ))}
           </div>
           <hr className='my-5' />
-        </>
+        </Fragment>
       ))}
 
       <p>

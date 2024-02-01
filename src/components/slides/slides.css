@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Days+One&display=swap');
 
-#root {
+div#root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
@@ -8,9 +8,11 @@
 
 :root {
   --bs-font-sans-serif: Avenir Next, system-ui;
+  scrollbar-width: none;
 }
 
-body::-webkit-scrollbar {
+/* Safari */
+:root::-webkit-scrollbar {
   display: none;
 }
 
@@ -43,12 +45,25 @@ h1,
 .h1 {
   font-weight: normal;
   font-family: 'days one', system-ui;
-  font-size: 1.5em;
+}
+
+h2,
+h3 {
+  font-size: 2rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-block-end: 1rem;
 }
 
 /* This is the slide deck */
 article {
+  scroll-behavior: smooth;
   /* Cover the screen */
   block-size: 100%;
   /* Make it a flex container */
@@ -64,20 +79,15 @@ article {
     overflow-inline: scroll;
     scroll-snap-type: inline mandatory;
   }
-  /* Set up a slide counter */
-  counter-reset: slide;
+  /* Set up a slide counter 
+  counter-reset: slide;*/
+  scrollbar-width: none;
 }
 
+/* Safari */
 article::-webkit-scrollbar {
-  /* background: transparent; /* Chrome/Safari/Webkit */
-  /* visibility: hidden; */
-  /* width: 0px; */ /* Ca enlève le scrollbar, mais désative la navigation par clavier  */
+  display: none;
 }
-
-/* .disable-scrollbars {
-  scrollbar-width: none; /* Firefox 
-  -ms-overflow-style: none; /* IE 10+ 
-} */
 
 /* These are the slides */
 article > * {
@@ -86,35 +96,32 @@ article > * {
   height: 100dvh;
   overflow-y: scroll;
 
-  /* --------------
-  height:100vh;
-  overflow-y:scroll;
-  -------------- */
-  /* grid-auto-flow: row;
-  grid-template-rows: max-content; */
-
   padding: 2rem;
   font-size: 1.5rem;
 
   /* Fill the scroll container */
+  flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 100%;
+
   /* Scroll to the start of the slide */
   scroll-snap-align: start;
-  /* Increment the slide counter */
-  counter-increment: slide;
+
+  /* Increment the slide counter
+  counter-increment: slide; */
+  scrollbar-width: none;
 }
 
+/* Safari */
 article > ::-webkit-scrollbar {
-  /* background: transparent; /* Chrome/Safari/Webkit */
-  visibility: visible;
-  /* width: 0px; */ /* Ca enlève le scrollbar, mais désative la navigation par clavier  */
+  display: none;
 }
 
-/* This is the counter */
-article > ::before {
-  /* Display the counter */
-  content: counter(slide);
+article > :focus-visible {
+  outline: none;
+}
+
+.corner-number {
   position: absolute;
   inset-block-start: 1rem;
   inset-inline-end: 1rem;
@@ -123,8 +130,9 @@ article > ::before {
   font-weight: 700;
   font-variant: tabular-nums;
   line-height: 1;
-  background-color: var(--bs-body-colorx);
-  color: var(--bs-body-bgx);
+  cursor: pointer;
+  background-color: var(--bs-body-color);
+  color: var(--bs-body-bg);
   clip-path: circle();
 }
 
@@ -139,8 +147,9 @@ article > .first-slide {
 }
 
 /* For the cover layout set the measure */
-article > :first-child > :first-child {
+article > :first-child > h1 {
   max-inline-size: 21ch;
+  font-size: 2.5em;
 }
 
 code {
@@ -149,27 +158,6 @@ code {
 
 .refractor-marker {
   background-color: rgb(52, 58, 64);
-}
-
-.color1,
-.color1 code {
-  color: darkblue;
-}
-.color2,
-.color2 code {
-  color: darkred;
-}
-.color3,
-.color3 code {
-  color: darkgreen;
-}
-.color4,
-.color4 code {
-  color: darkslateblue;
-}
-.color5,
-.color5 code {
-  color: darkviolet;
 }
 
 tr:hover {
@@ -194,27 +182,6 @@ tr:hover {
 
 [data-bs-theme='dark'] tr:hover {
   background-color: darkslategrey;
-}
-[data-bs-theme='dark'] .color1,
-[data-bs-theme='dark'] .color1 code {
-  color: lightblue;
-}
-[data-bs-theme='dark'] .color2,
-[data-bs-theme='dark'] .color2 code {
-  color: lightcoral;
-}
-
-[data-bs-theme='dark'] .color3,
-[data-bs-theme='dark'] .color3 code {
-  color: lightgreen;
-}
-[data-bs-theme='dark'] .color4,
-[data-bs-theme='dark'] .color4 code {
-  color: lightsteelblue;
-}
-[data-bs-theme='dark'] .color5,
-[data-bs-theme='dark'] .color5 code {
-  color: lightgoldenrodyellow;
 }
 
 [data-bs-theme='dark'] code {
