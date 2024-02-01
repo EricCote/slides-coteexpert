@@ -1,0 +1,49 @@
+[
+  {
+    "route": "blazor",
+    "title": "Blazor",
+    "description": "Formation Blazor 2024",
+    "language": "fr",
+    "filename": "blazor.fr.mdx"
+  },
+  {
+    "route": "fundamentals",
+    "title": "React Fundamentals",
+    "description": "Your first steps with React",
+    "language": "en",
+    "filename": "fundamentals.en.mdx"
+  },
+  {
+    "route": "fundamentals",
+    "title": "Fondements de React",
+    "description": "Vos premiers pas en React",
+    "language": "fr",
+    "filename": "fundamentals.fr.mdx"
+  },
+  {
+    "filename": "react-pdf.fr.mdx"
+  },
+  {
+    "filename": "react-router.css"
+  },
+  {
+    "route": "react-router",
+    "title": "React Router",
+    "description": "Introducing React Router",
+    "language": "en",
+    "filename": "react-router.en.mdx"
+  },
+  {
+    "route": "react-router",
+    "title": "Routage React",
+    "description": "Introduction à React Router",
+    "language": "fr",
+    "filename": "react-router.fr.mdx"
+  },
+  {
+    "filename": "remix.fr.mdx"
+  },
+  {
+    "filename": "test.en.mdx"
+  }
+]
