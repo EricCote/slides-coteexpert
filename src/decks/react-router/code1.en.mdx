@@ -1,0 +1,135 @@
+## Server Routing
+
+<Sandpack options={{ showNavigator: true }} >
+
+```jsx App.js active
+import Home from '../Home';
+import Menu from './Menu';
+
+export default function App() {
+  return (
+    <>
+      <Menu />
+      <Home />
+    </>
+  );
+}
+```
+
+```jsx Menu.jsx
+export default function Menu() {
+  return (
+    <ul className='menu'>
+      <li>
+        <a class='active' href='/'>
+          Home
+        </a>
+      </li>
+      <li>
+        <a href='/news'>News</a>
+      </li>
+      <li>
+        <a href='/contact'>Contact</a>
+      </li>
+      <li>
+        <a href='/About'>About</a>
+      </li>
+    </ul>
+  );
+}
+```
+
+```jsx Menu2.jsx
+const menuList = [
+  {
+    name: 'Home',
+    url: '/',
+  },
+  {
+    name: 'News',
+    url: '/news',
+  },
+  {
+    name: 'Contact',
+    url: '/contact',
+  },
+  {
+    name: 'About',
+    url: '/about',
+  },
+];
+
+export default function Menu() {
+  return (
+    <ul className='menu'>
+      {menuList.map((menuItem) => (
+        <li key={menuItem.url}>
+          <a
+            className={menuItem.url === '/' ? 'active' : ''}
+            href={menuItem.url}
+          >
+            {menuItem.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```jsx Home.jsx
+export default function Home() {
+  return (
+    <div>
+      <h1>Home page</h1>
+      <p>The way a web server is configured in SPA mode:</p>
+      <ul>
+        <li>If a folder or page exists on disk, serve it.</li>
+        <li>
+          If it doesn't exist, serve the default page instead (index.html)
+        </li>
+        <ul>
+          <li>
+            Unless there is an extension in the request (.png .css .js .html)
+            then serve a 404.
+          </li>
+        </ul>
+        <li>Different SPA frameworks might have slightly different rules</li>
+      </ul>
+    </div>
+  );
+}
+```
+
+```css
+ul.menu {
+  list-style-type: none;
+  margin: 0;
+  margin-bottom: 1em;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu li {
+  float: left;
+}
+
+.menu li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.menu .active {
+  background-color: royalblue;
+}
+```
+
+</Sandpack>

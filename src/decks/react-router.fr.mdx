@@ -71,6 +71,12 @@ Offre de la formation depuis 2018.
 
 ---
 
+import Code1 from './react-router/code1.fr.mdx';
+
+<Code1 components={props.components} />
+
+---
+
 ### Comment décortiquer le URL?
 
 - Les URL sont définis dans un standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
@@ -161,6 +167,12 @@ switch (page) {
 
 ---
 
+import Code2 from './react-router/code2.en.mdx';
+
+<Code2 components={props.components} />
+
+---
+
 ### Mais...
 
 <div >
@@ -226,6 +238,12 @@ Ceci modifiant le DOM, il faut donc lier le gestionnaire d'événement dans un `
 
 ---
 
+import Code3 from './react-router/code3.en.mdx';
+
+<Code3 components={props.components} />
+
+---
+
 ### Mais...
 
 <div>
@@ -273,9 +291,9 @@ useEffect(() => {
 - Voici à quoi ressemble le gestionnaire d'événement _click_ `<Link to="/path" />`:
 
 ```js
-function clickHandler(evt, link) {
+function clickHandler(evt) {
   //create a url object from the link href
-  const url = new URL(link.href);
+  const url = new URL(event.target.href);
 
   evt.preventDefault(); //cancel the navigation
   //Add destination in history
@@ -283,6 +301,12 @@ function clickHandler(evt, link) {
   setCurrentPage(url.pathname); //set State to re-render the app.
 }
 ```
+
+---
+
+import Code4 from './react-router/code4.en.mdx';
+
+<Code4 components={props.components} />
 
 ---
 
@@ -317,6 +341,12 @@ window.navigation.addEventListener('navigate', (evt) => {
   });
 });
 ```
+
+---
+
+import Code5 from './react-router/code5.en.mdx';
+
+<Code5 components={props.components} />
 
 ---
 

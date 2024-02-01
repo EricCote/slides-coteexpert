@@ -1,0 +1,169 @@
+## React Naïve Routing
+
+<Sandpack options={{ showNavigator: true, editorHeight: '500px' }} >
+
+```jsx App.js active
+import Menu from './Menu';
+import Route, { AllRoutes } from './Route';
+
+//todo: in the returned data, replace the "AllRoutes" with a single "Route"
+
+//the problem here: when we click on the menu,
+//the browser loads our app again, instead of hiding/showing
+//the current page/component.
+//But there's no need to reload, since a SPA loads
+//all components at load time.
+export default function App() {
+  const currentPage = window.location.pathname;
+
+  return (
+    <>
+      <Menu />
+      <AllRoutes page={currentPage} />
+    </>
+  );
+}
+```
+
+```jsx Route.jsx
+import Home from './Home';
+import News from './News';
+import Contact from './Contact';
+
+export default function Route({ page }) {
+  // Routes are managed here.
+  // Note that /about will do a 404.
+  switch (page) {
+    case '/home':
+    case '/':
+    case '':
+      return <Home />;
+    case '/news':
+      return <News />;
+    case '/contact':
+      return <Contact />;
+    default:
+      return <div>404 error</div>;
+  }
+}
+
+export function AllRoutes() {
+  return (
+    <>
+      <Home />
+      <hr />
+      <News />
+      <hr />
+      <Contact />
+      <hr />
+      <Home />
+      <hr />
+      <div>404 error</div>
+    </>
+  );
+}
+```
+
+```jsx Menu.jsx
+export default function Menu() {
+  return (
+    <ul className='menu'>
+      {menuList.map((menuItem) => (
+        <li key={menuItem.url}>
+          <a
+            className={menuItem.url === location.pathname ? 'active' : ''}
+            href={menuItem.url}
+          >
+            {menuItem.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const menuList = [
+  {
+    name: 'Home',
+    url: '/',
+  },
+  {
+    name: 'News',
+    url: '/news',
+  },
+  {
+    name: 'Contact',
+    url: '/contact',
+  },
+  {
+    name: 'About',
+    url: '/about',
+  },
+];
+```
+
+```jsx Home.jsx
+export default function Home() {
+  return (
+    <>
+      <h1>Home page</h1>
+      <p>This is the home page!</p>
+    </>
+  );
+}
+```
+
+```jsx News.jsx
+export default function About() {
+  return (
+    <>
+      <h1>News page</h1>
+      <p>This is the News page!</p>
+    </>
+  );
+}
+```
+
+```jsx Contact.jsx
+export default function Contact() {
+  return (
+    <>
+      <h1>Contact page</h1>
+      <p>This is the contact page!</p>
+    </>
+  );
+}
+```
+
+```css
+ul.menu {
+  list-style-type: none;
+  margin: 0;
+  margin-bottom: 1em;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu li {
+  float: left;
+}
+
+.menu li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.menu .active {
+  background-color: #04aa6d;
+}
+```
+
+</Sandpack>

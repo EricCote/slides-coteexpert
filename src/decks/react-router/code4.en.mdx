@@ -1,0 +1,179 @@
+## History Routing
+
+<Sandpack options={{ showNavigator: true, editorHeight: '500px', showConsole:true }} >
+
+```jsx App.js active
+import { useEffect, useState } from 'react';
+import Menu from './Menu';
+import Route from './Route';
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(window.location.pathname);
+
+  function backButtonHandler(evt) {
+    setCurrentPage(evt.state); //change state to re-render the right page
+  }
+
+  useEffect(() => {
+    //handle the Back button!
+    window.addEventListener('popstate', backButtonHandler);
+    //add the current page
+    window.history.replaceState(currentPage, '', currentPage);
+  }, []); //bind this event on the first render.
+
+  //click handler that uses the history API instead of navigating
+  function clickHandler(evt) {
+    //create a url object from the link text
+    const url = new URL(evt.target.href);
+    if (
+      //if hostname is the same, but with a different path,
+      //then handle the navigation
+      url.hostname === window.location.hostname &&
+      url.pathname !== window.location.pathname
+    ) {
+      evt.preventDefault(); //cancel the navigation
+      //Add destination in history API
+      window.history.pushState(url.pathname, '', url.pathname);
+      setCurrentPage(url.pathname); //set State to re-render the app.
+    } else if (
+      url.hostname === window.location.hostname &&
+      url.pathname === window.location.pathname
+    ) {
+      evt.preventDefault(); //cancel if we navigate to the same page twice
+    }
+  }
+
+  return (
+    <>
+      <Menu onClick={clickHandler} />
+      <Route page={currentPage} />
+    </>
+  );
+}
+```
+
+```jsx Route.jsx
+import Home from './Home';
+import News from './News';
+import Contact from './Contact';
+
+export default function Route({ page }) {
+  switch (page) {
+    case '/home':
+    case '/':
+    case '':
+      return <Home />;
+    case '/news':
+      return <News />;
+    case '/contact':
+      return <Contact />;
+    default:
+      return <div>404 error</div>;
+  }
+}
+```
+
+```jsx Menu.jsx
+export default function Menu({ onClick }) {
+  return (
+    <ul className='menu'>
+      {menuList.map((menuItem) => (
+        <li key={menuItem.url}>
+          <a
+            className={menuItem.url === location.hash ? 'active' : ''}
+            href={menuItem.url}
+            onClick={onClick}
+          >
+            {menuItem.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const menuList = [
+  {
+    name: 'Home',
+    url: '/',
+  },
+  {
+    name: 'News',
+    url: '/news',
+  },
+  {
+    name: 'Contact',
+    url: '/contact',
+  },
+  {
+    name: 'About',
+    url: '/about',
+  },
+];
+```
+
+```jsx Home.jsx
+export default function Home() {
+  return (
+    <>
+      <h1>Home page</h1>
+      <p>This is the home page!</p>
+    </>
+  );
+}
+```
+
+```jsx News.jsx
+export default function About() {
+  return (
+    <>
+      <h1>News page</h1>
+      <p>This is the News page!</p>
+    </>
+  );
+}
+```
+
+```jsx Contact.jsx
+export default function Contact() {
+  return (
+    <>
+      <h1>Contact page</h1>
+      <p>This is the contact page!</p>
+    </>
+  );
+}
+```
+
+```css
+ul.menu {
+  list-style-type: none;
+  margin: 0;
+  margin-bottom: 1em;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu li {
+  float: left;
+}
+
+.menu li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.menu .active {
+  background-color: #04aa6d;
+}
+```
+
+</Sandpack>

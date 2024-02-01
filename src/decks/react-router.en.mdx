@@ -75,6 +75,12 @@ Multiple courses
 
 ---
 
+import Code1 from './react-router/code1.en.mdx';
+
+<Code1 components={props.components} />
+
+---
+
 ### Anatomy of an URL
 
 - URL are defined in a Standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
@@ -166,6 +172,12 @@ switch (page) {
 
 ---
 
+import Code2 from './react-router/code2.en.mdx';
+
+<Code2 components={props.components} />
+
+---
+
 ### But...
 
 <div >
@@ -231,6 +243,12 @@ This modifies the DOM (an effect!), so wrap this in a `useEffect(..., [])`.
 
 ---
 
+import Code3 from './react-router/code3.en.mdx';
+
+<Code3 components={props.components} />
+
+---
+
 ### But...
 
 <div>
@@ -279,9 +297,9 @@ useEffect(() => {
 - This is how the click of `<Link to="/path" /> would need to be handled`:
 
 ```js
-function clickHandler(evt, link) {
+function clickHandler(evt) {
   //create a url object from the link href
-  const url = new URL(link.href);
+  const url = new URL(evt.target.href);
 
   evt.preventDefault(); //cancel the navigation
   //Add destination in history
@@ -289,6 +307,12 @@ function clickHandler(evt, link) {
   setCurrentPage(url.pathname); //set State to re-render the app.
 }
 ```
+
+---
+
+import Code4 from './react-router/code4.en.mdx';
+
+<Code4 components={props.components} />
 
 ---
 
@@ -323,6 +347,12 @@ window.navigation.addEventListener('navigate', (evt) => {
   });
 });
 ```
+
+---
+
+import Code5 from './react-router/code5.en.mdx';
+
+<Code5 components={props.components} />
 
 ---
 
@@ -599,30 +629,6 @@ action = async function ({ request }) {
   return redirect(`/person/{newPerson.id}`);
 };
 ```
-
----
-
-### What should we cover in a future event?
-
-<div>
-<img
-  src='/img/debug.jpeg'
-  style={{ float: 'right'}}
-/>
-
-Remix
-
-Next
-
-Testing
-
-Security
-
-Caching
-
-???
-
-</div>
 
 ---
 

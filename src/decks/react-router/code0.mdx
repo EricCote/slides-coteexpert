@@ -1,0 +1,30 @@
+## Basic
+
+<Sandpack options={{showNavigator:true}}>
+
+```html index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My app</title>
+  </head>
+  <body>
+    <!-- contenu de page qui sera remplacé -->
+  </body>
+</html>
+```
+
+```js src/index.js active
+import { createRoot } from 'react-dom/client';
+
+// remplacer le contenu du html
+document.body.innerHTML = '<div id="app"></div>';
+
+const divApp = document.getElementById('app');
+
+// Render your React component instead
+const root = createRoot(app);
+root.render(<h1>Hello, world</h1>);
+```
+
+</Sandpack>
