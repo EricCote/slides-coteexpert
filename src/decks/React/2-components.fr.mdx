@@ -2088,8 +2088,8 @@ Sur votre composant d'horloge, on demande d'afficher les derniers "témoignages"
 
 <Sandpack>
 
-```js RangeeTemoignage.js active
-export default function RangeeTemoignage({ temoignages }) {
+```js RangeeTemoignages.js active
+export default function RangeeTemoignages({ temoignages }) {
   temoignages.push({
     id: 'create',
     label: 'Ajouter témoignage',
@@ -2107,9 +2107,9 @@ export default function RangeeTemoignage({ temoignages }) {
 
 ```js App.js hidden
 import { useState, useEffect } from 'react';
-import RangeeTemoignage from './RangeeTemoignage.js';
+import RangeeTemoignages from './RangeeTemoignages.js';
 
-let temoignageInitiaux = [
+let temoignagesInitiaux = [
   { id: 0, label: 'Témoignage de Sophie' },
   { id: 1, label: 'Témoignage de Luc' },
 ];
@@ -2133,7 +2133,7 @@ export default function App() {
       }}
     >
       <h2>Il est maintenant {time.toLocaleTimeString()}.</h2>
-      <RangeeTemoignages témoignages={temoignages} />
+      <RangeeTemoignages temoignages={temoignages} />
     </div>
   );
 }
