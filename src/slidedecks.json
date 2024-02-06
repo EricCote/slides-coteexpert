@@ -1,6 +1,10 @@
 [
   {
-    "filename": "api1.fr.mdx"
+    "route": "aspnetwebapi",
+    "title": "ASP.NET Web API",
+    "description": "Formation ASP.NET Web API",
+    "language": "fr",
+    "filename": "aspnetwebapi.fr.mdx"
   },
   {
     "route": "blazor",
@@ -13,21 +17,16 @@
     "filename": "react-pdf.fr.mdx"
   },
   {
-    "filename": "react-router.css"
-  },
-  {
-    "route": "react-router",
     "title": "React Router",
     "description": "Introducing React Router",
     "language": "en",
-    "filename": "react-router.en.mdx"
+    "filename": "react-router.en.mdx.old"
   },
   {
-    "route": "react-router",
     "title": "Routage React",
     "description": "Introduction à React Router",
     "language": "fr",
-    "filename": "react-router.fr.mdx"
+    "filename": "react-router.fr.mdx.old"
   },
   {
     "route": "react",

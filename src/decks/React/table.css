@@ -1,0 +1,10 @@
+.my-tbl > thead > tr > th {
+  padding-left: 1em;
+}
+.my-tbl > thead > tr > th:first-child {
+  padding-left: 0em;
+}
+
+.my-tbl pre[class*='language-'] {
+  padding: 0em 1em;
+}

@@ -1,0 +1,199 @@
+## React Router Lazy loading
+
+<Sandpack options={{ showNavigator: true }} >
+
+```jsx App.js active
+import { RouterProvider } from 'react-router-dom';
+import router from './router';
+
+export default function App() {
+  return <RouterProvider router={router} />;
+}
+```
+
+```js router.js
+import { Suspense, lazy } from 'react';
+import Layout from './Layout';
+import Home from './Home';
+import News from './News';
+import {
+  createBrowserRouter,
+  useRouteError,
+  isRouteErrorResponse,
+} from 'react-router-dom';
+
+const Contact = lazy(() => import('./Contact.jsx'));
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    errorElement: <ErrorBoundary />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: 'news',
+        element: <News />,
+      },
+      {
+        path: 'contact',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Contact />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+]);
+
+export default router;
+
+export function ErrorBoundary() {
+  let error = useRouteError();
+  return isRouteErrorResponse(error) ? (
+    <h1>
+      {error.status} {error.statusText}
+    </h1>
+  ) : (
+    <h1>{error.message || error}</h1>
+  );
+}
+```
+
+```jsx Layout.jsx
+import Menu from './Menu.jsx';
+import { Suspense } from 'react';
+import { Outlet } from 'react-router-dom';
+
+export default function Layout() {
+  return (
+    <>
+      <Menu />
+      <Outlet />
+    </>
+  );
+}
+```
+
+```jsx Menu.jsx
+import { NavLink } from 'react-router-dom';
+
+export default function Menu() {
+  return (
+    <ul className='menu'>
+      {menuList.map((menuItem) => (
+        <li key={menuItem.url}>
+          <NavLink to={menuItem.url}>{menuItem.name}</NavLink>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const menuList = [
+  {
+    name: 'Home',
+    url: '/',
+  },
+  {
+    name: 'News',
+    url: '/news',
+  },
+  {
+    name: 'Contact',
+    url: '/contact',
+  },
+  {
+    name: 'About',
+    url: '/about',
+  },
+];
+```
+
+```jsx Home.jsx
+export default function Home() {
+  return (
+    <>
+      <h1>Home page</h1>
+      <p>This is the Home page!</p>
+    </>
+  );
+}
+```
+
+```jsx News.jsx
+export default function News() {
+  return (
+    <>
+      <h1>News page</h1>
+      <p>This is the News page!</p>
+    </>
+  );
+}
+```
+
+```jsx Contact.jsx
+export default function Contact() {
+  return (
+    <>
+      <h1>Contact page</h1>
+      <p>This is the Contact page!</p>
+    </>
+  );
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "react-router-dom": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
+```
+
+```css
+ul.menu {
+  list-style-type: none;
+  margin: 0;
+  margin-bottom: 1em;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu li {
+  float: left;
+}
+
+.menu li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.menu .active {
+  background-color: #04aa6d;
+}
+```
+
+</Sandpack>

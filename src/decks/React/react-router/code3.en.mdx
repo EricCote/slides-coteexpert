@@ -1,33 +1,23 @@
-## Navigation Routing
+## Hash Routing
 
-<Sandpack options={{ showNavigator: true, editorHeight: '500px' }} >
+<Sandpack options={{ showNavigator: true, editorHeight: '500px', showConsole:true }} >
 
 ```jsx App.js active
 import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import Route from './Route';
 
+//todo: fix the error of multiple navigations while using strict mode
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(window.location.pathname);
+  const [currentPage, setCurrentPage] = useState(window.location.hash);
 
-  //with the Navigation API, the code is simpler.
-  //No need for a <Link to="/dest"> component,
-  //nor to handle click events on hyperlinks.
-
-  function navigationHandler(evt) {
-    if (!evt.canIntercept) return; //is it a local page that we can intercept?
-    evt.intercept({
-      //in that case, intercept the navigation (cancels navigation)
-      handler: () => {
-        //Simpy setState, React will then to re-render
-        setCurrentPage(new URL(evt.destination.url).pathname);
-      },
-    });
+  function changePage(evt) {
+    setCurrentPage(window.location.hash);
   }
 
   useEffect(() => {
-    //Manage the navigate event
-    window.navigation.addEventListener('navigate', navigationHandler);
+    //Handle the "hashchange" event
+    window.addEventListener('hashchange', changePage);
   }, []);
 
   return (
@@ -46,13 +36,13 @@ import Contact from './Contact';
 
 export default function Route({ page }) {
   switch (page) {
-    case '/home':
-    case '/':
+    case '#home':
+    case '#':
     case '':
       return <Home />;
-    case '/news':
+    case '#news':
       return <News />;
-    case '/contact':
+    case '#contact':
       return <Contact />;
     default:
       return <div>404 error</div>;
@@ -81,19 +71,19 @@ export default function Menu() {
 const menuList = [
   {
     name: 'Home',
-    url: '/',
+    url: '#',
   },
   {
     name: 'News',
-    url: '/news',
+    url: '#news',
   },
   {
     name: 'Contact',
-    url: '/contact',
+    url: '#contact',
   },
   {
     name: 'About',
-    url: '/about',
+    url: '#about',
   },
 ];
 ```
@@ -103,14 +93,14 @@ export default function Home() {
   return (
     <>
       <h1>Home page</h1>
-      <p>This is the home page!</p>
+      <p>This is the Home page!</p>
     </>
   );
 }
 ```
 
 ```jsx News.jsx
-export default function About() {
+export default function News() {
   return (
     <>
       <h1>News page</h1>
@@ -163,7 +153,3 @@ ul.menu {
 ```
 
 </Sandpack>
-
-Incompatible with Code SandBox "back button" or url bar
-
-Works with browser right-click "back" menu. Or inspect.

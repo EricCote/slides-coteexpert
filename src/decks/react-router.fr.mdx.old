@@ -1,5 +1,4 @@
 ---
-route: react-router
 title: Routage React
 description: Introduction à React Router
 language: fr
@@ -15,7 +14,7 @@ Présentation par Éric Côté
 
 ---
 
-### Eric Côté
+## Eric Côté
 
 <img
   src='https://www.reactacademy.live/static/20616643d8afc491bd4c1817ae69db63/5a6cd/Eric_Cote.webp'
@@ -32,13 +31,13 @@ Présentation par Éric Côté
 
 ---
 
-### React Academy Live
+## React Academy Live
 
 <div>
 
 <img
-  src='/img/logoReact.svg'
-  style={{ float: 'left', width: '300px', marginRight: '40px' }}
+src='/img/logoReact.svg'
+style={{ float: 'left', width: '300px', marginRight: '40px' }}
 />
 
 Formations en entreprise, ainsi qu'en virtuel
@@ -55,7 +54,7 @@ Offre de la formation depuis 2018.
 
 ---
 
-### 3 parties:
+## 3 parties:
 
 1. Le routage, à la base
 2. Présentation de React Router
@@ -63,7 +62,7 @@ Offre de la formation depuis 2018.
 
 ---
 
-### Pourquoi le routage?
+## Pourquoi le routage?
 
 - Dans un SPA (Single Page App), on configure le serveur web de façon différente:
 - Toutes les requêtes non-trouvées retournent `index.html` plutôt qu'une erreur **404**
@@ -77,7 +76,7 @@ import Code1 from './react-router/code1.fr.mdx';
 
 ---
 
-### Comment décortiquer le URL?
+## Comment décortiquer le URL?
 
 - Les URL sont définis dans un standard (RFC 1738, 3986, 8820, Tim Berners-Lee)
 - On sépare le URL en différentes parties:
@@ -128,7 +127,7 @@ import Code1 from './react-router/code1.fr.mdx';
 
 ---
 
-### Comment ça marche?
+## Comment ça marche?
 
 Dans le protocole http[s], on combine le `path` et le `query` de la requête.
 
@@ -144,7 +143,7 @@ Le Fragment (hash) n'est pas envoyé avec la requête. Il reste sur le client. L
 
 ---
 
-### Rendu conditionnel en React
+## Rendu conditionnel en React
 
 Avec du JavaScript, on peut changer le rendu de react. On afficher le composant en fonction de la page demandée.
 
@@ -173,7 +172,7 @@ import Code2 from './react-router/code2.en.mdx';
 
 ---
 
-### Mais...
+## Mais...
 
 <div >
 <img  src='/img/AngryCat.jpeg' style={{ marginInlineStart: 30, width: 300, float: 'right' }} />
@@ -195,8 +194,8 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
 3. Navigation Api
 
 <img
-  src='/img/spa-day.jpeg'
-  style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
+src='/img/spa-day.jpeg'
+style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
 />
 
 ---
@@ -206,8 +205,8 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
 <div>
 
 <img
-  src='/img/homer-question.png'
-  style={{ marginInlineEnd: 30, width: 300, float: 'left' }}
+src='/img/homer-question.png'
+style={{ marginInlineEnd: 30, width: 300, float: 'left' }}
 />
 
 Le changement de hash ne provoque pas d'appel réseau.
@@ -222,7 +221,7 @@ Comment faire pour générer un re-rendu en React????
 
 ---
 
-### State à la rescousse
+## State à la rescousse
 
 Modifier l'état (le state) provoque un changement.
 
@@ -244,7 +243,7 @@ import Code3 from './react-router/code3.en.mdx';
 
 ---
 
-### Mais...
+## Mais...
 
 <div>
 <img
@@ -267,7 +266,7 @@ Voir _NextJS_, _Remix_ et _Gatsby_.
 
 ---
 
-### History API
+## History API
 
 - Permet l'accès à l'historique de session du navigateur: back(), forward(), go(-5),
 - Permet de modifier l'historique (pushState(), popState event, etc)
@@ -284,7 +283,7 @@ useEffect(() => {
 
 ---
 
-### History API gérer le click des hyperliens
+## History API gérer le click des hyperliens
 
 - Il faut mettre un événement clic sur tous les hyperliens pour modifier leur comportement et provoquer un re-rendu
 - En général, on encapsule ce comportement dans un composant `<Link to="/path" />`
@@ -310,7 +309,7 @@ import Code4 from './react-router/code4.en.mdx';
 
 ---
 
-### Navigation API
+## Navigation API
 
 - Nouvel API, conçu pour les applis SPA.
 - Expérimental sur _Chrome_, _Edge_, _Opera_ et _Chromium_
@@ -318,14 +317,14 @@ import Code4 from './react-router/code4.en.mdx';
 - Simplifie le _History API_ pour le SPA. Aucun besoin de programmer les clics des liens.
 
 <img
-  src='/img/new-shiny.jpeg'
-  width='300'
-  style={{ marginLeft: 'auto', marginRight: 'auto' }}
+src='/img/new-shiny.jpeg'
+width='300'
+style={{ marginLeft: 'auto', marginRight: 'auto' }}
 />
 
 ---
 
-### Exemple du Navigation API
+## Exemple du Navigation API
 
 Le code ressemble à celui où on attache un gestionnaire d'événement sur le changement du hash, mais c'est sur la navigation globale. Ca se nomme _navigate_.
 
@@ -350,13 +349,13 @@ import Code5 from './react-router/code5.en.mdx';
 
 ---
 
-### Qu'est-ce que **React Router**
+## Qu'est-ce que **React Router**
 
 <div>
 
 <img
-  src='/img/trends.png'
-  style={{ width: '50%', float: 'Right', marginLeft: 50 }}
+src='/img/trends.png'
+style={{ width: '50%', float: 'Right', marginLeft: 50 }}
 />
 
 La librairie React la plus populaire pour le routage. Plus populaire que:
@@ -374,7 +373,7 @@ La moitié des programmes React utilisent une forme de React-Router
 
 ---
 
-### Où utiliser React Router?
+## Où utiliser React Router?
 
 - Create-React-App (n'est plus recommandé)
 - Vite
@@ -392,13 +391,13 @@ Même sur ces boîtes à outils, l'influence de React Router se fait sentir.
 
 ---
 
-### Composants de base
+## Composants de base
 
-### `<RouterProvider router={router} />`
+## `<RouterProvider router={router} />`
 
 Composant racine qui gère les routes, l'état (state), les contextes et les re-rendus pour React Router.
 
-### `<Link to="about">About Us</Link>`
+## `<Link to="about">About Us</Link>`
 
 Composant génèrant un hyperlien, capture l'événement clic prenant en charge le "History API".
 
@@ -414,7 +413,7 @@ Anciens composants racines, ne supportant pas les nouvelles props des routes. (C
 
 ---
 
-### Comment générer le router?
+## Comment générer le router?
 
 On génère le router avec un tableau JS décrivant les routes:
 
@@ -456,7 +455,7 @@ createBrowserRouter([
 
 ---
 
-### Génération des routes avec JSX
+## Génération des routes avec JSX
 
 Permet de travailler avec une approche similaire à V4-V5
 
@@ -477,7 +476,7 @@ createBrowserRouter(
 
 ---
 
-### Routes imbriquées
+## Routes imbriquées
 
 <div style={{marginTop: "0px", height:"600px", overflowY:"scroll"  }}  onLoad={(e)=>(e.target.parentElement.scrollTop=105)}>
 
@@ -492,7 +491,7 @@ createBrowserRouter(
 
 ---
 
-### Remplacer l'état avec le routage
+## Remplacer l'état avec le routage
 
 Pour la plupart des apps, c'est la recommendation. Le routage a plus flexibilité que l'état.
 
@@ -502,7 +501,19 @@ On peut aussi partager cet url, ou créer un favori ou un raccourci.
 
 ---
 
-### Segments Dynamiques
+import Code6 from './react-router/code6.en.mdx';
+
+<Code6 components={props.components} />
+
+---
+
+import Code7 from './react-router/code7.en.mdx';
+
+<Code7 components={props.components} />
+
+---
+
+## Segments Dynamiques
 
 ```js
 <Route path='projects/:projectId/tasks/:taskId' />
@@ -522,7 +533,7 @@ function Task() {
 
 ---
 
-### Data loading
+## Data loading
 
 Routes ont une prop `loader` permettant de charger les données de manière asynchrone...
 
@@ -540,7 +551,7 @@ loader = async function ({ request }) {
 
 ---
 
-### Loader est futé
+## Loader est futé
 
 Si on retourne la promesse de `fetch()`, le `loader` appellera `res.json()` automatiquement.
 
@@ -580,7 +591,7 @@ function Team() {
 
 ---
 
-### Obtenir l'état de chargement
+## Obtenir l'état de chargement
 
 ```js
 const navigation = useNavigation();
@@ -594,7 +605,7 @@ Trois états possibles:
 
 ---
 
-### Attendre les données: patienter? ou afficher une icone d'attente?
+## Attendre les données: patienter? ou afficher une icone d'attente?
 
 Par défaut, on attend les données quand on charge
 
@@ -606,7 +617,7 @@ Si on utilise `defer({data})`, on peut alors utiliser `<Suspense fallback={plach
 
 ---
 
-### Modifier des données
+## Modifier des données
 
 Route `loader` décrit une fonction pour charger les données
 
@@ -626,7 +637,7 @@ action = async function ({ request }) {
 
 ---
 
-### Prochain événement
+## Prochain événement
 
 <div>
 <img
@@ -653,6 +664,6 @@ Caching
 ## Questions?
 
 <img
-  src='/img/job.jpeg'
-  style={{ marginLeft: 'auto', marginRight: 'auto', width: '50%' }}
+src='/img/job.jpeg'
+style={{ marginLeft: 'auto', marginRight: 'auto', width: '50%' }}
 />

@@ -187,3 +187,7 @@ tr:hover {
 [data-bs-theme='dark'] code {
   color: lightgreen;
 }
+
+.sandpack .sp-editor {
+  -webkit-font-smoothing: none;
+}

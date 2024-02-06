@@ -1,0 +1,1071 @@
+# Le Contexte
+
+---
+
+## Le Contexte
+
+D'habitude, on passe les informations entre un composant parent et enfant via les props. Mais cela peut devenir verbeux et complexe quand il faut passer l'info à travers des composants intermédiaires, ou quand plusieurs composants ont besoin de la même donnée.
+
+Le contexte permet à un parent de partager l'info à n'importe quel autre composant dans la sous-arborescence, sans passer par les props.
+
+---
+
+## Concepts
+
+- Description du "prop drilling"
+- Comment remplacer le passage de props avec le contexte
+- Cas d'utilisation du contexte
+- Alternatives au contexte
+
+---
+
+## Le problème de passer des props
+
+[Passer des props](/learn/passing-props-to-a-component) est une façon simple fournir les données d'un composant parent vers des composants enfants.
+
+Mais passer des props peut devenir lourd et répétitif quand on doit passer une prop profondément dans l'arborescence, ou quand plusieurs composant partagent la même prop. L'ancêtre commun entre deux composants pourrait être loin vers le haut, et "remonter l'état" entraîne alors la situation de "prop drilling" (forage de props),
+
+<TwoColumns>
+
+<Diagram name="passing_data_lifting_state" height={120} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in purple. The value flows down to each of the two children, both highlighted in purple." >
+
+Lifting state up
+
+</Diagram>
+
+<Diagram name="passing_data_prop_drilling" height={250}  captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.">
+
+Prop drilling
+
+</Diagram>
+
+</TwoColumns>
+
+Il y a un moyen de "téléporter" les données aux composants sans utiliser de props: le **Contexte**
+
+---
+
+## Le Contexte: une alternative aux props
+
+Le Contexte permet à un composant parent de fournir des données à l'arborescence en dessous.
+
+Imaginons le composant `Heading` qui accepte la prop `level` pour la taille:
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section>
+      <Heading level={1}>Title</Heading>
+      <Heading level={2}>Heading</Heading>
+      <Heading level={3}>Sub-heading</Heading>
+      <Heading level={4}>Sub-sub-heading</Heading>
+      <Heading level={5}>Sub-sub-sub-heading</Heading>
+      <Heading level={6}>Sub-sub-sub-sub-heading</Heading>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+export default function Section({ children }) {
+  return <section className='section'>{children}</section>;
+}
+```
+
+```js Heading.js
+export default function Heading({ level, children }) {
+  switch (level) {
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+---
+
+## Beaucoup de props
+
+Si on veut que les `Heading`s sous la même `Section` aient la même taille:
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section>
+      <Heading level={1}>Title</Heading>
+      <Section>
+        <Heading level={2}>Heading</Heading>
+        <Heading level={2}>Heading</Heading>
+        <Heading level={2}>Heading</Heading>
+        <Section>
+          <Heading level={3}>Sub-heading</Heading>
+          <Heading level={3}>Sub-heading</Heading>
+          <Heading level={3}>Sub-heading</Heading>
+          <Section>
+            <Heading level={4}>Sub-sub-heading</Heading>
+            <Heading level={4}>Sub-sub-heading</Heading>
+            <Heading level={4}>Sub-sub-heading</Heading>
+          </Section>
+        </Section>
+      </Section>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+export default function Section({ children }) {
+  return <section className='section'>{children}</section>;
+}
+```
+
+```js Heading.js
+export default function Heading({ level, children }) {
+  switch (level) {
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+<TwoColumns style={{alignItems: "center"}}>
+
+```jsx
+<Section>
+  <Heading level={3}>About</Heading>
+  <Heading level={3}>Photos</Heading>
+  <Heading level={3}>Videos</Heading>
+</Section>
+```
+
+Ici, on passe le `level` à chaque `<Heading>`.
+
+```jsx
+<Section level={3}>
+  <Heading>About</Heading>
+  <Heading>Photos</Heading>
+  <Heading>Videos</Heading>
+</Section>
+```
+
+Ici, on passe le `level` au composant `<Section>`, plutôt que `<Heading>`. C'est plus simple de s'assurer que tous les headings ont la même taille.
+
+</TwoColumns>
+
+---
+
+## Contexte
+
+Comment le composant `<Heading>` peut obtenir le `level` de la `<Section>` la plus proche? **Comme si un composant enfant pouvait "demander" pour les données quelque part en haut de l'arborescence**
+
+Impossible à faire avec des props. Il faut utiliser un Contexte.
+
+1. **Créer** un contexte. (Nommons le `LevelContext`, parce que c'est pour le `level`.)
+2. **Utiliser** ce contexte du composant qui désire la donnée. (`Heading` utilise `LevelContext`.)
+3. **Fournir** ce contexte du composant qui spécifie ces données. (`Section` fournit `LevelContext`.)
+
+Le contexte permet au parent de fournir des données dans l'arborescence dessous, même à travers plusieurs niveaux.
+
+<TwoColumns>
+
+<Diagram name="passing_data_context_close" height={100} width={400} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in orange which projects down to the two children, each highlighted in orange." >
+
+Using context in close children
+
+</Diagram>
+
+<Diagram name="passing_data_context_far" height={200} captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.">
+
+Using context in distant children
+
+</Diagram>
+
+</TwoColumns>
+
+---
+
+## Étape 1: Créer le contexte
+
+Il faut créer le contexte et l'**exporter d'un fichier** pour que les composants puissent l'utiliser:
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section>
+      <Heading level={1}>Title</Heading>
+      <Section>
+        <Heading level={2}>Heading</Heading>
+        <Heading level={2}>Heading</Heading>
+        <Heading level={2}>Heading</Heading>
+        <Section>
+          <Heading level={3}>Sub-heading</Heading>
+          <Heading level={3}>Sub-heading</Heading>
+          <Heading level={3}>Sub-heading</Heading>
+          <Section>
+            <Heading level={4}>Sub-sub-heading</Heading>
+            <Heading level={4}>Sub-sub-heading</Heading>
+            <Heading level={4}>Sub-sub-heading</Heading>
+          </Section>
+        </Section>
+      </Section>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+export default function Section({ children }) {
+  return <section className='section'>{children}</section>;
+}
+```
+
+```js Heading.js
+export default function Heading({ level, children }) {
+  switch (level) {
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```js LevelContext.js active
+import { createContext } from 'react';
+
+export const LevelContext = createContext(1);
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+Le seul argument à `createContext`, c'est la valeur par _défaut_. Ici, `1` réfère au niveau `<h1>`. Un défaut pourrait être n'importe type, incluant un objet.
+
+---
+
+## Étape 2: Utiliser le Contexte
+
+On importe le hook `useContext` de React, ainsi que le contexte:
+
+```js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+```
+
+On ne devrait plus lire `level` des props:
+
+```js
+export default function Heading({ level, children }) {
+  // ...
+}
+```
+
+On enlève la prop `level` et on lit la valeur provenant de `LevelContext`:
+
+```js {2}
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+}
+```
+
+---
+
+## useContext
+
+`useContext` est un Hook. Tout comme `useState`et `useReducer`, on n'appelle le Hook que dans le top niveau d'un composant React (pas dans des boucles ou des conditions. **`useContext` indique à React quel composant `Heading` désire lire le `LevelContext`.**
+
+`Heading` n'utilise plus la prop `level`, on pourra réduire le code suivant:
+
+<TwoColumns style={{gridTemplateColumns: '1.2fr 1fr'}}>
+
+```jsx
+<Section>
+  <Heading level={4}>Sub-sub-heading</Heading>
+  <Heading level={4}>Sub-sub-heading</Heading>
+  <Heading level={4}>Sub-sub-heading</Heading>
+</Section>
+```
+
+```jsx
+<Section level={4}>
+  <Heading>Sub-sub-heading</Heading>
+  <Heading>Sub-sub-heading</Heading>
+  <Heading>Sub-sub-heading</Heading>
+</Section>
+```
+
+</TwoColumns>
+
+---
+
+## Code
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section level={1}>
+      <Heading>Title</Heading>
+      <Section level={2}>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Section level={3}>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Section level={4}>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+          </Section>
+        </Section>
+      </Section>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+export default function Section({ children }) {
+  return <section className='section'>{children}</section>;
+}
+```
+
+```js Heading.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+  switch (level) {
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```js LevelContext.js
+import { createContext } from 'react';
+
+export const LevelContext = createContext(1);
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+Cet exemple ne fonctionne pas encore: toutes les entêtes ont la même taille. Les composants enfants utilisent le contexte, mais aucun composant parent ne fournit de contexte.
+
+Qaund on ne fournit pas de contexte, React utilise la valeur par défaut. Dans cet exemple, c'est `1`. (On répare ce problème avec `<Section>` qui fournit le contexte.)
+
+---
+
+## Étape 3: Fournir le contexte
+
+Originalement, le composant `Section` ne fait qu'afficher ses children:
+
+```jsx
+export default function Section({ children }) {
+  return <section className='section'>{children}</section>;
+}
+```
+
+**Ajoutons un "context provider"** pour fournir le `LevelContext`:
+
+{/* prettier-ignore */}
+```jsx {1,6,8}
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ level, children }) {
+  return (
+    <section className='section'>
+      <LevelContext.Provider value={level}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+---
+
+## Explications
+
+{/* prettier-ignore */}
+```jsx {1,6,8}
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ level, children }) {
+  return (
+    <section className='section'>
+      <LevelContext.Provider value={level}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+Ceci dit à React: "Si un composant dans cette `<Section>` demande `LevelContext`, alors fournit ce `level`". Un composant utilise toujours la valeur du `<LevelContext.Provider>` parent le plus proche.
+
+---
+
+## Code
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section level={1}>
+      <Heading>Title</Heading>
+      <Section level={2}>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Section level={3}>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Section level={4}>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+          </Section>
+        </Section>
+      </Section>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ level, children }) {
+  return (
+    <section className='section'>
+      <LevelContext.Provider value={level}>{children}</LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+```js Heading.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+  switch (level) {
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```js LevelContext.js
+import { createContext } from 'react';
+
+export const LevelContext = createContext(1);
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+C'est le même résultat qu'originalement, nous n'avons pas besoin de passer la prop `level` à chaque composant `Heading`. Ce dernier obtient l'information du contexte fournit par la `Section` parent la plus proche.
+
+1. On passe la prop `level` à la `<Section>`.
+2. `Section` fournit à ses enfants le contexte `<LevelContext.Provider value={level}>`.
+3. `Heading` obtient le `LevelContext` du parent le plus proche, en appelant `useContext(LevelContext)`.
+
+---
+
+## Utiliser et fournir le contexte du même composant
+
+Ici, on spécifie chaque `level` manuellement:
+
+```js
+export default function Page() {
+  return (
+    <Section level={1}>
+      ...
+      <Section level={2}>
+        ...
+        <Section level={3}>
+          ...
+```
+
+---
+
+## Relancer le contexte
+
+Puisque le contexte permet de lire l'info d'un composant plus haut, chaque `Section` pourrait lire le `level` de la section plus haut, et passer `level + 1` vers le bas.
+
+```js Section.js {5,8}
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ children }) {
+  const level = useContext(LevelContext);
+  return (
+    <section className='section'>
+      <LevelContext.Provider value={level + 1}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+---
+
+## Code
+
+Avec ce changement, plus besoin de passer la prop level. Ni à la `<Section>`, ni au `<Heading>`:
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function Page() {
+  return (
+    <Section>
+      <Heading>Title</Heading>
+      <Section>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Heading>Heading</Heading>
+        <Section>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Heading>Sub-heading</Heading>
+          <Section>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+            <Heading>Sub-sub-heading</Heading>
+          </Section>
+        </Section>
+      </Section>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ children }) {
+  const level = useContext(LevelContext);
+  return (
+    <section className='section'>
+      <LevelContext.Provider value={level + 1}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+```js Heading.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+  switch (level) {
+    case 0:
+      throw Error('Heading must be inside a Section!');
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```js LevelContext.js
+import { createContext } from 'react';
+
+export const LevelContext = createContext(0);
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+```
+
+</Sandpack>
+
+Maintenant, `Heading` et `Section` lisent le `LevelContext` pour déterminer la profondeur. Et la `Section` relance vers ses enfants un `LevelContext` plus "profond".
+
+---
+
+## Usage multiple
+
+L'exemple ici utilise des niveaux de heading car cela démontre visuellement l'utilisation du contexte. Mais il y a bien d'autres cas où c'est utile. On peut passer toutes sortes d'informations dans l'arborescence: le theme de couleur sélectionné, l'identité de l'usager connecté, etc.
+
+---
+
+## Le contexte passe à travers les composants intermédiaires
+
+On peut insérer autant de couches de composants entre le parent fournisseur de contexte et l'enfant qui consomme ce contexte.
+
+Dans cet exemple, le composant `<Post>` (avec une bordure hachurée) ajoute une couche entre la source et le consommateur du contexte. Notez que `<Heading>` reçoit l'onfo de la `<Section>` la plus proche:
+
+<Sandpack>
+
+```js
+import Heading from './Heading.js';
+import Section from './Section.js';
+
+export default function ProfilePage() {
+  return (
+    <Section>
+      <Heading>My Profile</Heading>
+      <Post title='Hello traveller!' body='Read about my adventures.' />
+      <AllPosts />
+    </Section>
+  );
+}
+
+function AllPosts() {
+  return (
+    <Section>
+      <Heading>Posts</Heading>
+      <RecentPosts />
+    </Section>
+  );
+}
+
+function RecentPosts() {
+  return (
+    <Section>
+      <Heading>Recent Posts</Heading>
+      <Post title='Flavors of Lisbon' body='...those pastéis de nata!' />
+      <Post title='Buenos Aires in the rhythm of tango' body='I loved it!' />
+    </Section>
+  );
+}
+
+function Post({ title, body }) {
+  return (
+    <Section isFancy={true}>
+      <Heading>{title}</Heading>
+      <p>
+        <i>{body}</i>
+      </p>
+    </Section>
+  );
+}
+```
+
+```js Section.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Section({ children, isFancy }) {
+  const level = useContext(LevelContext);
+  return (
+    <section className={'section ' + (isFancy ? 'fancy' : '')}>
+      <LevelContext.Provider value={level + 1}>
+        {children}
+      </LevelContext.Provider>
+    </section>
+  );
+}
+```
+
+```js Heading.js
+import { useContext } from 'react';
+import { LevelContext } from './LevelContext.js';
+
+export default function Heading({ children }) {
+  const level = useContext(LevelContext);
+  switch (level) {
+    case 0:
+      throw Error('Heading must be inside a Section!');
+    case 1:
+      return <h1>{children}</h1>;
+    case 2:
+      return <h2>{children}</h2>;
+    case 3:
+      return <h3>{children}</h3>;
+    case 4:
+      return <h4>{children}</h4>;
+    case 5:
+      return <h5>{children}</h5>;
+    case 6:
+      return <h6>{children}</h6>;
+    default:
+      throw Error('Unknown level: ' + level);
+  }
+}
+```
+
+```js LevelContext.js
+import { createContext } from 'react';
+
+export const LevelContext = createContext(0);
+```
+
+```css
+.section {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+
+.fancy {
+  border: 4px dashed pink;
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+Rien de spécial à faire. La `Section` spécifie le contexte pour l'arborescence. On peut insérer le `<Heading>` n'importe où en dessous, et ça aura la bonne taille.
+
+**Le contexte permet d'écrire des composants qui s'adaptent à leur environnement. Ils s'affichent différemment dépendant de leur position (car la position dicte le contexte reçu.)**
+
+Ça pourrait faire penser à l'héritage des [propriétés CSS.](https://developer.mozilla.org/en-US/docs/Web/CSS/inheritance) En CSS, si on spécifie `color: blue` dans un `<div>`, tous les noeuds DOM en dessous, indépendant de la profondeur, héritera de cette couleur. À moins qu'un autre noeud DOM au milieu n'écrase cette couleur, avec `color: green`. En React, c'est similaire: le contexte provient d'en haut et un contexte en bas peut écraser le contexte parent.
+
+En CSS, les différentes propriétés telles que `color` et `background-color` ne s'affectent pas entre elles. On peut mettre la `color` des `<div>` à rouge sans affecter `background-color`. Tout comme, **les contextes React ne s'affectent pas l'un l'autre.** Chaque contexte créé avec `createContext()` est complètement séparé des autres, cela relie les composants de ce contexte particulier. Un composant peut utiliser ou fournir plusieurs contextes sans problèmes.
+
+---
+
+## Avant d'utiliser le contexte
+
+Le contexte est tentant à utiliser. Par contre, c'est facile à sur-utiliser. **Les props ne méritent pas toutes d'être mises en contexte.**
+
+Voici des alternatives
+
+1. **Passer des props** Dans un composant complexe, on pourrait avoir des dizaines de props que l'on passe à des dizaines de composants. Cela peut sembler lourd, mais ça a le mérite d'être clair quand on lit le code. La personne qui maintient le code sera contente que le flot de données soit explicitement déclaré avec des props.
+2. **Extraire les composants et passer ce JSX en tant que `children`** Quand on passe certaines props à travers plusieurs couches de composants intermédiaires qui n'utilisent pas ces données (sauf pour les passer aux couches inférieures), cela signifie qu'on a oublié d'extraire certains composants. Par exemple, passer des props tels que `posts`, à des composants qui ne les utilisent pas directement, comme `<Layout posts={posts} />`. Alternativement, faites que `Layout` utilise la prop `children` et génère `<Layout><Posts posts={posts} /></Layout>`. Ceci réduit le nombre de couches entre les composants et les donneés.
+
+Si ces approches ne fonctionnent pas pour vous, utilisez le contexte.
+
+---
+
+## Cas pour le contexte
+
+- **Thème:** Permet à l'usager de changer l'apparence visuelle des composants (ex: dark mode)
+- **Compte courant:** Plusieurs composants ont besoin de savoir quelle est l'identité de l'usager.
+- **Routage:** Permet de gérer la route courante.
+- **Gestion d'état:** Les applications complexes gèrent beaucoup d'état. Cet état a tendance à remonter vers les composants du haut. Dans ces situations, utiliser un contexte peut aider, surtout quand on combine le contexte et le reducer.
+
+Le contexte n'est pas limité aux valeurs statiques. Si on passe une valeur différente au prochain rendu, ceci met à jour les composants dessous. Le contexte est souvent utilisé avec l'état.
+
+## En général, quand des données sont utilisées par différents composants dans différentes emplacements dans l'arborescence, c'est une indication que le contexte serait utile.
+
+## Résumé
+
+- Le contexte permet à des composants de fournir des données à l'arborescence dessous.
+- Pour passer le contexte:
+  1. Créez et exportez `export const MyContext = createContext(defaultValue)`.
+  2. Utilisez le hook `useContext(MyContext)` pour lire le contexte dans n'importe quel composant enfant, quelle que soit la profondeur.
+  3. utilisez dans un composant parent `<MyContext.Provider value={...}>` pour fournir ce contexte aux composants enfants.
+- Le contexte passe à travers les composants intermédiaires.
+- Le contexte permet de créer des composants qui "s'adaptent à leur environnement".
+- Plutôt que d'utiliser un contexte, passez des props ou passez du JSX dans `children`.
+
+---
+
+## Défi: Remplacer le forage de props par un contexte
+
+In this example, toggling the checkbox changes the `imageSize` prop passed to each `<PlaceImage>`. The checkbox state is held in the top-level `App` component, but each `<PlaceImage>` needs to be aware of it.
+
+Currently, `App` passes `imageSize` to `List`, which passes it to each `Place`, which passes it to the `PlaceImage`. Remove the `imageSize` prop, and instead pass it from the `App` component directly to `PlaceImage`.
+
+You can declare context in `Context.js`.
+
+<Sandpack>
+
+```js App.js
+import { useState } from 'react';
+import { places } from './data.js';
+import { getImageUrl } from './utils.js';
+
+export default function App() {
+  const [isLarge, setIsLarge] = useState(false);
+  const imageSize = isLarge ? 150 : 100;
+  return (
+    <>
+      <label>
+        <input
+          type='checkbox'
+          checked={isLarge}
+          onChange={(e) => {
+            setIsLarge(e.target.checked);
+          }}
+        />
+        Use large images
+      </label>
+      <hr />
+      <List imageSize={imageSize} />
+    </>
+  );
+}
+
+function List({ imageSize }) {
+  const listItems = places.map((place) => (
+    <li key={place.id}>
+      <Place place={place} imageSize={imageSize} />
+    </li>
+  ));
+  return <ul>{listItems}</ul>;
+}
+
+function Place({ place, imageSize }) {
+  return (
+    <>
+      <PlaceImage place={place} imageSize={imageSize} />
+      <p>
+        <b>{place.name}</b>
+        {': ' + place.description}
+      </p>
+    </>
+  );
+}
+
+function PlaceImage({ place, imageSize }) {
+  return (
+    <img
+      src={getImageUrl(place)}
+      alt={place.name}
+      width={imageSize}
+      height={imageSize}
+    />
+  );
+}
+```
+
+```js Context.js
+
+```
+
+```js data.js
+export const places = [
+  {
+    id: 0,
+    name: 'Bo-Kaap in Cape Town, South Africa',
+    description:
+      'The tradition of choosing bright colors for houses began in the late 20th century.',
+    imageId: 'K9HVAGH',
+  },
+  {
+    id: 1,
+    name: 'Rainbow Village in Taichung, Taiwan',
+    description:
+      'To save the houses from demolition, Huang Yung-Fu, a local resident, painted all 1,200 of them in 1924.',
+    imageId: '9EAYZrt',
+  },
+  {
+    id: 2,
+    name: 'Macromural de Pachuca, Mexico',
+    description:
+      'One of the largest murals in the world covering homes in a hillside neighborhood.',
+    imageId: 'DgXHVwu',
+  },
+  {
+    id: 3,
+    name: 'Selarón Staircase in Rio de Janeiro, Brazil',
+    description:
+      'This landmark was created by Jorge Selarón, a Chilean-born artist, as a "tribute to the Brazilian people."',
+    imageId: 'aeO3rpI',
+  },
+  {
+    id: 4,
+    name: 'Burano, Italy',
+    description:
+      'The houses are painted following a specific color system dating back to 16th century.',
+    imageId: 'kxsph5C',
+  },
+  {
+    id: 5,
+    name: 'Chefchaouen, Marocco',
+    description:
+      'There are a few theories on why the houses are painted blue, including that the color repells mosquitos or that it symbolizes sky and heaven.',
+    imageId: 'rTqKo46',
+  },
+  {
+    id: 6,
+    name: 'Gamcheon Culture Village in Busan, South Korea',
+    description:
+      'In 2009, the village was converted into a cultural hub by painting the houses and featuring exhibitions and art installations.',
+    imageId: 'ZfQOOzf',
+  },
+];
+```
+
+```js utils.js
+export function getImageUrl(place) {
+  return 'https://i.imgur.com/' + place.imageId + 'l.jpg';
+}
+```
+
+```css
+ul {
+  list-style-type: none;
+  padding: 0px 10px;
+}
+li {
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+}
+```
+
+</Sandpack>

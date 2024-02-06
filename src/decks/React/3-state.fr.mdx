@@ -1,0 +1,4909 @@
+---
+title: 'Interaction et État'
+date: '2023-02-22'
+---
+
+# Interaction et état
+
+---
+
+## Ajouter interactions
+
+```jsx
+export default function Bouton() {
+  return <button>Je ne fais rien</button>;
+}
+```
+
+1. Pour gérer le click, on déclare une fonction `handleClick` qui affiche une alerte
+2. On ajoute `onClick={handleClick}` au `<button>`
+
+```jsx
+export default function Bouton() {
+  function handleClick() {
+    alert('On a cliqué!');
+  }
+
+  return <button onClick={handleClick}>Cliquez-moi</button>;
+}
+```
+
+---
+
+## Gestionnaire d'événement
+
+**Rappel** on peut passer une fonction dans les props.
+
+`handleClick` est une fonction de type **gestionnaire d'événements** (event handler)
+
+Les gestionnaires d'événements sont souvent:
+
+- Définis dans nos composants
+- Décrits par un nom qui débute par `handle`
+  - Exemple: `onClick={handleClick}`, `onMouseEnter={handleMouseEnter}`
+
+---
+
+## À la volée (inline)
+
+On peut définir un gestionnaire d'événements en ligne, à la volée, directement dans le JSX.
+
+```js
+<button onClick={function handleClick() {
+  alert('On a cliqué!');
+}}>
+```
+
+On préfère souvent la syntaxe flèche, plus simple.
+
+```js
+<button onClick={() => {
+  alert('On a cliqué!');
+}}>
+```
+
+Cette méthode en ligne (à la volée) est souvent utilisée pour les fonctions courtes.
+
+---
+
+## Passage des gestionnaires d'événements
+
+import './table.css';
+
+<table className="my-tbl">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Passer fonction ✅</th>
+      <th>Appeler fonction ❌</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Par nom</th>
+      <td>
+```js 
+<button onClick={handleClick}>
+```
+</td>
+<td>
+```js
+<button onClick={handleClick()}>
+```
+  </td>
+</tr>
+<tr>
+  <th>À la volée</th>
+  <td> 
+```js
+<button onClick={() => alert('...')}>
+```
+  </td>
+  <td>
+```js
+<button onClick={alert('...')}>
+``` 
+  </td>
+    </tr>
+
+  </tbody>
+</table>
+
+<hr />
+
+Les fonctions doivent être passées, PAS appelées. Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement.
+
+`<button onClick={handleClick}>` passe la fonction `handleClick`.
+
+`<button onClick={() => alert('...')}>` passe la fonction `() => alert('...')`.
+
+---
+
+## Lire des props dans le gestionnaire d'événements
+
+Quand les gestionnaires d'événements sont définis dans le composante,
+ils ont accès aux props et variables du composant. (Magie du closure)
+
+<Sandpack>
+
+```js
+function AlertButton({ message, children }) {
+  return <button onClick={() => alert(message)}>{children}</button>;
+}
+
+export default function Toolbar() {
+  return (
+    <div>
+      <AlertButton message='On joue le film!'>Jouer Film</AlertButton>
+      <AlertButton message='On télécharge!'>Téléchager Image</AlertButton>
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Passer le gestionnaire d'événements dans les props
+
+Il est possible de passer un gestionnaire d'événements dans les props
+
+<Sandpack>
+
+```js
+function Button({ onClick, children }) {
+  return <button onClick={onClick}>{children}</button>;
+}
+
+function PlayButton({ movieName }) {
+  function handlePlayClick() {
+    alert(`On joue ${movieName}!`);
+  }
+
+  return <Button onClick={handlePlayClick}>Jouer "{movieName}"</Button>;
+}
+
+function UploadButton() {
+  return (
+    <Button onClick={() => alert('On télécharge une image')}>
+      Upload Image
+    </Button>
+  );
+}
+
+export default function Toolbar() {
+  return (
+    <div>
+      <PlayButton movieName='SpiderMan 2' />
+      <UploadButton />
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Nommer les props de gestionnaire d'événements
+
+Par convention, vos gestionnaires d'événements commencent par `on`. ex: `onClick`.
+
+Dans cet exemple, on utilise onSmash:
+
+<Sandpack>
+
+```js
+function Button({ onSmash, children }) {
+  return <button onClick={onSmash}>{children}</button>;
+}
+
+export default function App() {
+  return (
+    <div>
+      <Button onSmash={() => alert('Je joue film!')}>Jouer film</Button>
+      <Button onSmash={() => alert('Je télécharge!')}>Télécharger image</Button>
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Propagation d'événements
+
+Un événement peut se gérer à différents niveaux.
+
+Devinez l'ordre des événements de l'exemple suivant:
+
+<Sandpack>
+
+```js
+export default function Toolbar() {
+  return (
+    <div
+      className='Toolbar'
+      onClick={() => {
+        alert('On a cliqué sur la barre!');
+      }}
+    >
+      <button onClick={() => alert('Je joue!')}>Jouer film</button>
+      <button onClick={() => alert('Je télécharge!')}>Télécharger Image</button>
+    </div>
+  );
+}
+```
+
+```css
+.Toolbar {
+  background: #aaa;
+  padding: 5px;
+}
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+Les événements se propagent du gestionnaire le plus spécifique au gestionnaire parent.
+
+**Exception:** l'événement onScroll ne se propage pas.
+
+---
+
+## Interrompre la propagation
+
+Les gestionnaires d'événements reçoivent un **event object** nommé `e` par convention (e pour "event").
+
+Une méthode nommée `e.stopPropagation()` permet de stopper la propagation vers le parent.
+
+<Sandpack>
+
+```js
+function Button({ onClick, children }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function Toolbar() {
+  return (
+    <div
+      className='Toolbar'
+      onClick={() => {
+        alert('On a cliqué sur la barre!');
+      }}
+    >
+      <Button onClick={() => alert('Je joue!')}>Jouer film</Button>
+      <Button onClick={() => alert('Je télécharge!')}>Télécharger Image</Button>
+    </div>
+  );
+}
+```
+
+```css
+.Toolbar {
+  background: #aaa;
+  padding: 5px;
+}
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Événements en capture plutôt qu'en propagation.
+
+Il existe deux facons de s'attacher avec le gestionnaires d'événement:
+
+1. En **capture**, du parent plus générique vers l'enfant plus spécifique (on descend)
+2. En **propagation**, de l'enfant plus spécifique vers le parent plus générique (on remonte)
+
+Normalement, on gère les événements en mode **propagation**. Mais dans de **rares** situations, on préférera gérer un événement en mode **capture**.
+
+```js
+<div
+  onClickCapture={() => {
+    /* Ceci est géré avant les boutons */
+  }}
+>
+  <button onClick={(e) => e.stopPropagation()} />
+  <button onClick={(e) => e.stopPropagation()} />
+</div>
+```
+
+---
+
+## Capture et propagation
+
+<img src='https://miro.medium.com/v2/resize:fit:1064/1*B0k6-J5ZwfmsxZDXAOCT2Q.jpeg' />
+
+---
+
+## Passer des gestionnaires ET stopper la propagation
+
+Ce gestionnaire roule le code qui stoppe la propagation **et ensuite** appelle la prop `onClick` passée par le parent.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js {4,5}
+function Button({ onClick, children }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. Ce patron est une **alternative** à la propagation. Contrairement à la propagation, ce n'est pas automatique. Mais c'est plus clair quel code est appelé et dans quel ordre.
+
+</aside>
+
+---
+
+## Comportement par défaut (formulaire)
+
+Certains événements du naviagateur sont associés à un comportement. Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
+
+<Sandpack>
+
+```js
+export default function Signup() {
+  return (
+    <form onSubmit={() => alert('On envoie!')}>
+      <input />
+      <button>Envoyer</button>
+    </form>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Prévenir le comportment par défaut
+
+Utiliser `e.preventDefault()` empêche le déclenchement du comportement.
+
+<Sandpack>
+
+```js
+export default function Signup() {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert('On envoie!');
+      }}
+    >
+      <input />
+      <button>Envoyer</button>
+    </form>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+Ne pas confondre les deux:
+
+- [`e.stopPropagation()`](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) empêche les gestionnaire d'événements parents de se déclencher
+- [`e.preventDefault()` ](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) empêche le comportement par défaut de se déclencher. (Pour les quelques composants qui ont un comportement par défaut.)
+
+---
+
+## Gestionnaire d'événements et Effets de bord
+
+On peut mettre des effets de bord dans un gestionnaire d'événement.
+
+En fait, c'est la **meilleure place**, car un gestionnaire n'a pas besoin d'être pur (contrairement au rendu de composants.)
+
+---
+
+## Défi #1
+
+Cliquer le bouton devrait basculer le fond entre blanc et noir. Ça ne fonctionne pas. Réparez le problème (Ne modifiez pas `handleClick`, son code est correct.)
+
+<Sandpack>
+
+```js
+export default function LightSwitch() {
+  function handleClick() {
+    let bodyStyle = document.body.style;
+    if (bodyStyle.backgroundColor === 'black') {
+      bodyStyle.backgroundColor = 'white';
+    } else {
+      bodyStyle.backgroundColor = 'black';
+    }
+  }
+
+  return <button onClick={handleClick()}>Interrupteur de lumière</button>;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi #2
+
+Le composant `ColorSwitch` génère un bouton qui doit changer la couleur de page. Il faut attacher le gestionnaire d'événements `onChangeColor` à l'événement `onClick` du bouton.
+
+Après le succès, on remarque que le bouton incrémente aussi le compteur de page. Que faudrait-il faire pour que `onChangeColor` ne puisse plus incrémenter le compteur?
+
+<Sandpack>
+
+```js ColorSwitch.js active
+export default function ColorSwitch({ onChangeColor }) {
+  return <button>Changer couleur</button>;
+}
+```
+
+```js App.js hidden
+import { useState } from 'react';
+import ColorSwitch from './ColorSwitch.js';
+
+export default function App() {
+  const [clicks, setClicks] = useState(0);
+
+  function handleClickOutside() {
+    setClicks((c) => c + 1);
+  }
+
+  function getRandomLightColor() {
+    let r = 150 + Math.round(100 * Math.random());
+    let g = 150 + Math.round(100 * Math.random());
+    let b = 150 + Math.round(100 * Math.random());
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function handleChangeColor() {
+    let bodyStyle = document.body.style;
+    bodyStyle.backgroundColor = getRandomLightColor();
+  }
+
+  return (
+    <div style={{ width: '100%', height: '100%' }} onClick={handleClickOutside}>
+      <ColorSwitch onChangeColor={handleChangeColor} />
+      <br />
+      <br />
+      <h2>Nombre de clics sur la page: {clicks}</h2>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+import myFile from './3-code/datafile.js';
+
+## Une variable ne suffit pas
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js
+import { sculptureList } from './data.js';
+
+export default function Gallery() {
+  let index = 0;
+
+  function handleClick() {
+    index = index + 1;
+  }
+
+  let sculpture = sculptureList[index];
+  return (
+    <>
+      <button onClick={handleClick}>Next</button>
+      <h2>
+        <i>{sculpture.name} </i>
+        by {sculpture.artist}
+      </h2>
+      <h3>
+        ({index + 1} of {sculptureList.length})
+      </h3>
+      <img src={sculpture.url} alt={sculpture.alt} />
+      <p>{sculpture.description}</p>
+    </>
+  );
+}
+```
+
+```css
+h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+h3 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 100%;
+}
+img {
+  width: 120px;
+  height: 120px;
+}
+button {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+`handleClick` modifie une variable locale, `index`. Mais il y a deux problèmes:
+
+1. **Une variable locale ne persiste pas entre les rendus.** Chaque fois qu'on fait un nouveau rendu, toutes les variables locales sont recréées.
+2. **Modifier une variable locale ne génère pas de rendu .** React ne réalise pas qu'il faut générer un nouveau rendu.
+
+---
+
+## Solution fournie par React
+
+Il faut:
+
+1. **Conserver** les données entre les rendus
+2. **Déclencher** la génération d'un nouveau rendu (_re-rendering_)
+
+Le Hook [`useState`](https://beta.reactjs.org/reference/react/useState) fournit ces deux choses.
+
+1. **variable state** Garde les données entre les rendus.
+2. **fonction state setter** pour modifier la donnée et générer un rendu.
+
+---
+
+## Ajouter une variable State
+
+D'abord, il faut ajouter l'importation `useState`
+
+```js
+import { useState } from 'react';
+```
+
+Et créer le state dans le composant
+
+```js
+const [index, setIndex] = useState(0);
+```
+
+`index` est une variable d'état (pour lire), et `setIndex` est la fonction setter (pour écrire).
+
+> La syntaxe `[` et `]` se nomme _décomposition de tableau_ ([array destructuring](https://javascript.info/destructuring-assignment)) Cela permet de lire les valeurs provenant d'un tableau. Le tableau retourné par `useState` a toujours 2 items.
+
+---
+
+## Modifier le state
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+On modifie le state dans `handleClick`:
+
+```js
+function handleClick() {
+  setIndex(index + 1);
+}
+```
+
+</aside>
+
+Voici le code réparé:
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js
+import { useState } from 'react';
+import { sculptureList } from './data.js';
+
+export default function Gallery() {
+  const [index, setIndex] = useState(0);
+
+  function handleClick() {
+    setIndex(index + 1);
+  }
+
+  let sculpture = sculptureList[index];
+  return (
+    <>
+      <button onClick={handleClick}>Next</button>
+      <h2>
+        <i>{sculpture.name} </i>
+        by {sculpture.artist}
+      </h2>
+      <h3>
+        ({index + 1} of {sculptureList.length})
+      </h3>
+      <img src={sculpture.url} alt={sculpture.alt} />
+      <p>{sculpture.description}</p>
+    </>
+  );
+}
+```
+
+```css
+h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+h3 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 100%;
+}
+img {
+  width: 120px;
+  height: 120px;
+}
+button {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## useState, le premier Hook
+
+`useState` n'est pas le seul Hook. Toute fonction démarrant par "`use`" est un Hook.
+
+_Hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://beta.reactjs.org/learn/render-and-commit#step-1-trigger-a-render).
+
+Les _hooks_ permettent de se connecter ("hook into") dans les fonctionnalités de React.
+
+"State" est une fonctionalité, mais on en verra d'autres.
+
+---
+
+## Caractéristiques des Hooks
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+**Attention:** les hooks (débutant par `use`) ne peuvent être appelés qu'à partir du "top niveau" de votre composant, ou de vos propres hooks.
+
+On ne peut **PAS** appeler un hook dans:
+
+- une condition
+- une boucle
+- une fonction imbriquée (gestionnaire d'événements).
+
+Même si les hooks sont des fonctions, vaut mieux considérer ceux-ci comme des déclarations des besoins de votre composant. On utilise les fonctionalités React au "top niveau" d'un composant, de la même façon qu'on importe les modules au début des fichiers.
+
+</div>
+
+---
+
+## Anatomie du `useState`
+
+Quand on appelle [`useState`](https://beta.reactjs.org/reference/react/useState), React stocke la valeur.
+
+```js
+const [index, setIndex] = useState(0);
+```
+
+**Convention:**
+
+- On nomme cette paire: `const [chose, setChose]`.
+- On pourrait nommer différemment, mais cette convention aide la compréhension.
+
+L'argument de `useState` est la **valeur initiale** de l'état. (Ici, la valeur 0).
+
+À chaque rendu, `useState` donne un tableau de 2 valeurs:
+
+1. La **variable d'état** (`index`) qui stocke la valeur.
+2. La **fonction state setter** (`setIndex`) pour modifier la valeur de l'état et déclencher un rendu.
+
+---
+
+## Détail du Hook:
+
+```js
+const [index, setIndex] = useState(0);
+```
+
+1. **Au premier rendu**, on passe `0` à `useState`, le hook retourne `[0, setIndex]`. React stocke `0` dans l'état.
+2. **On met à jour le state** quand l'usager clique, l'événement appelle `setIndex(index + 1)`. Puisqu'`index` est `0`, cela appelle `setIndex(1)`. React stocke `1` et génère un nouveau rendu.
+3. **Au second rendu** React appelle `useState(0)`, mais React a déjà stocké `1` dans `index`. Donc React retourne `[1, setIndex]`.
+4. Ainsi de suite...
+
+---
+
+## Composants avec des états multiples
+
+Un composant peut avoir de multiples variables d'états.
+
+L'exemple suivant possède deux variables d'état: un nombre `index` et un booléen `showMore` qui bascule quand on clique "Afficher Détails" .
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js
+import { useState } from 'react';
+import { sculptureList } from './data.js';
+
+export default function Gallery() {
+  const [index, setIndex] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+
+  function handleNextClick() {
+    setIndex(index + 1);
+  }
+
+  function handleMoreClick() {
+    setShowMore(!showMore);
+  }
+
+  let sculpture = sculptureList[index];
+  return (
+    <>
+      <button onClick={handleNextClick}>Suivant</button>
+      <h2>
+        <i>{sculpture.name} </i>
+        par {sculpture.artist}
+      </h2>
+      <h3>
+        ({index + 1} de {sculptureList.length})
+      </h3>
+      <button onClick={handleMoreClick}>
+        {showMore ? 'Cacher' : 'Afficher'} détails
+      </button>
+      {showMore && <p>{sculpture.description}</p>}
+      <img src={sculpture.url} alt={sculpture.alt} />
+    </>
+  );
+}
+```
+
+```css
+h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+h3 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 100%;
+}
+img {
+  width: 120px;
+  height: 120px;
+}
+button {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+On sépare le state quand les valeurs ne sont pas liées. (C'est le cas ci-haut).
+
+Si les valeurs sont liées ou modifiées ensemble, on préfère les combiner dans un objet unique. (Ex: un formulaire)
+
+---
+
+## Comment React sait quoi retourner?
+
+Il n'y a pas d'identifiant passé en arguments à `useState`. Comment sait-il quelle valeur retourner?
+
+Les hooks se fient sur **un ordre d'appel, qui reste stable** dans un composant donné. C'est grâce à la règle des hooks: il faut les placer au "top niveau" d'un composant. (Il y a même un [linter](https://www.npmjs.com/package/eslint-plugin-react-hooks) qui permet de détecter les erreurs.)
+
+React utilise un tableau de paires pour chaque composant. Il maintient un index sur l'usage des hooks et l'incrémente à chaque appel de useState. Voir: [React Hooks: Not Magic, Just Arrays.](https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e)
+
+L'exemple suivant n'utilise **PAS** React. Mais il démontre comment fonctionne les hooks.
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js index.js active
+import { sculptureList } from './data.js';
+
+let componentHooks = [];
+let currentHookIndex = 0;
+
+// Démontre le concept de useState (simplifié).
+function useState(initialState) {
+  let pair = componentHooks[currentHookIndex];
+  if (pair) {
+    // Après le premier rendu,
+    // La paire d'état existe déjà
+    // Il faut incrémenter l'index et retourner la paire
+    currentHookIndex++;
+    return pair;
+  }
+
+  // Quand c'est un premier rendu,
+  // On créé la paire d'état et on la stocke.
+  pair = [initialState, setState];
+
+  function setState(nextState) {
+    // Quand on modifie l'état,
+    // On met la nouvelle valeur dans la paire
+    pair[0] = nextState;
+    updateDOM();
+  }
+
+  // Stockons la paire pour les prochains rendus
+  // Et on se prépare pour le prochain appel Hook
+  componentHooks[currentHookIndex] = pair;
+  currentHookIndex++;
+  return pair;
+}
+
+function Gallery() {
+  // Each useState() call will get the next pair.
+  const [index, setIndex] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+
+  function handleNextClick() {
+    setIndex(index + 1);
+  }
+
+  function handleMoreClick() {
+    setShowMore(!showMore);
+  }
+
+  let sculpture = sculptureList[index];
+  // On n'utilise pas React
+  // On retourne un objet plutôt que du JSX.
+  return {
+    onNextClick: handleNextClick,
+    onMoreClick: handleMoreClick,
+    header: `${sculpture.name} by ${sculpture.artist}`,
+    counter: `${index + 1} of ${sculptureList.length}`,
+    more: `${showMore ? 'Hide' : 'Show'} details`,
+    description: showMore ? sculpture.description : null,
+    imageSrc: sculpture.url,
+    imageAlt: sculpture.alt,
+  };
+}
+
+function updateDOM() {
+  // Reset the current Hook index
+  // before rendering the component.
+  currentHookIndex = 0;
+  let output = Gallery();
+
+  // Update the DOM to match the output.
+  // This is the part React does for you.
+  nextButton.onclick = output.onNextClick;
+  header.textContent = output.header;
+  moreButton.onclick = output.onMoreClick;
+  moreButton.textContent = output.more;
+  image.src = output.imageSrc;
+  image.alt = output.imageAlt;
+  if (output.description !== null) {
+    description.textContent = output.description;
+    description.style.display = '';
+  } else {
+    description.style.display = 'none';
+  }
+}
+
+let nextButton = document.getElementById('nextButton');
+let header = document.getElementById('header');
+let moreButton = document.getElementById('moreButton');
+let description = document.getElementById('description');
+let image = document.getElementById('image');
+
+// Make UI match the initial state.
+updateDOM();
+```
+
+```html public/index.html
+<button id="nextButton">Next</button>
+<h3 id="header"></h3>
+<button id="moreButton"></button>
+<p id="description"></p>
+<img id="image" />
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    padding: 0;
+  }
+  button {
+    display: block;
+    margin-bottom: 10px;
+  }
+</style>
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## L'état est isolé et privé
+
+L'état est local à l'instance du composant. **Si vous affichez deux fois le même composant, chacun d'eux aura son propre état isolé.** Changer l'un n'affecte pas l'autre.
+
+Dans l'exemple suivant, le composant `Gallery` est rendu deux fois. Les états sont indépendants.
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js
+import Gallery from './Gallery.js';
+
+export default function Page() {
+  return (
+    <div className='Page'>
+      <Gallery />
+      <Gallery />
+    </div>
+  );
+}
+```
+
+```js Gallery.js
+import { useState } from 'react';
+import { sculptureList } from './data.js';
+
+export default function Gallery() {
+  const [index, setIndex] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+
+  function handleNextClick() {
+    setIndex(index + 1);
+  }
+
+  function handleMoreClick() {
+    setShowMore(!showMore);
+  }
+
+  let sculpture = sculptureList[index];
+  return (
+    <section>
+      <button onClick={handleNextClick}>Next</button>
+      <h2>
+        <i>{sculpture.name} </i>
+        by {sculpture.artist}
+      </h2>
+      <h3>
+        ({index + 1} of {sculptureList.length})
+      </h3>
+      <button onClick={handleMoreClick}>
+        {showMore ? 'Hide' : 'Show'} details
+      </button>
+      {showMore && <p>{sculpture.description}</p>}
+      <img src={sculpture.url} alt={sculpture.alt} />
+    </section>
+  );
+}
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+.Page > * {
+  float: left;
+  width: 50%;
+  padding: 10px;
+}
+h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+h3 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 100%;
+}
+img {
+  width: 120px;
+  height: 120px;
+}
+button {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## L'état est isolé
+
+L'état n'est lié ni à une fonction, ni à un module. Il est lié à l'instance d'un composant qui affiche sur la page. Quand on affiche deux composants `Gallery`, React gère donc deux states.
+
+Le composant `Page` ne connait rien de l'état de `Gallery`. L'état est complètement privé au composant qui le déclare. Le parent ne peut le changer. On peut ajouter ou enlever de l'état sans affecter le reste des composants.
+
+Si on veut que les deux galleries partagent leurs états? La bonne pratique en React, c'est d'enlever l'état aux composants enfants pour le rajouter à leur parent partagé. On couvrira cela plus tard.
+
+---
+
+## Défi 1
+
+Quand on clique "Next" à la dernière image, le code plante. Réparons le code. 2 approches: On ajoute de la logique au gestionnaire d'événments, ou on désactive le bouton quand l'action n'est pas possible.
+
+Après avoir réparé le code, ajoutez un bouton "previous" pour revenir en arrière. Empêchez que ça plante à la première image.
+
+<Sandpack    files={{
+    "/data.js": myFile
+  }}  >
+
+```js
+import { useState } from 'react';
+import { sculptureList } from './data.js';
+
+export default function Gallery() {
+  const [index, setIndex] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+
+  function handleNextClick() {
+    setIndex(index + 1);
+  }
+
+  function handleMoreClick() {
+    setShowMore(!showMore);
+  }
+
+  let sculpture = sculptureList[index];
+  return (
+    <>
+      <button onClick={handleNextClick}>Next</button>
+      <h2>
+        <i>{sculpture.name} </i>
+        by {sculpture.artist}
+      </h2>
+      <h3>
+        ({index + 1} of {sculptureList.length})
+      </h3>
+      <button onClick={handleMoreClick}>
+        {showMore ? 'Hide' : 'Show'} details
+      </button>
+      {showMore && <p>{sculpture.description}</p>}
+      <img src={sculpture.url} alt={sculpture.alt} />
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+.Page > * {
+  float: left;
+  width: 50%;
+  padding: 10px;
+}
+h2 {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+h3 {
+  margin-top: 5px;
+  font-weight: normal;
+  font-size: 100%;
+}
+img {
+  width: 120px;
+  height: 120px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 2
+
+Quand on tape dans les champs de saisie, rien n'apparait. Le valeurs sont "bloquées" avec des strings vides. La valeur `value` du premier `<input>` est liée à `firstName`. La valeur du second `<input>` est liée à `lastName`. Les deux entrées ont le gestionnaire d'événements `onChange`, qui modifie les variables d'après le champ de saisie (`e.target.value`). Par contre, les variables ne se rappellent pas de leur valeurs entre les rendus. Il faudrait reprogrammer en utilisant des variables d'état.
+
+<Sandpack>
+
+```js
+export default function Form() {
+  let firstName = '';
+  let lastName = '';
+
+  function handleFirstNameChange(e) {
+    firstName = e.target.value;
+  }
+
+  function handleLastNameChange(e) {
+    lastName = e.target.value;
+  }
+
+  function handleReset() {
+    firstName = '';
+    lastName = '';
+  }
+
+  return (
+    <form onSubmit={(e) => e.preventDefault()}>
+      <input
+        placeholder='First name'
+        value={firstName}
+        onChange={handleFirstNameChange}
+      />
+      <input
+        placeholder='Last name'
+        value={lastName}
+        onChange={handleLastNameChange}
+      />
+      <h1>
+        Hi, {firstName} {lastName}
+      </h1>
+      <button onClick={handleReset}>Reset</button>
+    </form>
+  );
+}
+```
+
+```css
+h1 {
+  margin-top: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 3
+
+Ce formulaire permet aux usagers de laisser du feedback. Quand on soumet du feedback, on devrait afficher "Merci". Mais cela plante avec le message d'erreur: "Rendered fewer hooks than expected". Il faut réparer l'erreur
+
+**Indice:** D'où peut-on appeler un hook? Ce composant brise-t-il une règle? Y a-t-il un commentaire qui désactive les validations du linter?
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function FeedbackForm() {
+  const [isSent, setIsSent] = useState(false);
+  if (isSent) {
+    return <h1>Thank you!</h1>;
+  } else {
+    // eslint-disable-next-line
+    const [message, setMessage] = useState('');
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          alert(`Sending: "${message}"`);
+          setIsSent(true);
+        }}
+      >
+        <textarea
+          placeholder='Message'
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <br />
+        <button type='submit'>Send</button>
+      </form>
+    );
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Rendu et commit
+
+React gère un cycle pour afficher des données. Voici ce cycle:
+
+1. **Lancer un déclencheur** qui provoque un rendu
+2. **Génèrer le rendu** du composant
+3. **Écrire le commit** vers le DOM
+
+---
+
+## Étape 1: Lancer un déclencheur
+
+Il y a deux raisons pour qu'un composant soit rendu.
+
+1. C'est le **rendu initial** du composant
+2. **L'état est modifié** sur le composant (ou l'un des parents).
+
+---
+
+## Rendu initial
+
+Quand l'application démarre, il faut déclencher le rendu initial. Certaines boîtes à outils cachent ce code. Quand ce code n'est pas caché, on appelle `createRoot` sur l'élément du DOM, et on appelle la méthode `render`.
+
+<Sandpack>
+
+```js index.js active
+import Image from './Image.js';
+import { createRoot } from 'react-dom/client';
+
+const root = createRoot(document.getElementById('root'));
+root.render(<Image />);
+```
+
+```js Image.js
+export default function Image() {
+  return (
+    <img
+      src='https://i.imgur.com/ZF6s192.jpg'
+      alt="'Floralis Genérica' by Eduardo Catalano: a gigantic metallic flower sculpture with reflective petals"
+    />
+  );
+}
+```
+
+</Sandpack>
+
+**NOTE:** Commentez `root.render()` et le composant disparait.
+
+---
+
+## Re-rendus déclenchés par une modification de l'état
+
+- Après le rendu initial, on peut déclencher des rendus additionnels en modifiant l'état avec `setState`.
+- Modifier l'état va placer un re-rendu dans la file.
+- On peut ajouter plusieurs rendus additionnels dans la file.
+
+---
+
+## Étape 2: On génère un Rendu du composant
+
+- Après le déclenchement du rendu, React appelle vos composants pour déterminer quoi afficher.
+
+**"Faire un rendu", c'est React qui appelle vos composants.**
+
+- **Au rendu initial** React appelle le composant racine.
+- **Pour les rendus suivants** React appelle le composant ayant le state modifié.
+
+C'est un processus recursif. Si le composant retourne d'autres composants, ils seront aussi appelés, ainsi que leurs enfants et ainsi de suite. Le processus continue jusqu'à ce que tous les sous-composants soient rendus, et que React sache exactement quoi afficher sur l'écran.
+
+---
+
+## Générer un rendu
+
+<Sandpack>
+
+```js Gallery.js active
+export default function Gallery() {
+  return (
+    <section>
+      <h1>Inspiring Sculptures</h1>
+      <Image />
+      <Image />
+      <Image />
+    </section>
+  );
+}
+
+function Image() {
+  return (
+    <img
+      src='https://i.imgur.com/ZF6s192.jpg'
+      alt="'Floralis Genérica' by Eduardo Catalano: a gigantic metallic flower sculpture with reflective petals"
+    />
+  );
+}
+```
+
+```js index.js
+import Gallery from './Gallery.js';
+import { createRoot } from 'react-dom/client';
+
+const root = createRoot(document.getElementById('root'));
+root.render(<Gallery />);
+```
+
+```css
+img {
+  margin: 0 10px 10px 0;
+}
+```
+
+</Sandpack>
+
+- **Pendant le rendu initial** React devra [créer des noeuds (node) du DOM](https://developer.mozilla.org/docs/Web/API/Document/createElement) pour `<section>`, `<h1>`, et trois balises `<img>`.
+- **Pendant le re-rendu,** React déterminera quelles propriétés ont changé, si c'est le cas. On compare avec le rendu précédent. (Cette information sera utile à la prochaine étape.)
+
+---
+
+## Le Rendu est pur
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+Le rendu doit toujours être une [fonction pure](https://react.dev/learn/keeping-components-pure):
+
+- **'Mêmes entrées, mêmes sorties'** Avec les même entrées et paramètres, le composant retourne le même JSX
+- **On ne touche à rien à l'extérieur du composant** On ne doit modifier ni objets, ni variables existantes.
+
+  - Si on oublie ces pricipes, on pourrait rencontrer des bogues difficiles à détecter.
+  - Quand on développe en **Strict Mode**, React appelle chaque fonction 2 fois au rendu initial.
+  - Ceci aide à détecter les fonctions impures.
+
+</div>
+
+---
+
+## Optimiser la performance
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+- Par défaut, un changement de state provoque un re-rendu du composant
+- et de **tous ses sous-composants** (et ainsi de suite). Ça peut être lourd.
+
+- Il existe des stratégies pour optimiser la performance. Ex: `createMemo()`.
+
+</div>
+
+---
+
+## Étape 3: React écrit le commit vers le DOM
+
+Après le rendu (l'appel) des composants, React modifie le DOM.
+
+- **Pour le rendu initial** React appelle [`appendChild()`](https://developer.mozilla.org/docs/Web/API/Node/appendChild) pour ajouter les noeuds DOM.
+- **Pour les rendus suivants** React applique les modifications minimales (comparées pendant le rendu) pour que le DOM corresponde au dernier rendu généré.
+
+---
+
+## React modifie le DOM que pour les éléments modifiés
+
+Par exemple, dans l'exemple suivant, le composant génère un re-rendu avec de nouvelles props à chaque seconde. On peut ajouter du texte au `<input>`, modifier la `value`, et le texte ne disparait pas au moment du re-rendu:
+
+<Sandpack>
+
+```js Clock.js active
+export default function Clock({ time }) {
+  return (
+    <>
+      <h1>{time}</h1>
+      <input />
+    </>
+  );
+}
+```
+
+```js App.js hidden
+import { useState, useEffect } from 'react';
+import Clock from './Clock.js';
+
+function useTime() {
+  const [time, setTime] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+export default function App() {
+  const time = useTime();
+  return <Clock time={time.toLocaleTimeString()} />;
+}
+```
+
+</Sandpack>
+
+Durant la dernière étape, React ne modifie que le contenu `<h1>` avec la nouvelle heure. `<input>` apparait à chaque nouveau re-rendu, mais sans modification. Donc React ne touche pas à `<input>`.
+
+---
+
+## L'après-exécution: Browser paint
+
+Rappel des différentes étapes:
+
+1. **Lancer un déclencheur** qui provoque un rendu
+2. **Génèrer le rendu** du composant
+3. **Écrire le commit** vers le DOM
+
+- Après le commit, les modifications sont affichées.
+- Le navigateur appelle cela "_browser rendering_"
+- La documentation React appelle cela "**browser painting**"
+
+---
+
+## En résumé
+
+- Voici les trois étapes d'affichage sur React
+  1. Déclencheur (Trigger)
+  2. Rendu (Render)
+  3. Écriture du DOM (Commit)
+- Utilisez "StrictMode" pour trouver les erreurs
+- React ne touche pas au DOM quand le rendu est le même que la fois précédente
+
+---
+
+## Modifier l'état déclenche un rendu
+
+Dans plusieurs environnements, on considère que la modification d'une interface usager est le résultat d'un événement, tel que le clic d'un bouton.
+
+Dans React, c'est différent.
+
+Il faut aussi **modifier l'état** pour que l'interface usager soit affectée.
+
+---
+
+## Exemple
+
+Dans l'exemple suivant, quand on presse "send", le `setIsSent(true)` modifie l'état et génère un re-rendu.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [isSent, setIsSent] = useState(false);
+  const [message, setMessage] = useState('Bonjour!');
+  if (isSent) {
+    return <h1>Votre message est envoyé</h1>;
+  }
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        setIsSent(true);
+        sendMessage(message);
+      }}
+    >
+      <textarea
+        placeholder='Message'
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button type='submit'>Envoyer</button>
+    </form>
+  );
+}
+
+function sendMessage(message) {
+  // ...
+}
+```
+
+```css
+label,
+textarea {
+  margin-bottom: 10px;
+  display: block;
+}
+```
+
+</Sandpack>
+
+Quand on clique le bouton
+
+1. Le gestionnaire d'événements `onSubmit` exécute.
+2. `setIsSent(true)` modifie `isSent` à `true` place le rendu dans la file.
+3. React génère le re-rendu en utilisant la nouvelle valeur de `isSent`.
+
+---
+
+## Rendu génère un Snapshot dans le temps
+
+Générer un "rendu" signifie que React appelle votre Composant (i.e. la fonction de votre composant).
+
+Le JSX retourné est comme une photo instantanée (un snapshot) de l'interface usager, à ce moment précis dans le temps.
+
+Les props, gestionnnaires d'événements et variables locales ont été générées **à partir de l'état au moment du rendu.**
+
+Ce snapshot du UI inclut de la logique comme des gesionnaires d'événements qui spécifient ce qui ce passe quand un usager interagit. React modifie l'écran pour synchroniser ce qui est affiché et ce qui a été généré (incluant la connection à des event handlers.)
+
+Quand React fait un re-rendu d'un composant:
+
+1. React appelle votre fonction.
+2. Cette fonction retourne un snapshot JSX.
+3. React modifie l'écran pour synchroniser avec le snapshot.
+
+---
+
+## L'état est géré par React
+
+Contrairement aux variables locales qui disparaissent quand la fonction est complétée (quand le JSX est retourné), l'état est conservé entre les appels.
+
+L'état est conservé par React, à l'extérieur de la fonction. Quand React appelle votre composant, il vous donne accès au snapshot de l'état pour ce rendu particulier. Votre composant retourne un snapshot du UI avec de nouveaux props et gestionnaires d'événements, générées à partir des valeurs d'états de ce rendu.
+
+---
+
+## L'état nest pas géré comme le reste
+
+Dans cet exemple, on pourrait s'attendre à ce que cliquer le bouton +3 incrémente de le compteur 3 fois car il appelle `setNumber(number + 1)` trois fois.
+
+Mais ce n'est pas le cas.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 1);
+          setNumber(number + 1);
+          setNumber(number + 1);
+        }}
+      >
+        +3
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+On incrémente qu'une seule fois.
+
+---
+
+## Modifier le state affecte le prochain rendu
+
+Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d'événement `onClick` considère que la valeur de `number` demeure `0` même après l'appel à `setNumber(number + 1):
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+<button
+  onClick={() => {
+    setNumber(number + 1);
+    setNumber(number + 1);
+    setNumber(number + 1);
+  }}
+>
+  +3
+</button>
+```
+
+<div>
+Voici ce qui est exécuté
+
+1. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
+2. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
+3. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
+
+</div>
+</aside>
+
+Même en appelant `setNumber(number + 1)` trois fois, dans le gestionnaire d'événements de _ce rendu_, le `number` demeure `0`.
+On modifie la valeur vers `1` trois fois. Le résultat final affiche `1` plutôt que `3`.
+
+---
+
+## Autre explication
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<div>
+Une autre façon de visualiser, c'est de substituer les états avec leur valeur dans votre code.
+
+```js
+<button
+  onClick={() => {
+    setNumber(0 + 1);
+    setNumber(0 + 1);
+    setNumber(0 + 1);
+  }}
+>
+  +3
+</button>
+```
+
+</div>
+<div>
+Au prochain rendu, `number` sera `1`, Donc pour _ce rendu_ le gestionnaire d'événements sera
+
+```js
+<button
+  onClick={() => {
+    setNumber(1 + 1);
+    setNumber(1 + 1);
+    setNumber(1 + 1);
+  }}
+>
+  +3
+</button>
+```
+
+</div>
+</aside >
+
+C'est pourquoi que la progression sera `2`, `3`, `4` et ainsi de suite.
+
+---
+
+## L'état à travers le temps
+
+Quel sera le résultat de cette alerte?
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 5);
+          alert(number);
+        }}
+      >
+        +5
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+Si vous substituez, vous pouvez deviner que ce sera zéro.
+
+```js
+setNumber(0 + 5);
+alert(0);
+```
+
+---
+
+## Question
+
+Et si on met un minuteur sur cette alerte, pour qu'elle soit lancée seulement après que le re-rendu soit complété? Ce serait "0" ou "5"? (Devinez!)
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 5);
+          setTimeout(() => {
+            alert(number);
+          }, 3000);
+        }}
+      >
+        +5
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+Si vous utilisez la méthode de substitution, on voit clairement l'état passé à l'alerte.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+setNumber(0 + 5);
+setTimeout(() => {
+  alert(0);
+}, 3000);
+```
+
+L'état stocké dans React est changé au moment où l'alerte éxécute, mais il a été planifié au moment où la valeur n'avait pas changé. C'est le moment du snapshot.
+
+</aside>
+
+---
+
+## L'état n'est jamais modifié pendant le rendu
+
+La variable d'état n'est pas modifiée durant le rendu, même si le code est asynchrone (comme un minuteur ou un timer).
+
+Dans le `onClick`, la valeur `number` continue d'être `0` même après que `setNumber(number + 5)` ne soit appelé. Sa valeur s'est fixée quand React a "pris son snapshot" de l'IU.
+
+Ceci permet au code d'être moins fragile aux erreurs de synchonisation et de timing.
+
+<hr />
+
+Imaginons un fomulaire qui envoie un message avec un délai de 5 secondes. Imaginez le scénario:
+
+1. On clique sur "Envoyer" pour dire "Bonjour" à Alice
+2. Avant la fin du délai de 5 secondes, on change la valeur du "destinataire" pour "Bob"
+
+Que devrait afficher `alert`? "Vous dites Bonjour à Alice" ou "Vous dites Bonjour à Bob"? (Consultez le code sur la prochaine diapositive.)
+
+---
+
+## L'état est une machine à voyager dans le temps
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [to, setTo] = useState('Alice');
+  const [message, setMessage] = useState('Bonjour');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setTimeout(() => {
+      alert(`Vous dites ${message} à ${to}`);
+    }, 5000);
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Destinataire:{' '}
+        <select value={to} onChange={(e) => setTo(e.target.value)}>
+          <option value='Alice'>Alice</option>
+          <option value='Bob'>Bob</option>
+        </select>
+      </label>
+      <textarea
+        placeholder='Message'
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button type='submit'>Envoyer</button>
+    </form>
+  );
+}
+```
+
+```css
+label,
+textarea {
+  margin-bottom: 10px;
+  display: block;
+}
+```
+
+</Sandpack>
+
+**React conserve les valeurs d'états "fixées" dans les gestionnaires d'événements de _ce rendu_.** Ne vous inquiétez pas d'un changement d'état pendant l'exécution de votre code.
+
+Que faire si on doit lire le dernier état avant un re-render? on pourrait utiliser une fonction de modification d'état. On verra cela bientôt.
+
+---
+
+## Défi 4
+
+Voici un feu de circulation pour piétons.
+
+Ajoutez une `alert` au gestionnaire du clic. Quand la lumière est verte et dit ¨Walk¨, cliquer le bouton devrait afficher "Stop is next". Quand la lumière est rouge et dit "Stop", cliquer le bouton devrait afficher "Walk is next".
+
+Est-ce que ça fait une différence lorsqu'on met l'alerte avant ou après l'appel `setWalk`?
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function TrafficLight() {
+  const [walk, setWalk] = useState(true);
+
+  function handleClick() {
+    setWalk(!walk);
+  }
+
+  return (
+    <>
+      <button onClick={handleClick}>Change to {walk ? 'Stop' : 'Walk'}</button>
+      <h1
+        style={{
+          color: walk ? 'darkgreen' : 'darkred',
+        }}
+      >
+        {walk ? 'Walk' : 'Stop'}
+      </h1>
+    </>
+  );
+}
+```
+
+```css
+h1 {
+  margin-top: 20px;
+}
+```
+
+</Sandpack>
+
+---
+
+## React regroupe les modification d'états en lots (batch)
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 1);
+          setNumber(number + 1);
+          setNumber(number + 1);
+        }}
+      >
+        +3
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+setNumber(0 + 1);
+setNumber(0 + 1);
+setNumber(0 + 1);
+```
+
+Chaque rendu est fixé au moment qu'il est généré, donc la valeur `number` demeure `0`, même lorsqu'on appelle `setNumber(1)` plusieurs fois.
+
+</aside>
+
+Il y a aussi une autre raison. **React attend que tous les gestionnaires d'événements aient fini de rouler avant de modifier l'état.**
+C'est pourquoi le re-rendu ne s'exécute _qu'après_ tous les `setNumber()`;
+
+---
+
+## Optimisation: Regrouper les setState en lot (batch)
+
+Similaire à l'expérience au resto: un serveur prend tous les détails de la commande avant de partir à la cuisine.
+
+S'il n'était pas très futé, il pourrait partir à la cuisine dès que vous commandez de la soupe, et revenir... Et repartir dès que vous commandez un drink, et revenir... ainsi de suite... ça ne serait pas très efficace.
+
+Cette approche permet de modifier plusieurs variables d'états, provenant de plusieurs composants, dans un seul re-rendu. L'Interface Usager ne sera pas mis-à-jour tant qu'on aura pas complété le gestionnaire d'événements. C'est ce qu'on appelle le regroupement par lot (batching). Cette optimisation améliore les performances. Cela évite les "rendus à moitié", où seulement certaines variables ont été mises-à-jour.
+
+**React ne regroupe pas à travers de _multiples_ événements intentionnels (comme de multiples clics).** Chaque clic est géré séparément. React regroupe que là où ça fait du sens. Cela nous assure que si le premier clic désactive le fomulaire, le second clic ne soumettra pas le formulaire une seconde fois.
+
+---
+
+## Modifier l'état de multiples fois dans un lot
+
+C'est un cas rare, mais si on désire modifier l'état plusieurs fois...
+
+On remplace la valeur `setNumber(number + 1)`, par une fonction `setNumber(n => n + 1)`. Ceci dit à React "d'exécuter le code plus tard".
+
+La fonction prend un paramètre (l'état courant) et retourne l'état suivant.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber((n) => n + 1);
+          setNumber((n) => n + 1);
+          setNumber((n) => n + 1);
+        }}
+      >
+        +3
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+Ici, `n => n + 1` est une **fonction d'updater.** Quand on passe cette fonction à un setState():
+
+1. React ajoute cette fonction à la file pour être traité après le gestionnaire d'événements ait terminé.
+2. Durant le prochain rendu, React passe à travers la file pour exécuter et retourner l'état modifié.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 2fr", columnGap:10}}>
+
+```js
+setNumber((n) => n + 1);
+setNumber((n) => n + 1);
+setNumber((n) => n + 1);
+```
+
+<div>
+Voici comment React gère ces lignes de code dans le gestionnaire d'événements
+
+1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
+1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
+1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
+
+</div>
+</aside >
+
+---
+
+## Explications
+
+Quand vous appelez `useState` au prochain rendu, React passe à travers la file. L'état précédent `number` est `0`, React passe cette valeur à la première fonction updater (par le paramètre `n`).
+
+<div style={{display: 'flex',   flexDirection: 'column'}}  >
+
+| file de fonctions | `n` | retourne    |
+| ----------------- | --- | ----------- |
+| `n => n + 1`      | `0` | `0 + 1 = 1` |
+| `n => n + 1`      | `1` | `1 + 1 = 2` |
+| `n => n + 1`      | `2` | `2 + 1 = 3` |
+
+</div>
+
+React stocke `3` comme résultat final et le retourne via le `useState`.
+
+C'est pour cela que l'exemple précédent fonctionne lorsqu'on clique "+3"
+
+---
+
+## Si on modifie le state après l'avoir remplacé
+
+Que penser de ce gestionnaire d'événements.
+
+```js
+<button onClick={() => {
+  setNumber(number + 5);
+  setNumber(n => n + 1);
+}}>
+```
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 5);
+          setNumber((n) => n + 1);
+        }}
+      >
+        Increase the number
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+1. `setNumber(number + 5)`: `number` est `0`, donc `setNumber(0 + 5)`. React ajoute _"replacer avec `5`"_ dans la file.
+2. `setNumber(n => n + 1)`: `n => n + 1` est une fonction updater. React ajoute _cette fonction_ dans la file.
+
+Pendant le prochain rendu, React passe par la file d'état:
+
+| file               | `n`           | retourne    |
+| ------------------ | ------------- | ----------- |
+| "remplace par `5`" | `0` (inutile) | `5`         |
+| `n => n + 1`       | `5`           | `5 + 1 = 6` |
+
+React stocke `6` comme résultat final et le retourne via le `useState`
+
+> Remarquez que `setState(x)` fonctionne comme `setState(n => x)`, mais `n` n'est pas utilisé!
+
+---
+
+## Si on remplace l'état après l'avoir modifié
+
+Quelle sera la valeur ici?
+
+```js
+<button onClick={() => {
+  setNumber(number + 5);
+  setNumber(n => n + 1);
+  setNumber(42);
+}}>
+```
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [number, setNumber] = useState(0);
+
+  return (
+    <>
+      <h1>{number}</h1>
+      <button
+        onClick={() => {
+          setNumber(number + 5);
+          setNumber((n) => n + 1);
+          setNumber(42);
+        }}
+      >
+        Increase the number
+      </button>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+}
+h1 {
+  display: inline-block;
+  margin: 10px;
+  width: 30px;
+  text-align: center;
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+1. `setNumber(number + 5)`: `number` est `0`, donc `setNumber(0 + 5)`. React ajoute _"remplacer avec `5`"_ à la file.
+2. `setNumber(n => n + 1)`: `n => n + 1` est une fonction updater. React ajoute _cette fonction_ à la file.
+3. `setNumber(42)`: React ajoute _"remplacer avec `42`"_ à la file.
+
+Pendant le prochain rendu, React passe à travers la file
+
+| file                  | `n`           | retourne    |
+| --------------------- | ------------- | ----------- |
+| "remplacer avec `5`"  | `0` (inutile) | `5`         |
+| `n => n + 1`          | `5`           | `5 + 1 = 6` |
+| "remplacer avec `42`" | `6` (inutile) | `42`        |
+
+React stocke `42` comme résultat final et le retourne via le `useState`
+
+---
+
+## Explications
+
+Deux façons d'appeler `setNumber`:
+
+1. **Avec une fonction updater n** (i.e. `n => n + 1`) qui se fait ajouter dans la file.
+2. **Avec une valeur** (i.e. nombre `5`) ajoute "remplacer avec `5`" à la file, en ignorant ce qui est déjà présent.
+
+- C'est après la série d'événments, au début du re-rendu, que React appelle la file des **updaters**.
+- Les **updaters** doivent être des fonctions pures
+- Ne pas mettre d'effets de bord, ni de setState.
+- En mode Strict, React exécute chaque fonction **updater** deux fois (mais exclut le second résultat)
+  - Ça aide à trouver les effets de bords indésirables.
+
+---
+
+## Convention de noms
+
+C'est commun de nommer l'argument de la fonction par les premières lettres du state.
+
+```js
+setEnabled((e) => !e);
+setLastName((ln) => ln.reverse());
+setFriendCount((fc) => fc * 2);
+```
+
+Si on préfère utiliser plus de lettres, une autre convention serait d'utiliser le nom de l'état, avec ou sans préfixe.
+
+```js
+setEnabled((enabled) => !enabled);
+setEnabled((prevEnabled) => !prevEnabled);
+```
+
+---
+
+## Défi 1
+
+Vous travaillez sur une application de marché d'euvres d'art où les usagers peuvent soumettre plusieurs commandes simultanément à une oeuvre. Chaque fois qu'un usager clic le boutton "Acheter", le compteur "achats en attente" doit augmenter de un. Après 3 secondes, le compteur "en attente" doit diminuer et le compteur "achats complétés" doit augmenter.
+
+Par contre, le compteur "en attente" ne fonctionne pas. Quand on clique "Acheter", il diminue à "-1" (ça ne devrait pas être possible). Et si on clique rapidement, le résultat est bizarre.
+
+Réparez les compteurs.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function RequestTracker() {
+  const [pending, setPending] = useState(0);
+  const [completed, setCompleted] = useState(0);
+
+  async function handleClick() {
+    setPending(pending + 1);
+    await delay(3000);
+    setPending(pending - 1);
+    setCompleted(completed + 1);
+  }
+
+  return (
+    <>
+      <h3>Achats en attente: {pending}</h3>
+      <h3>Achats complétés: {completed}</h3>
+      <button onClick={handleClick}>Acheter</button>
+    </>
+  );
+}
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+```
+
+</Sandpack>
+
+---
+
+## React et les mutations d'objets
+
+En React, on ne devrait jamais modifier un objet stocké dans l'état. Plutôt que de muter un objet, on devrait créer de nouvelles copies qu'on modifie.
+
+---
+
+## Types immuables
+
+N'importe quel type de valeur peut être stocké par l'état.
+
+```js
+const [x, setX] = useState(0);
+```
+
+Types immuables (qu'on ne peut modifier):
+
+- nombres
+- chaines de caractères
+- booléens
+
+On ne peut _modifier_ ces types. Mais on peut déclencher un re-rendu pour _remplacer_ une valeur.
+
+```js
+setX(5);
+```
+
+L'état `x` est modifié de `0` à `5`, (mais le _nombre `0`_ n'a pas muté.)
+
+---
+
+## Types muables
+
+Mais considérons un objet dans l'état:
+
+```js
+const [position, setPosition] = useState({ x: 0, y: 0 });
+```
+
+Quand on change le contenu de l'objet, **c'est nommé une mutation:**
+
+```js
+position.x = 5;
+```
+
+- Les objets dans un état React sont, techniquement, muables.
+- **MAIS** On devrait toujours les traiter **comme si** ils étaient immuables. (Tel un nombre, booléen ou chaîne de caractères)
+- Plutôt que de les modifier, on préfère les **remplacer**.
+
+---
+
+## Considérer l'état comme un objet "read-only"
+
+On devrait toujours traiter les **objets JS placés dans l'état comme étant en lecture seulement.**
+
+Cet objet détient un objet dans l'état pour représenter la position d'un pointeur. Le point rouge devrait se déplacer via l'état quand on touche ou déplace le curseur. Mais le point reste immobile:
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+export default function MovingDot() {
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+  return (
+    <div
+      onPointerMove={(e) => {
+        position.x = e.clientX;
+        position.y = e.clientY;
+      }}
+      style={{
+        position: 'relative',
+        width: '100vw',
+        height: '100vh',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          backgroundColor: 'red',
+          borderRadius: '50%',
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          left: -10,
+          top: -10,
+          width: 20,
+          height: 20,
+        }}
+      />
+    </div>
+  );
+}
+```
+
+```css
+body {
+  margin: 0;
+  padding: 0;
+  height: 250px;
+}
+```
+
+</Sandpack>
+
+Où est le problème?
+
+---
+
+## Réponse
+
+Le problème se situe ici:
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+onPointerMove={e => {
+  position.x = e.clientX;
+  position.y = e.clientY;
+}}
+```
+
+Ce code mute l'objet assigné à `position` du rendu précédent. Mais sans utiliser la fonction `setState`, React n'a pas moyen de savoir que l'objet est modifié. Donc React ne réagit pas.
+
+<div style={{textAlign:"right"}}>
+<br />
+
+Pour déclencher un re-rendu, **il faut créer un nouvel objet dans lequel on place les informations** :
+
+</div>
+
+```js
+onPointerMove={e => {
+  setPosition({
+    x: e.clientX,
+    y: e.clientY
+  });
+}}
+```
+
+</aside>
+
+---
+
+## Explications
+
+Avec `setPosition`, on dit à React de:
+
+- Remplacer `position` avec ce nouvel objet
+- Faire un re-rendu du composant.
+
+Maintenant, le point rouge suit notre curseur.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+export default function MovingDot() {
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+  return (
+    <div
+      onPointerMove={(e) => {
+        setPosition({
+          x: e.clientX,
+          y: e.clientY,
+        });
+      }}
+      style={{
+        position: 'relative',
+        width: '100vw',
+        height: '100vh',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          backgroundColor: 'red',
+          borderRadius: '50%',
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          left: -10,
+          top: -10,
+          width: 20,
+          height: 20,
+        }}
+      />
+    </div>
+  );
+}
+```
+
+```css
+body {
+  margin: 0;
+  padding: 0;
+  height: 250px;
+}
+```
+
+</Sandpack>
+
+---
+
+## La mutation locale est permise
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+<aside style={{display:'grid', gridTemplateColumns:'1fr 1fr', columnGap:15}} >
+
+<div>
+Ce code est **parfaitement correct** car on mute un nouvel object qui vient tout juste d'être créé.
+
+```js
+const nextPosition = {};
+nextPosition.x = e.clientX;
+nextPosition.y = e.clientY;
+setPosition(nextPosition);
+```
+
+Aussi équivalent à ceci:
+
+```js
+setPosition({
+  x: e.clientX,
+  y: e.clientY,
+});
+```
+
+</div>
+
+<div>
+
+Ce code est problématique car il modifie un objet d'état _existant_:
+
+```js
+position.x = e.clientX;
+position.y = e.clientY;
+```
+
+- La mutation est un problème seulement quand on modifie des objets _existants_ dans l'état.
+- Muter un objet qui tout juste d'être créé est correct, car _aucun autre code n'y fait encore référence._
+- Muter un nouvel objet n'a pas d'impact. C'est ce qu'on appelle une "mutation locale". (On peut même faire des mutations locales durant un rendu.)
+
+</div>
+
+</aside>
+</div>
+
+---
+
+## Modifier partiellement un objet
+
+Dans l'exemple précédent, l'objet `position` est toujours recréé avec les nouvelles positions.
+
+Mais que faire si on désire inclure les données existantes dans le nouvel objet?
+Par exemple, si on désire modifier un seul champ d'un formulaire, tout en gardant les autres données existantes?
+
+Les champs de saisie ci-bas ne fonctionnent pas car les handlers `onChange` modifient l'état:
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [person, setPerson] = useState({
+    firstName: 'Barbara',
+    lastName: 'Hepworth',
+    email: 'bhepworth@sculpture.com',
+  });
+
+  function handleFirstNameChange(e) {
+    person.firstName = e.target.value;
+  }
+
+  function handleLastNameChange(e) {
+    person.lastName = e.target.value;
+  }
+
+  function handleEmailChange(e) {
+    person.email = e.target.value;
+  }
+
+  return (
+    <>
+      <label>
+        First name:
+        <input value={person.firstName} onChange={handleFirstNameChange} />
+      </label>
+      <label>
+        Last name:
+        <input value={person.lastName} onChange={handleLastNameChange} />
+      </label>
+      <label>
+        Email:
+        <input value={person.email} onChange={handleEmailChange} />
+      </label>
+      <p>
+        {person.firstName} {person.lastName} ({person.email})
+      </p>
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Conserver les valeurs existantes
+
+Par exemple, ceci modifie l'objet `person` en modifiant le "firstName" du rendu précédent.
+
+```js
+person.firstName = e.target.value;
+```
+
+La façon fiable de modifier l'état est de créer un nouvel objet et de le passer à `setPerson`. En plus, il faut aussi **copier les données existantes**.
+
+```js
+setPerson({
+  firstName: e.target.value, // Nouveau prénom
+  lastName: person.lastName,
+  email: person.email,
+});
+```
+
+---
+
+## Décomposition (spread syntax)
+
+On peut utiliser la syntaxe `...` de la [décomposition d'objet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#spread_in_object_literals) pour ne pas avoir besoin de recopier chaque propriété séparément.
+
+```js
+setPerson({
+  ...person, // copie les anciennes propriétés
+  firstName: e.target.value, // Modifie firstName
+});
+```
+
+---
+
+## Valider l'usage de la décomposition (spread syntax)
+
+Maintenant, le formulaire fonctionne.
+
+Pas besoin de déclarer une variable d'état pour chaque champ de saisie. Pour les gros formulaires, garder toutes les données groupées dans un seul objet est très pratique. (En autant qu'il soit modifié correctement.)
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [person, setPerson] = useState({
+    firstName: 'Barbara',
+    lastName: 'Hepworth',
+    email: 'bhepworth@sculpture.com',
+  });
+
+  function handleFirstNameChange(e) {
+    setPerson({
+      ...person,
+      firstName: e.target.value,
+    });
+  }
+
+  function handleLastNameChange(e) {
+    setPerson({
+      ...person,
+      lastName: e.target.value,
+    });
+  }
+
+  function handleEmailChange(e) {
+    setPerson({
+      ...person,
+      email: e.target.value,
+    });
+  }
+
+  return (
+    <>
+      <label>
+        First name:
+        <input value={person.firstName} onChange={handleFirstNameChange} />
+      </label>
+      <label>
+        Last name:
+        <input value={person.lastName} onChange={handleLastNameChange} />
+      </label>
+      <label>
+        Email:
+        <input value={person.email} onChange={handleEmailChange} />
+      </label>
+      <p>
+        {person.firstName} {person.lastName} ({person.email})
+      </p>
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+```
+
+</Sandpack>
+
+Notez que `...` (la syntaxe de décomposition, spread syntax) est "superficielle". Elle ne copie qu'à un seul niveau de profondeur. Ça garde de bonnes performances, mais quand on a des objets imbriqués, il faut utiliser cette syntaxe à de multiples niveaux.
+
+---
+
+## Utiliser qu'un seul gestionnaire d'événements pour plusieurs champs
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+Il est possible d'utiliser les accolades carrées `[` et `]` dans votre objet pour spécifier une propriété avec un nom dynamique. Voici le même exemple, avec un seul gestionnaire d'événement plutôt que trois.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [person, setPerson] = useState({
+    firstName: 'Barbara',
+    lastName: 'Hepworth',
+    email: 'bhepworth@sculpture.com',
+  });
+
+  function handleChange(e) {
+    setPerson({
+      ...person,
+      [e.target.name]: e.target.value,
+    });
+  }
+
+  return (
+    <>
+      <label>
+        First name:
+        <input
+          name='firstName'
+          value={person.firstName}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Last name:
+        <input
+          name='lastName'
+          value={person.lastName}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Email:
+        <input name='email' value={person.email} onChange={handleChange} />
+      </label>
+      <p>
+        {person.firstName} {person.lastName} ({person.email})
+      </p>
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+```
+
+</Sandpack>
+
+Ici, `e.target.name` réfère à la propriété `name` dans l'élément `<input>` du DOM.
+
+</div>
+
+---
+
+## Mettre à jour un objet imbriqué
+
+Considérez l'objet imbriqué suivant:
+
+```js
+const [person, setPerson] = useState({
+  name: 'Niki de Saint Phalle',
+  artwork: {
+    title: 'Blue Nana',
+    city: 'Hamburg',
+    image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+  },
+});
+```
+
+Pour modifier `person.artwork.city`, c'est tout simple avec une mutation.
+
+```js
+person.artwork.city = 'New Delhi';
+```
+
+---
+
+## Remplacer un objet imbriqué avec la décomposition
+
+Mais en React, on doit approcher l'état de façon immuable.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 3fr", columnGap:10}}>
+
+<div style={{ marginTop: 20 }}>
+  On créé un nouvel objet `artwork` (copiant les données de l'état précédent)
+  ainsi qu'un nouvel objet `person` qui réfère au nouvel `artwork`.
+</div>
+
+```js
+const nextArtwork = { ...person.artwork, city: 'New Delhi' };
+const nextPerson = { ...person, artwork: nextArtwork };
+setPerson(nextPerson);
+```
+
+<div style={{marginTop:30}}>
+Alternativement, en une seule commande:
+</div >
+```js
+setPerson({
+  ...person, // Copier les propriétés
+  artwork: {
+    // remplacer artwork
+    ...person.artwork, // avec les mêmes données
+    city: 'New Delhi', // mais à New Delhi!
+  },
+});
+```
+
+</aside>
+
+---
+
+## Exemple de modification avec imbrication
+
+La syntaxe de décomposition d'objets imbriqués n'est pas toujours facile à écrire, mais ça fonctionne très bien.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [person, setPerson] = useState({
+    name: 'Niki de Saint Phalle',
+    artwork: {
+      title: 'Blue Nana',
+      city: 'Hamburg',
+      image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+    },
+  });
+
+  function handleNameChange(e) {
+    setPerson({
+      ...person,
+      name: e.target.value,
+    });
+  }
+
+  function handleTitleChange(e) {
+    setPerson({
+      ...person,
+      artwork: {
+        ...person.artwork,
+        title: e.target.value,
+      },
+    });
+  }
+
+  function handleCityChange(e) {
+    setPerson({
+      ...person,
+      artwork: {
+        ...person.artwork,
+        city: e.target.value,
+      },
+    });
+  }
+
+  function handleImageChange(e) {
+    setPerson({
+      ...person,
+      artwork: {
+        ...person.artwork,
+        image: e.target.value,
+      },
+    });
+  }
+
+  return (
+    <>
+      <label>
+        Name:
+        <input value={person.name} onChange={handleNameChange} />
+      </label>
+      <label>
+        Title:
+        <input value={person.artwork.title} onChange={handleTitleChange} />
+      </label>
+      <label>
+        City:
+        <input value={person.artwork.city} onChange={handleCityChange} />
+      </label>
+      <label>
+        Image:
+        <input value={person.artwork.image} onChange={handleImageChange} />
+      </label>
+      <p>
+        <i>{person.artwork.title}</i>
+        {' by '}
+        {person.name}
+        <br />
+        (located in {person.artwork.city})
+      </p>
+      <img src={person.artwork.image} alt={person.artwork.title} />
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+img {
+  width: 200px;
+  height: 200px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Les objets sont-il imbriqués?
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 2fr", columnGap:10, fontSize:"0.9em"}}>
+
+<div style={{marginTop:20}}>
+
+Les objets suivants semblent "imbriqués" dans le code.
+
+</div>
+
+```js
+let obj = {
+  name: 'Niki de Saint Phalle',
+  artwork: {
+    title: 'Blue Nana',
+    city: 'Hamburg',
+    image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+  },
+};
+```
+
+<div style={{ marginTop: 20 }}>
+  Mais cette notion d'imbrication est trompeuse. Quand le code exécute, il
+  n'existe pas de notion d'imbrication. En fait, ce sont deux objets distincts.
+</div>
+
+```js
+let obj1 = {
+  title: 'Blue Nana',
+  city: 'Hamburg',
+  image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+};
+
+let obj2 = {
+  name: 'Niki de Saint Phalle',
+  artwork: obj1,
+};
+```
+
+</aside>
+
+---
+
+## Les objet ne sont pas vraiment imbriqués
+
+L'objet `obj1` n'est pas vraiment stocké dans `obj2`. La preuve, `obj3` pourrait référer à `obj1` aussi:
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+let obj1 = {
+  title: 'Blue Nana',
+  city: 'Hamburg',
+  image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+};
+
+let obj2 = {
+  name: 'Niki de Saint Phalle',
+  artwork: obj1,
+};
+
+let obj3 = {
+  name: 'Copycat',
+  artwork: obj1,
+};
+```
+
+<div style={{marginTop:20}}>
+Si on mute `obj3.artwork.city`, cela affecte `obj2.artwork.city` ainsi que `obj1.city`.
+
+C'est que `obj3.artwork`, `obj2.artwork`, ainsi qu'`obj1` réfèrent tous au même objet.
+
+Ils ne sont donc pas "imbriqués". Il est préférable de les concevoir en tant qu'objets séparés, qui réfèrent ou pointent les uns les autres.
+
+</div>
+</aside>
+
+---
+
+## Réaliser des modifications complexes avec immer
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+Quand l'état est complexe, avec plusieurs objets "imbriqués", on pourrait considérer le
+rendre plat (le rendre moins complexe). Mais si on préfère conserver la structure complexe, il existe
+un outil pour les changements complexes. [Immer](https://github.com/immerjs/use-immer) est
+une bibliothèque populaire qui permet d'utiliser une syntaxe de changements mutatifs,
+mais qui produit un résultat en copie d'objet. On pourrait croire que le code suivant brise
+la règle d'immuabilité du state. Mais avec Immer, ce n'est pas le cas.
+
+```js
+updatePerson((draft) => {
+  draft.artwork.city = 'Lagos';
+});
+```
+
+Contrairement aux mutations régulières, immer n'écrase pas les états précédents.
+
+</div>
+
+---
+
+## Comment fonctionne Immer?
+
+Pour utiliser Immer
+
+1. `npm install use-immer` pour ajouter Immer en tant que dépendance.
+2. Remplacez `import { useState } from 'react'` par `import { useImmer } from 'use-immer'`
+
+<div className="alert alert-warning px-5 py-4 text-body">
+Le `draft` (brouillon) fourni par Immer est un objet spécial, nommé [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), qui enregistre toutes les mutations qui affectent l'objet. C'est pour cela qu'il est possible de muter l'objet autant qu'on le désire. Dans les coulisses, Immer détermine les modifications à `draft` et produit un nouvel objet avec toutes vos modifications.
+
+</div>
+
+---
+
+## Exemple qui utilise Immer
+
+<Sandpack>
+
+```js
+import { useImmer } from 'use-immer';
+
+export default function Form() {
+  const [person, updatePerson] = useImmer({
+    name: 'Niki de Saint Phalle',
+    artwork: {
+      title: 'Blue Nana',
+      city: 'Hamburg',
+      image: 'https://i.imgur.com/Sd1AgUOm.jpg',
+    },
+  });
+
+  function handleNameChange(e) {
+    updatePerson((draft) => {
+      draft.name = e.target.value;
+    });
+  }
+
+  function handleTitleChange(e) {
+    updatePerson((draft) => {
+      draft.artwork.title = e.target.value;
+    });
+  }
+
+  function handleCityChange(e) {
+    updatePerson((draft) => {
+      draft.artwork.city = e.target.value;
+    });
+  }
+
+  function handleImageChange(e) {
+    updatePerson((draft) => {
+      draft.artwork.image = e.target.value;
+    });
+  }
+
+  return (
+    <>
+      <label>
+        Name:
+        <input value={person.name} onChange={handleNameChange} />
+      </label>
+      <label>
+        Title:
+        <input value={person.artwork.title} onChange={handleTitleChange} />
+      </label>
+      <label>
+        City:
+        <input value={person.artwork.city} onChange={handleCityChange} />
+      </label>
+      <label>
+        Image:
+        <input value={person.artwork.image} onChange={handleImageChange} />
+      </label>
+      <p>
+        <i>{person.artwork.title}</i>
+        {' by '}
+        {person.name}
+        <br />
+        (located in {person.artwork.city})
+      </p>
+      <img src={person.artwork.image} alt={person.artwork.title} />
+    </>
+  );
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "immer": "1.7.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "use-immer": "0.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+img {
+  width: 200px;
+  height: 200px;
+}
+```
+
+</Sandpack>
+
+Les gestionnaires d'événements ci-haut sont simples et concis.
+
+Il serait possible d'utiliser le `useState` et le `useImmer` dans le même composant.
+
+Immer est une façon de garder le code simple et concis, surtout avec des objets imbriqués,
+où la copie d'objet génère du code complexe.
+
+---
+
+## Pourquoi éviter la mutation d'état en React (1/2)
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+Voici les raisons:
+
+- **Débogage:** Si vous utilisez `console.log` et ne mutez pas le state, vos logs précédents ne seront pas écrasés par vos logs plus récents. C'est plus simple et clair de suivre l'historique des changements.
+- **Optimisations:** Plusieurs stratégies d'optimisation de React (memo) vont 'sauter' le rendu quand les props ou le state n'a pas été modifié. Quand on ne mute jamais l'état, c'est très simple de valider s'il y a des changements avec une simple comparaison `prevObj ===  obj`
+- **Nouvelles fonctionnalités:** L'équipe React prépare de nouvelles fonctionnalités qui se fient que l'état n'est jamais muté. Ces nouvelles fonctionnalités pourraient échouer si votre projet utilise de la mutation.
+
+</div>
+
+---
+
+## Pourquoi éviter la mutation d'état en React (2/2)
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+- **Ajout de besoins:** Certaines fonctionnalités, tel qu'implanter annuler/rétablir, afficher un historique de changements, permettre de réinitialiser un formulaire aux valeurs précédentes, sont des actions simples à réaliser quand rien n'est muté. C'est plus simple de garder des copies des états précédents, et de les ramener au besoin. C'est plus compliqué à implanter quand il y a des mutations.
+- **Simplicité:** Quand React ne fait aucune mutation, il n'y a alors rien de spécial à coder. Pas besoin de proxy, ni de propriétés capturées, ni d'objets réactifs à initialiser. C'est pourquoi React nous permet d'ajouter n'importe quel objet dans l'état, sans aucun impact sur la performance.
+
+Il est souvent possible de muter l'état en React sans ressentir d'impact négatif. Mais à mesure que des nouvelles fonctionnalités sont ajoutées à React, celles-ci s'attendent à ce que les objets soient immuables. Donc, pour que votre code soit compatible avec une future version de React, assurez-vous d'écrire du code avec un état immuable.
+
+</div>
+
+---
+
+## Défi 1
+
+Ce formulaire a quelques bogues. Cliquez le bouton pour ajouter du pointage quelques fois. Rien ne change... Modifiez le prénom, et soudainement le pointage est corrigé. Modifiez le nom, et tout disparait.
+
+Trouvez les bogues et réparez-les...
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Scoreboard() {
+  const [joueur, setJoueur] = useState({
+    prenom: 'Ranjani',
+    nom: 'Shettar',
+    pointage: 10,
+  });
+
+  function handlePlusClick() {
+    joueur.pointage++;
+  }
+
+  function handlePrenomChange(e) {
+    setJoueur({
+      ...joueur,
+      prenom: e.target.value,
+    });
+  }
+
+  function handleNomChange(e) {
+    setJoueur({
+      nom: e.target.value,
+    });
+  }
+
+  return (
+    <>
+      <label>
+        Pointages: <b>{joueur.pointage}</b>{' '}
+        <button onClick={handlePlusClick}>+1</button>
+      </label>
+      <label>
+        Prénom:
+        <input value={joueur.prenom} onChange={handlePrenomChange} />
+      </label>
+      <label>
+        Nom:
+        <input value={joueur.nom} onChange={handleNomChange} />
+      </label>
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+input {
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 2
+
+Voci un boîte que l'on peut déplacer. On peut changer sa couleur avec le champ de saisie.
+
+Mais il y a un bogue. Si vous déplacez la boîte d'abord, et ensuite changez sa couleur, le fond va sauter à une nouvelle position. Ce n'est pas normal.
+
+Réparez le bogue.
+
+Il y a un changement innatendu via mutation.
+
+<Sandpack>
+
+```js App.js
+import { useState } from 'react';
+import Background from './Background.js';
+import Box from './Box.js';
+
+const initialPosition = {
+  x: 0,
+  y: 0,
+};
+
+export default function Canvas() {
+  const [shape, setShape] = useState({
+    color: 'orange',
+    position: initialPosition,
+  });
+
+  function handleMove(dx, dy) {
+    shape.position.x += dx;
+    shape.position.y += dy;
+  }
+
+  function handleColorChange(e) {
+    setShape({
+      ...shape,
+      color: e.target.value,
+    });
+  }
+
+  return (
+    <>
+      <select value={shape.color} onChange={handleColorChange}>
+        <option value='orange'>orange</option>
+        <option value='lightpink'>lightpink</option>
+        <option value='aliceblue'>aliceblue</option>
+      </select>
+      <Background position={initialPosition} />
+      <Box color={shape.color} position={shape.position} onMove={handleMove}>
+        Bougez moi!
+      </Box>
+    </>
+  );
+}
+```
+
+```js Box.js
+import { useState } from 'react';
+
+export default function Box({ children, color, position, onMove }) {
+  const [lastCoordinates, setLastCoordinates] = useState(null);
+
+  function handlePointerDown(e) {
+    e.target.setPointerCapture(e.pointerId);
+    setLastCoordinates({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }
+
+  function handlePointerMove(e) {
+    if (lastCoordinates) {
+      setLastCoordinates({
+        x: e.clientX,
+        y: e.clientY,
+      });
+      const dx = e.clientX - lastCoordinates.x;
+      const dy = e.clientY - lastCoordinates.y;
+      onMove(dx, dy);
+    }
+  }
+
+  function handlePointerUp(e) {
+    setLastCoordinates(null);
+  }
+
+  return (
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      style={{
+        width: 100,
+        height: 100,
+        cursor: 'grab',
+        backgroundColor: color,
+        position: 'absolute',
+        border: '1px solid black',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        transform: `translate(
+          ${position.x}px,
+          ${position.y}px
+        )`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+```js Background.js
+export default function Background({ position }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        transform: `translate(
+        ${position.x}px,
+        ${position.y}px
+      )`,
+        width: 250,
+        height: 250,
+        backgroundColor: 'rgba(200, 200, 0, 0.2)',
+      }}
+    />
+  );
+}
+```
+
+```css
+body {
+  height: 280px;
+}
+select {
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 3
+
+Voici le même exemple que dans le défi précédent. Cette fois-ci, il faut réparer la mutation via Immer. Pour vous aider, `useImmer` est déjà importé. Il ne reste qu'à changer la variable shape.
+
+<Sandpack>
+
+```js App.js
+import { useState } from 'react';
+import { useImmer } from 'use-immer';
+import Background from './Background.js';
+import Box from './Box.js';
+
+const initialPosition = {
+  x: 0,
+  y: 0,
+};
+
+export default function Canvas() {
+  const [shape, setShape] = useState({
+    color: 'orange',
+    position: initialPosition,
+  });
+
+  function handleMove(dx, dy) {
+    shape.position.x += dx;
+    shape.position.y += dy;
+  }
+
+  function handleColorChange(e) {
+    setShape({
+      ...shape,
+      color: e.target.value,
+    });
+  }
+
+  return (
+    <>
+      <select value={shape.color} onChange={handleColorChange}>
+        <option value='orange'>orange</option>
+        <option value='lightpink'>lightpink</option>
+        <option value='aliceblue'>aliceblue</option>
+      </select>
+      <Background position={initialPosition} />
+      <Box color={shape.color} position={shape.position} onMove={handleMove}>
+        Bougez moi!
+      </Box>
+    </>
+  );
+}
+```
+
+```js Box.js
+import { useState } from 'react';
+
+export default function Box({ children, color, position, onMove }) {
+  const [lastCoordinates, setLastCoordinates] = useState(null);
+
+  function handlePointerDown(e) {
+    e.target.setPointerCapture(e.pointerId);
+    setLastCoordinates({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }
+
+  function handlePointerMove(e) {
+    if (lastCoordinates) {
+      setLastCoordinates({
+        x: e.clientX,
+        y: e.clientY,
+      });
+      const dx = e.clientX - lastCoordinates.x;
+      const dy = e.clientY - lastCoordinates.y;
+      onMove(dx, dy);
+    }
+  }
+
+  function handlePointerUp(e) {
+    setLastCoordinates(null);
+  }
+
+  return (
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      style={{
+        width: 100,
+        height: 100,
+        cursor: 'grab',
+        backgroundColor: color,
+        position: 'absolute',
+        border: '1px solid black',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        transform: `translate(
+          ${position.x}px,
+          ${position.y}px
+        )`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+```js Background.js
+export default function Background({ position }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        transform: `translate(
+        ${position.x}px,
+        ${position.y}px
+      )`,
+        width: 250,
+        height: 250,
+        backgroundColor: 'rgba(200, 200, 0, 0.2)',
+      }}
+    />
+  );
+}
+```
+
+```css
+body {
+  height: 280px;
+}
+select {
+  margin-bottom: 10px;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "immer": "1.7.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "use-immer": "0.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Modifier les tableaux
+
+En JavaScript, il est permis de muter les tableaux. Mais pour l'état React, on doit les traiter de façon immuable. Comme les objets, quand on veut modifier un tableau, il faut en créer un nouveau ou le cloner.
+
+---
+
+## Modifier les tableaux sans mutation
+
+En JS, les tableaux sont un type d'objet. Et de la même façon qu'on gère les objets en React, on doit gérer les tableaux dans l'état React comme s'ils sont en lecture seule. Il faut éviter la réassignation: `arr[0] = 'non'` ainsi que les méthodes qui mutent le tableau (ex: `push()` et `pop()`).
+
+Chaque fois qu'on veut modifier le tableau, il faut passer un nouveau tableau au setState. On peut utiliser les méthodes `filter()` et `map()`. On peut écrire l'état avec le nouveau tableau.
+
+Voici une table de référence des opérations de tableau communes. Evitez les méthodes de la colonne de gauche. Préférez les méthodes de la colonne de droite.
+
+|           | Évitez (Mute le tableau)             | Adoptez (Crée nouveau tableau)             |
+| --------- | ------------------------------------ | ------------------------------------------ |
+| Ajouter   | `push`, `unshift`                    | `concat`, `[...arr]` syntaxe décomposition |
+| Enlever   | `pop`, `shift`, `splice`             | `filter`, `slice`                          |
+| Remplacer | `splice`, `arr[i] = ...` assignation | `map`                                      |
+| Trier     | `reverse`, `sort`                    | Copier le tableau avant de trier           |
+
+Alternativement, on peut utiliser Immer qui permet l'usage des deux colonnes.
+
+---
+
+## Note
+
+<div className="alert alert-warning px-5 py-4 text-body">
+
+Notez que les méthodes [`slice`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) ont [`splice`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) ont des noms similaires, mais se comportent de façons différentes.
+
+- `slice` permet de copier un tableau, en partie ou totalité.
+- `splice` **mute** un tableau (en insérant ou enlevant des items).
+
+En React, on recommande d'utiliser `slice` (sans `p`!) pour éviter la mutation.
+
+</div>
+
+---
+
+## Ajouter à un tableau avec push
+
+`push()` mute un tableau en ajoutant un item. (À éviter)
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 0;
+
+export default function List() {
+  const [name, setName] = useState('');
+  const [artists, setArtists] = useState([]);
+
+  return (
+    <>
+      <h1>Sculpteurs:</h1>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button
+        onClick={() => {
+          setName('');
+          artists.push({
+            id: nextId++,
+            name: name,
+          });
+        }}
+      >
+        Add
+      </button>
+      <ul>
+        {artists.map((artist) => (
+          <li key={artist.id}>{artist.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Ajouter à un tableau avec décomposition
+
+Préférez plutôt la création d'un _nouveau_ tableau contenant les items existants et un nouvel item à la fin. Il y a plusieurs approches possibles, mais le plus simple est d'utiliser la syntaxe de décomposition de tableau: `...`
+
+```js
+setArtists(
+  // Remplacer l'état
+  [
+    // avec un nouveau tableau
+    ...artists, // contenant les anciens items
+    { id: nextId++, name: name }, // et un item additionnel à la fin.
+  ]
+);
+```
+
+---
+
+## Exemple de tableau avec décomposition
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 0;
+
+export default function List() {
+  const [name, setName] = useState('');
+  const [artists, setArtists] = useState([]);
+
+  return (
+    <>
+      <h1>Sculpteurs:</h1>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button
+        onClick={() => {
+          setName('');
+          setArtists([...artists, { id: nextId++, name: name }]);
+        }}
+      >
+        Ajouter
+      </button>
+      <ul>
+        {artists.map((artist) => (
+          <li key={artist.id}>{artist.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+La décomposition permet d'ajouter à la fin (comme `push()`) ou au début (comme `unshift()`).
+
+```js
+setArtists([
+  { id: nextId++, name: name }, //  ici, on insère au début du tableau
+  ...artists, //            on ajoute le contenu existant par la suite
+]);
+```
+
+---
+
+## Enlever à un Tableau
+
+Pour enlever un item, il suffit de le _filtrer_ avec `filter`.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let initialArtists = [
+  { id: 0, name: 'Marta Colvin Andrade' },
+  { id: 1, name: 'Lamidi Olonade Fakeye' },
+  { id: 2, name: 'Louise Nevelson' },
+];
+
+export default function List() {
+  const [artists, setArtists] = useState(initialArtists);
+
+  return (
+    <>
+      <h1>Sculpteurs:</h1>
+      <ul>
+        {artists.map((artist) => (
+          <li key={artist.id}>
+            {artist.name}{' '}
+            <button
+              onClick={() => {
+                setArtists(artists.filter((a) => a.id !== artist.id));
+              }}
+            >
+              Enlever
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+```js
+setArtists(artists.filter((a) => a.id !== artist.id));
+```
+
+Le `filter` crée un nouveau tableau d'`artists` conservant les ID qui sont différents de `artist.id`. Chaque clic du bouton "enlever" va créer un nouveau tableau filtré, et provoquer un re-rendu. Notez que `filter` ne modifie pas le tableau original.
+
+---
+
+## Transformer un tableau avec `map`
+
+Si vous désirez modifier certains ou tous les items d'un tableau, utilisez `map()` pour créer un nouveau tableau. La fonction passée à `map` détermine quoi faire avec chaque item, basé sur son contenu ou son index (ou les deux).
+
+Dans cet exemple, un tableau détient les coordonnées de deux cercles et un carré. Quand on clique le bouton, on déplace les cercles de 50 pixels vers le bas. `map()` va créer ce nouveau tableau.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let initialShapes = [
+  { id: 0, type: 'circle', x: 50, y: 100 },
+  { id: 1, type: 'square', x: 150, y: 100 },
+  { id: 2, type: 'circle', x: 250, y: 100 },
+];
+
+export default function ShapeEditor() {
+  const [shapes, setShapes] = useState(initialShapes);
+
+  function handleClick() {
+    const nextShapes = shapes.map((shape) => {
+      if (shape.type === 'square') {
+        // Pas de changement
+        return shape;
+      } else {
+        // Retourne un cercle 50 pixels plus bas
+        return {
+          ...shape,
+          y: shape.y + 50,
+        };
+      }
+    });
+    // Provoque un re-rendu avec le nouveau tableau
+    setShapes(nextShapes);
+  }
+
+  return (
+    <>
+      <button onClick={handleClick}>Déplacez les cercles!</button>
+      {shapes.map((shape) => (
+        <div
+          key={shape.id}
+          style={{
+            background: 'purple',
+            position: 'absolute',
+            left: shape.x,
+            top: shape.y,
+            borderRadius: shape.type === 'circle' ? '50%' : '',
+            width: 20,
+            height: 20,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+```
+
+```css
+body {
+  height: 300px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Remplacer les items d'un tableau
+
+Il est fréquent de vouloir remplacer un ou plusieurs items d'un tableau.
+
+Les asignations du genre `arr[0] = 'non'` mutent l'objet. On préfère utiliser `map`.
+
+Pour remplacer un item, créez un nouveau tableau avec `map`. Dans votre appel `map`, vous recevez l'index de l'item comme second argument. On peut utiliser cette position pour décider si on retourne l'item original, ou autre chose.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let initialCounters = [0, 0, 0];
+
+export default function CounterList() {
+  const [counters, setCounters] = useState(initialCounters);
+
+  function handleIncrementClick(index) {
+    const nextCounters = counters.map((c, i) => {
+      if (i === index) {
+        // Incrémentez le compteur cliqué
+        return c + 1;
+      } else {
+        // Le reste demeure la même chose
+        return c;
+      }
+    });
+    setCounters(nextCounters);
+  }
+
+  return (
+    <ul>
+      {counters.map((counter, i) => (
+        <li key={i}>
+          {counter}
+          <button
+            onClick={() => {
+              handleIncrementClick(i);
+            }}
+          >
+            +1
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Insérer au milieu d'un tableau
+
+Parfois, on veut insérer un item dans une position spécifique, qui n'est ni au début, ni à la fin.
+Pour cela, on peut utiliser la méthode `slice()` avec la syntaxe de décomposition de tableau `...`.
+`slice()` permet d'obtenir une "portion" du tableau.
+Pour insérer un item, il faut créer un tableau qui décompose la portion avant le point d'insértion,
+par la suite ajouter le nouvel item, et ensuite décomposer le reste du tableau.
+
+Dans cet exemple, le bouton "Insérer" va toujours insérer à l'index 1.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 3;
+const initialArtists = [
+  { id: 0, name: 'Marta Colvin Andrade' },
+  { id: 1, name: 'Lamidi Olonade Fakeye' },
+  { id: 2, name: 'Louise Nevelson' },
+];
+
+export default function List() {
+  const [name, setName] = useState('');
+  const [artists, setArtists] = useState(initialArtists);
+
+  function handleClick() {
+    const insertAt = 1; // Pourrait être n'importe quel index
+    const nextArtists = [
+      // Items avant le point d'insertion:
+      ...artists.slice(0, insertAt),
+      // Nouvel item
+      { id: nextId++, name: name },
+      // Items après le point d'insertion:
+      ...artists.slice(insertAt),
+    ];
+    setArtists(nextArtists);
+    setName('');
+  }
+
+  return (
+    <>
+      <h1>Sculpteurs:</h1>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button onClick={handleClick}>Insérer</button>
+      <ul>
+        {artists.map((artist) => (
+          <li key={artist.id}>{artist.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Faire des changements avancés
+
+On pourrait vouloir renverser un tableau, ou le trier. Mais les méthodes `reverse()` et `sort()` mutent le tableau orginal. Que faire?
+
+**Faites une copie du tableau d'abord, et faites des changements mutatifs ensuite**
+
+Par exemple:
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 3;
+const initialList = [
+  { id: 0, title: 'Big Bellies' },
+  { id: 1, title: 'Lunar Landscape' },
+  { id: 2, title: 'Terracotta Army' },
+];
+
+export default function List() {
+  const [list, setList] = useState(initialList);
+
+  function handleClick() {
+    const nextList = [...list];
+    nextList.reverse();
+    setList(nextList);
+  }
+
+  return (
+    <>
+      <button onClick={handleClick}>Inverser</button>
+      <ul>
+        {list.map((artwork) => (
+          <li key={artwork.id}>{artwork.title}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Changements avancés
+
+On utilise la syntaxe de décomposition `[...list]` pour créer une copie du tableau original. Il est maintenant possible d'utiliser `nextList.reverse()` ou `nextList.sort()`, ou même asigner des items directement `nextList[0] = "something"`.
+
+Par contre, même si on copie un tableau, on ne peut muter les items du tableau. La copie est superficielle (shallow), et ce nouveau tableau contient les mêmes items que l'original. Si on modifie un objet dans le tableau copié, on mute l'état. Le code suivant est donc problématique:
+
+```js
+const nextList = [...list];
+nextList[0].seen = true; // Problème: mute list[0]
+setList(nextList);
+```
+
+Même si `nextList` et `list` sont deux tableaux distincts, **`nextList[0]` et `list[0]` pointent vers le même objet** En modifiant `nextList[0].seen`, on modifie aussi `list[0].seen`. C'est donc une mutation d'état, qu'il est préférable d'éviter. On résout ce problème de la même façon qu'avec les objets JS imbriqués -- En copiant des items individuels qu'on désire changer plutôt que de muter. Voici comment:
+
+---
+
+## Modifier des objets dans des tableaux
+
+Les objets ne sont pas réellement dans les tableaux. Même si on dirait qu'ils sont imbriqués, chaque objet est une valeur séparée, vers lequel le tableau pointe. On doit être prudent lorsqu'on change des champs imbriqués tel que `list[0]`, car on pourrait changer un item qui est référé par un autre tableau.
+
+**Lorsqu'on met à jour des états imbriqués, il faut créer des copies des objets à modifier, jusqu'au top niveau.**
+
+Dans cet exemple, deux listes d'oeuvres d'art partagent le même état initial. Ils devraient être isolés, mais à cause d'une valeur mutée, leur état est accidentellement partagé, et cocher la boite d'une liste affecte l'autre liste.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 3;
+const initialList = [
+  { id: 0, title: 'Big Bellies', seen: false },
+  { id: 1, title: 'Lunar Landscape', seen: false },
+  { id: 2, title: 'Terracotta Army', seen: true },
+];
+
+export default function BucketList() {
+  const [myList, setMyList] = useState(initialList);
+  const [yourList, setYourList] = useState(initialList);
+
+  function handleToggleMyList(artworkId, nextSeen) {
+    const myNextList = [...myList];
+    const artwork = myNextList.find((a) => a.id === artworkId);
+    artwork.seen = nextSeen;
+    setMyList(myNextList);
+  }
+
+  function handleToggleYourList(artworkId, nextSeen) {
+    const yourNextList = [...yourList];
+    const artwork = yourNextList.find((a) => a.id === artworkId);
+    artwork.seen = nextSeen;
+    setYourList(yourNextList);
+  }
+
+  return (
+    <>
+      <h1>Oeuvres d'art</h1>
+      <h2>Ma liste d'art:</h2>
+      <ItemList artworks={myList} onToggle={handleToggleMyList} />
+      <h2>Ta liste d'art:</h2>
+      <ItemList artworks={yourList} onToggle={handleToggleYourList} />
+    </>
+  );
+}
+
+function ItemList({ artworks, onToggle }) {
+  return (
+    <ul>
+      {artworks.map((artwork) => (
+        <li key={artwork.id}>
+          <label>
+            <input
+              type='checkbox'
+              checked={artwork.seen}
+              onChange={(e) => {
+                onToggle(artwork.id, e.target.checked);
+              }}
+            />
+            {artwork.title}
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## le problème
+
+Le problème est ici:
+
+```js
+const myNextList = [...myList];
+const artwork = myNextList.find((a) => a.id === artworkId);
+artwork.seen = nextSeen; // Problème: on mute un item existant
+setMyList(myNextList);
+```
+
+Même si le tableau `myNextList` est nouveau, les _items_ sont les mêmes que dans le tableau original `myList`. Changer `artwork.seen` change donc l'item _original_. Cet item se trouve aussi dans `yourArtworks`, causant le bogue. Ces bogue sont difficiles à cerner, mais disparaissent dès qu'on arrête de muter.
+
+**On peut utiliser map pour substituer un vieil item avec sa nouvelle version sans mutation**
+
+```js
+setMyList(myList.map(artwork => {
+  if (artwork.id === artworkId) {
+    // Créer un nouvel item avec changements
+    return { ...artwork, seen: nextSeen };
+  } else {
+    // Pas de changements
+    return artwork;
+  }
+});
+```
+
+---
+
+## Décomposer les items des tableaux
+
+Ici, `...` est la syntaxe de décomposition pour créer la copie d'un objet.
+
+Avec cette approche, aucun des items d'état n'est muté, et le bogue est réglé.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+let nextId = 3;
+const initialList = [
+  { id: 0, title: 'Big Bellies', seen: false },
+  { id: 1, title: 'Lunar Landscape', seen: false },
+  { id: 2, title: 'Terracotta Army', seen: true },
+];
+
+export default function BucketList() {
+  const [myList, setMyList] = useState(initialList);
+  const [yourList, setYourList] = useState(initialList);
+
+  function handleToggleMyList(artworkId, nextSeen) {
+    setMyList(
+      myList.map((artwork) => {
+        if (artwork.id === artworkId) {
+          // Créé un *nouvel* objet avec changements
+          return { ...artwork, seen: nextSeen };
+        } else {
+          // Pas de changements.
+          return artwork;
+        }
+      })
+    );
+  }
+
+  function handleToggleYourList(artworkId, nextSeen) {
+    setYourList(
+      yourList.map((artwork) => {
+        if (artwork.id === artworkId) {
+          // Créé un *nouvel* objet avec changements
+          return { ...artwork, seen: nextSeen };
+        } else {
+          // Pas de changements.
+          return artwork;
+        }
+      })
+    );
+  }
+
+  return (
+    <>
+      <h1>Liste des oeuvres d'art</h1>
+      <h2>Ma liste:</h2>
+      <ItemList artworks={myList} onToggle={handleToggleMyList} />
+      <h2>Ta liste:</h2>
+      <ItemList artworks={yourList} onToggle={handleToggleYourList} />
+    </>
+  );
+}
+
+function ItemList({ artworks, onToggle }) {
+  return (
+    <ul>
+      {artworks.map((artwork) => (
+        <li key={artwork.id}>
+          <label>
+            <input
+              type='checkbox'
+              checked={artwork.seen}
+              onChange={(e) => {
+                onToggle(artwork.id, e.target.checked);
+              }}
+            />
+            {artwork.title}
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</Sandpack>
+
+En général, **le seul objet d'état que l'on peut muter, c'est celui qui vient tout juste d'être créé.** Si vous devez insérer une nouvelle oeuvre d'art, c'est correct de la muter. Si on gère quelque chose provenant de l'état, il faut faire une copie.
+
+---
+
+## Écrivez une logique concise avec Immer.
+
+Modifier des tableaux imbriqués sans mutation est répétitif et complexe. Utilisez les mêmes stratégies qu'avec les objets:
+
+- En général, on ne devrait pas modifier les données profondément imbriquées. Si c'est le cas, tentez de réécrire la structure pour avoir une structure moins profonde ou plate
+
+- Si on ne désire pas restructurer, on pourrait utiliser [Immer](https://github.com/immerjs/use-immer). On peut alors écrire une syntaxe de mutation, mais qui est converti en copies.
+
+Voici le même exemple réécrit en Immer
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+import { useImmer } from 'use-immer';
+
+let nextId = 3;
+const initialList = [
+  { id: 0, title: 'Big Bellies', seen: false },
+  { id: 1, title: 'Lunar Landscape', seen: false },
+  { id: 2, title: 'Terracotta Army', seen: true },
+];
+
+export default function BucketList() {
+  const [myList, updateMyList] = useImmer(initialList);
+  const [yourArtworks, updateYourList] = useImmer(initialList);
+
+  function handleToggleMyList(id, nextSeen) {
+    updateMyList((draft) => {
+      const artwork = draft.find((a) => a.id === id);
+      artwork.seen = nextSeen;
+    });
+  }
+
+  function handleToggleYourList(artworkId, nextSeen) {
+    updateYourList((draft) => {
+      const artwork = draft.find((a) => a.id === artworkId);
+      artwork.seen = nextSeen;
+    });
+  }
+
+  return (
+    <>
+      <h1>Liste d'oeuvres d'art</h1>
+      <h2>Ma liste:</h2>
+      <ItemList artworks={myList} onToggle={handleToggleMyList} />
+      <h2>Ta liste:</h2>
+      <ItemList artworks={yourArtworks} onToggle={handleToggleYourList} />
+    </>
+  );
+}
+
+function ItemList({ artworks, onToggle }) {
+  return (
+    <ul>
+      {artworks.map((artwork) => (
+        <li key={artwork.id}>
+          <label>
+            <input
+              type='checkbox'
+              checked={artwork.seen}
+              onChange={(e) => {
+                onToggle(artwork.id, e.target.checked);
+              }}
+            />
+            {artwork.title}
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "immer": "1.7.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "use-immer": "0.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## oui
+
+Avec Immer, **les mutations comme `artwork.seen = nextSeen` sont permises:**
+
+```js
+updateMyTodos((draft) => {
+  const artwork = draft.find((a) => a.id === artworkId);
+  artwork.seen = nextSeen;
+});
+```
+
+C'est correct ici car on ne mute pas l'état original. On mute un objet spécial `draft`, fourni par Immer. On pourait aussi utiliser `push()` and `pop()` pour modifier `draft`.
+
+Dans les coulisses, Immer construit le prochain objet d'état à partir des mutations de `draft`. Ceci permet d'avoir des gestionnaires d'événemnts plus simples et courts.
+
+---
+
+## Défi 5
+
+Écrivez la logique de `handleIncreaseClick`. Quand on clique "+", cela incrémente le nombre
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+const initialProducts = [
+  {
+    id: 0,
+    name: 'Baklava',
+    count: 1,
+  },
+  {
+    id: 1,
+    name: 'Sandwich',
+    count: 5,
+  },
+  {
+    id: 2,
+    name: 'Spaghetti',
+    count: 2,
+  },
+];
+
+export default function ShoppingCart() {
+  const [products, setProducts] = useState(initialProducts);
+
+  function handleIncreaseClick(productId) {}
+
+  return (
+    <ul>
+      {products.map((product) => (
+        <li key={product.id}>
+          {product.name} (<b>{product.count}</b>)
+          <button
+            onClick={() => {
+              handleIncreaseClick(product.id);
+            }}
+          >
+            +
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 6
+
+Le bouton "-" ne fait rien. Il faut ajouter un gestionnaire d'événements qui décrémente le `count`du produit. Quand on pèse "-" et que le compte est 1, il faut enlever le produit du panier d'achat. (On ne doit pas afficher 0)
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+const initialProducts = [
+  {
+    id: 0,
+    name: 'Baklava',
+    count: 1,
+  },
+  {
+    id: 1,
+    name: 'Sandwich',
+    count: 5,
+  },
+  {
+    id: 2,
+    name: 'Spaghetti',
+    count: 2,
+  },
+];
+
+export default function ShoppingCart() {
+  const [products, setProducts] = useState(initialProducts);
+
+  function handleIncreaseClick(productId) {
+    setProducts(
+      products.map((product) => {
+        if (product.id === productId) {
+          return {
+            ...product,
+            count: product.count + 1,
+          };
+        } else {
+          return product;
+        }
+      })
+    );
+  }
+
+  return (
+    <ul>
+      {products.map((product) => (
+        <li key={product.id}>
+          {product.name} (<b>{product.count}</b>)
+          <button
+            onClick={() => {
+              handleIncreaseClick(product.id);
+            }}
+          >
+            +
+          </button>
+          <button>–</button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 7
+
+Tous les gestionnaires d'événements de `App.js` utilisent la mutation. L'édition et la supression des todos ne fonctionnent pas. Il faut réécrire `handleAddTodo`, `handleChangeTodo` et `handleDeleteTodo` pour ne plus muter.
+
+<Sandpack>
+
+```js App.js
+import { useState } from 'react';
+import AddTodo from './AddTodo.js';
+import TaskList from './TaskList.js';
+
+let nextId = 3;
+const initialTodos = [
+  { id: 0, title: 'Acheter lait', done: true },
+  { id: 1, title: 'Manger collation', done: false },
+  { id: 2, title: 'Préparer du thé', done: false },
+];
+
+export default function TaskApp() {
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAddTodo(title) {
+    todos.push({
+      id: nextId++,
+      title: title,
+      done: false,
+    });
+  }
+
+  function handleChangeTodo(nextTodo) {
+    const todo = todos.find((t) => t.id === nextTodo.id);
+    todo.title = nextTodo.title;
+    todo.done = nextTodo.done;
+  }
+
+  function handleDeleteTodo(todoId) {
+    const index = todos.findIndex((t) => t.id === todoId);
+    todos.splice(index, 1);
+  }
+
+  return (
+    <>
+      <AddTodo onAddTodo={handleAddTodo} />
+      <TaskList
+        todos={todos}
+        onChangeTodo={handleChangeTodo}
+        onDeleteTodo={handleDeleteTodo}
+      />
+    </>
+  );
+}
+```
+
+```js AddTodo.js
+import { useState } from 'react';
+
+export default function AddTodo({ onAddTodo }) {
+  const [title, setTitle] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Ajouter Todo'
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setTitle('');
+          onAddTodo(title);
+        }}
+      >
+        Ajouter
+      </button>
+    </>
+  );
+}
+```
+
+```js TaskList.js
+import { useState } from 'react';
+
+export default function TaskList({ todos, onChangeTodo, onDeleteTodo }) {
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <li key={todo.id}>
+          <Task todo={todo} onChange={onChangeTodo} onDelete={onDeleteTodo} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ todo, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let todoContent;
+  if (isEditing) {
+    todoContent = (
+      <>
+        <input
+          value={todo.title}
+          onChange={(e) => {
+            onChange({
+              ...todo,
+              title: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Confirmer</button>
+      </>
+    );
+  } else {
+    todoContent = (
+      <>
+        {todo.title}
+        <button onClick={() => setIsEditing(true)}>Modifier</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={todo.done}
+        onChange={(e) => {
+          onChange({
+            ...todo,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {todoContent}
+      <button onClick={() => onDelete(todo.id)}>Suprimer</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi 8
+
+Même exemple que précédemment. Cette fois-ci, on répare les mutations en utilisant Immer. `useImmer` est déjà importé.
+
+<Sandpack>
+
+```js App.js
+import { useState } from 'react';
+import { useImmer } from 'use-immer';
+import AddTodo from './AddTodo.js';
+import TaskList from './TaskList.js';
+
+let nextId = 3;
+const initialTodos = [
+  { id: 0, title: 'Acheter lait', done: true },
+  { id: 1, title: 'Manger collation', done: false },
+  { id: 2, title: 'Préparer du thé', done: false },
+];
+
+export default function TaskApp() {
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAddTodo(title) {
+    todos.push({
+      id: nextId++,
+      title: title,
+      done: false,
+    });
+  }
+
+  function handleChangeTodo(nextTodo) {
+    const todo = todos.find((t) => t.id === nextTodo.id);
+    todo.title = nextTodo.title;
+    todo.done = nextTodo.done;
+  }
+
+  function handleDeleteTodo(todoId) {
+    const index = todos.findIndex((t) => t.id === todoId);
+    todos.splice(index, 1);
+  }
+
+  return (
+    <>
+      <AddTodo onAddTodo={handleAddTodo} />
+      <TaskList
+        todos={todos}
+        onChangeTodo={handleChangeTodo}
+        onDeleteTodo={handleDeleteTodo}
+      />
+    </>
+  );
+}
+```
+
+```js AddTodo.js
+import { useState } from 'react';
+
+export default function AddTodo({ onAddTodo }) {
+  const [title, setTitle] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Ajouter Todo'
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setTitle('');
+          onAddTodo(title);
+        }}
+      >
+        Ajouter
+      </button>
+    </>
+  );
+}
+```
+
+```js TaskList.js
+import { useState } from 'react';
+
+export default function TaskList({ todos, onChangeTodo, onDeleteTodo }) {
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <li key={todo.id}>
+          <Task todo={todo} onChange={onChangeTodo} onDelete={onDeleteTodo} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ todo, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let todoContent;
+  if (isEditing) {
+    todoContent = (
+      <>
+        <input
+          value={todo.title}
+          onChange={(e) => {
+            onChange({
+              ...todo,
+              title: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Confirmer</button>
+      </>
+    );
+  } else {
+    todoContent = (
+      <>
+        {todo.title}
+        <button onClick={() => setIsEditing(true)}>Modifier</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={todo.done}
+        onChange={(e) => {
+          onChange({
+            ...todo,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {todoContent}
+      <button onClick={() => onDelete(todo.id)}>Supprimer</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "immer": "1.7.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "use-immer": "0.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Devoir 4
+
+Générer des composants React qui devrait avoir ces caractéristiques:
+
+Un composant parent nommé "Compteur" qui gère un état nommé "compte". Ce composant aura aussi quelques gestionnaires d'états.
+
+Ce composant génère des composants enfants.
+
+- Un "Titre" qui affiche le contenu du compteur dans un `<h1>`.
+- Des "Bouton" qui permetent d'incrémenter le contenu du compteur. On affiche 3 de ces boutons:
+  - Un "Bouton" qui permet d'incrémenter le contenu par 1.
+  - Un "Bouton" qui permet d'incrémenter le contenu par 10.
+  - Un "Bouton" qui permet d'incrémenter le contenu par 100.
+
+On veut le bouton affiché 3 fois, avec des props correctement configurés.
+
+---
+
+## Devoir (extras)
+
+**Extra 1:** Modifier le code du bouton permettre d'ajouter un bouton qui décrémente le contenu de 10. (C'est-à-dire qui incrémente de -10) Gérer le formattage pour que ce bouton affiche d'une couleur différente quand on décrémente, et qui utilie le vocabulaire "incrémente/décrémente" correctement.
+
+**Extra 2:** Ajouter un composant nommé "Boite", qui affiche un `<input>` avec le nombre. Il faudra gérer correctment le gestionnaire d'événement `onChange` pour lire le contenu du input (e.target.value). Il faudra convertir ce contenu vers un nombre pour modifier correctement l'état. (indice: utiliser parseInt ou (+) unaire.)
+
+Bonne chance!
+
+---
+
+```
+
+```
+
+```
+
+```
