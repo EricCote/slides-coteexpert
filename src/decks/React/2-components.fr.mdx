@@ -1838,6 +1838,8 @@ export default function TeaSet() {
 
 </Sandpack>
 
+---
+
 ### Éliminer les effets de bord
 
 Pour réparer, on pourrait utiliser des props:
@@ -1861,6 +1863,8 @@ export default function TeaSet() {
 ```
 
 </Sandpack>
+
+---
 
 ## Mode Strict
 
@@ -2084,17 +2088,17 @@ Sur votre composant d'horloge, on demande d'afficher les derniers "témoignages"
 
 <Sandpack>
 
-```js RangéeTémoignage.js active
-export default function RangéeTémoignage({ témoignage }) {
-  témoignage.push({
+```js RangeeTemoignage.js active
+export default function RangeeTemoignage({ temoignages }) {
+  temoignages.push({
     id: 'create',
     label: 'Ajouter témoignage',
   });
 
   return (
     <ul>
-      {témoignages.map((témoignage) => (
-        <li key={témoignage.id}>{témoignage.label}</li>
+      {temoignages.map((temoignage) => (
+        <li key={temoignage.id}>{temoignage.label}</li>
       ))}
     </ul>
   );
@@ -2103,7 +2107,7 @@ export default function RangéeTémoignage({ témoignage }) {
 
 ```js App.js hidden
 import { useState, useEffect } from 'react';
-import RangéeTémoignage from './RangéeTémoignage.js';
+import RangeeTemoignage from './RangeeTemoignage.js';
 
 let témoignageInitiaux = [
   { id: 0, label: 'Témoignage de Sophie' },
@@ -2111,13 +2115,13 @@ let témoignageInitiaux = [
 ];
 
 export default function App() {
-  let [témoignages, setTémoignages] = useState([...témoignageInitiaux]);
+  let [temoignages, setTemoignages] = useState([...temoignagesInitiaux]);
   let time = useTime();
 
   // HACK: Prevent the memory from growing forever while you read docs.
   // We're breaking our own rules here.
-  if (témoignages.length > 100) {
-    témoignages.length = 100;
+  if (temoignages.length > 100) {
+    temoignages.length = 100;
   }
 
   return (
@@ -2129,7 +2133,7 @@ export default function App() {
       }}
     >
       <h2>Il est maintenant {time.toLocaleTimeString()}.</h2>
-      <RangéeTémoignages témoignages={témoignages} />
+      <RangeeTemoignages témoignages={temoignages} />
     </div>
   );
 }
