@@ -66,17 +66,15 @@ Le code d'un composant est soit:
 
 Que faire s'il y a un effet de bord, mais qu'il n'y a pas d'événement spécifique associé?
 
-Un _Effect_ permet de générer des effets de bord causé par le rendu, plutôt qu'un événement particulier.
+- Un _Effect_ permet de coder des effets de bord suite à un rendu.
+- Un _Effect_ roule suite à la phase "commit", suite à l'affichage des modifications du DOM.
 
-Ces _Effects_ roulent suite à la phase "commit", suite à l'affichage des modifications du DOM.
+**On n'a pas toujours besoin d'un _Effect_**
+
+- C'est utile pour se synchroniser avec un système externe.
+- Mais c'est trop si c'est pour modifier le state en fonction d'un autre state.
 
 **Note:** On utilisera _Effect_ pour parler de la fonctionalité offerte par `useEffect`.
-
----
-
-## Pas besoin d'Effects
-
-**On n'a pas toujours besoin d'un _Effect_ ** C'est utile pour se synchroniser avec un système externe. Mais c'est trop si c'est pour modifier le state en fonction d'un autre state.
 
 ---
 
@@ -84,7 +82,7 @@ Ces _Effects_ roulent suite à la phase "commit", suite à l'affichage des modif
 
 1. **Déclarer un Effect** Par défaut, un _Effect_ exécute après chaque rendu
 2. **Spécifier les dépendances** Les _Effects_ ne devraient ré-exécuter qu'au besoin, plutôt qu'après chaque rendu
-3. **Ajouter une fonction de cleanup, au besoin** Certains _Effects_ doivent indiquer comment arrêter ce qu'ils font. Ex: `connect` et `disconnect`, `subscribe`et `unsubscribe`, `fetch` et `cancel`
+3. **Ajouter une fonction de cleanup, au besoin** Certains _Effects_ doivent indiquer comment arrêter ce qu'ils font. Ex: `connect` et `disconnect`, `subscribe` et `unsubscribe`, `fetch` et `cancel`
 
 Regardons ces étapes en détail.
 
@@ -113,15 +111,15 @@ Après chaque rendu, React met d'abord l'écran à jour, et ensuite exécute le 
 
 ---
 
-## Exemple
+## Exemple VideoPlayer
 
-Imaginons le composant `<VideoPlayer>`, et la prop `isPlaying`, pour démarrer ou arrêter la vidéo.
+Imaginons le composant `<VideoPlayer>`, et une prop `isPlaying`, pour démarrer ou arrêter la vidéo:
 
 ```js
 <VideoPlayer isPlaying={isPlaying} />
 ```
 
-`VideoPlayer` génère la balise `<video>` au rendu
+`VideoPlayer` génère la balise `<video>` au rendu :
 
 ```js
 function VideoPlayer({ src, isPlaying }) {
@@ -130,15 +128,14 @@ function VideoPlayer({ src, isPlaying }) {
 }
 ```
 
-La balise `<video>` n'a pas de prop `isPlaying`. Par contre, on a les méthodes `play()` et `pause()`.
-
-Il faut donc synchroniser `isPlaying` avec les appels `play()` et `pause()`
-
-Il faut un `ref` au communiquer avec `<video>` dans le DOM
+- La balise n'a pas de prop `isPlaying`.
+- Par contre, `<video>` possède des méthodes `play()` et `pause()`.
+- Il faut donc synchroniser `isPlaying` avec les appels `play()` et `pause()`
+- Un `ref` permet de référer la balise `<video>` dans le DOM
 
 ---
 
-## Exemple
+## Ne pas référer au DOM pendant le render
 
 On serait tenté d'appeler `play()` ou `pause()` pendant le render, mais ça ne fonctionne pas:
 
@@ -151,9 +148,9 @@ function VideoPlayer({ src, isPlaying }) {
   const ref = useRef(null);
 
   if (isPlaying) {
-    ref.current.play(); // Calling these while rendering isn't allowed.
+    ref.current.play(); // plante dans le rendu
   } else {
-    ref.current.pause(); // Also, this crashes.
+    ref.current.pause(); // plante dans le rendu
   }
 
   return <video ref={ref} src={src} loop playsInline />;
@@ -187,7 +184,13 @@ video {
 
 </Sandpack>
 
-The reason this code isn't correct is that it tries to do something with the DOM node during rendering. In React, [rendering should be a pure calculation](/learn/keeping-components-pure) of JSX and should not contain side effects like modifying the DOM.
+---
+
+## Explications
+
+- Il ne faut pas référer au DOM pendant le rendu.
+- Un composant React devrait être pur, sans effets de bords
+- Surtout pas modifier le DOM
 
 Moreover, when `VideoPlayer` is called for the first time, its DOM does not exist yet! There isn't a DOM node yet to call `play()` or `pause()` on, because React doesn't know what DOM to create until you return the JSX.
 
