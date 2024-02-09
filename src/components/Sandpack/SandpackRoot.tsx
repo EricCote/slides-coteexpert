@@ -14,7 +14,7 @@ import {
 //import { CustomPreset } from './CustomPreset';
 import { createFileMap, StylesCSSPath } from './createFileMap';
 //import { CustomTheme } from './Themes';
-import { useSandpackLint } from './useSandpackLint';
+//import { useSandpackLint } from './useSandpackLint';
 import { template } from './template';
 
 type SandpackProps = {
@@ -85,13 +85,13 @@ function SandpackRoot(props: SandpackProps) {
     ...rest
   } = props;
   myOptions = myOptions ?? {};
-  const { lintErrors, lintExtensions } = useSandpackLint();
+  //const { lintErrors, lintExtensions } = useSandpackLint();
 
   if (s) {
     myOptions = { editorWidthPercentage: s, ...myOptions };
   }
   myOptions! = {
-    codeEditor: { extensions: [lintExtensions] },
+    // codeEditor: { extensions: [lintExtensions] },
     editorHeight: '500px',
     showConsoleButton: true,
     ...myOptions,

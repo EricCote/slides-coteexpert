@@ -187,3 +187,7 @@ tr:hover {
 [data-bs-theme='dark'] code {
   color: lightgreen;
 }
+
+[title='Open in CodeSandbox'] > span {
+  display: none;
+}

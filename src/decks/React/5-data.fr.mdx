@@ -393,7 +393,7 @@ useEffect(() => {
 
 ## Effect exécute une seule fois
 
-La console indique que `React Hook useEffect has a missing dependency: 'isPlaying'`:
+esLint indique que `React Hook useEffect has a missing dependency: 'isPlaying'`:
 
 <Sandpack>
 
@@ -447,20 +447,28 @@ video {
 
 </Sandpack>
 
-The problem is that the code inside of your Effect _depends on_ the `isPlaying` prop to decide what to do, but this dependency was not explicitly declared. To fix this issue, add `isPlaying` to the dependency array:
+---
+
+## Tableau de dépendances
+
+Le code Effect dépend de la prop `isPlaying`, mais cette dépendance n'est pas déclarée explicitement. Il faut donc ajouter `isPlaying` au tableau de dépendances.
 
 ```js {2,7}
 useEffect(() => {
   if (isPlaying) {
-    // It's used here...
+    // c'est utilisé ici
     // ...
   } else {
     // ...
   }
-}, [isPlaying]); // ...so it must be declared here!
+}, [isPlaying]); // ...il faut le déclarer ici!
 ```
 
-Now all dependencies are declared, so there is no error. Specifying `[isPlaying]` as the dependency array tells React that it should skip re-running your Effect if `isPlaying` is the same as it was during the previous render. With this change, typing into the input doesn't cause the Effect to re-run, but pressing Play/Pause does:
+React sait maintenant qu'il doit sauter l'Effect quand `isPlaying` conserve la même valeur que le rendu précédent. Maintenant, taper des lettres ne ré-exécute plus l'Effect, alors que "Play/Pause" ré-exécute l'Effect.
+
+---
+
+## Exemple réparé
 
 <Sandpack>
 
@@ -513,6 +521,10 @@ video {
 ```
 
 </Sandpack>
+
+---
+
+## Explications
 
 The dependency array can contain multiple dependencies. React will only skip re-running the Effect if _all_ of the dependencies you specify have exactly the same values as they had during the previous render. React compares the dependency values using the [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is) comparison. See the [`useEffect` reference](/reference/react/useEffect#reference) for details.
 
