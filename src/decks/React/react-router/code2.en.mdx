@@ -2,7 +2,7 @@
 
 <Sandpack options={{ showNavigator: true }} >
 
-```jsx App.js active
+```jsx src/App.js active
 import Menu from './Menu';
 import Route, { AllRoutes } from './Route';
 
@@ -25,7 +25,7 @@ export default function App() {
 }
 ```
 
-```jsx Route.jsx
+```jsx src/Route.jsx
 import Home from './Home';
 import News from './News';
 import Contact from './Contact';
@@ -64,7 +64,7 @@ export function AllRoutes() {
 }
 ```
 
-```jsx Menu.jsx
+```jsx src/Menu.jsx
 export default function Menu() {
   return (
     <ul className='menu'>
@@ -102,7 +102,7 @@ const menuList = [
 ];
 ```
 
-```jsx Home.jsx
+```jsx src/Home.jsx
 export default function Home() {
   return (
     <>
@@ -113,7 +113,7 @@ export default function Home() {
 }
 ```
 
-```jsx News.jsx
+```jsx src/News.jsx
 export default function News() {
   return (
     <>
@@ -124,7 +124,7 @@ export default function News() {
 }
 ```
 
-```jsx Contact.jsx
+```jsx src/Contact.jsx
 export default function Contact() {
   return (
     <>

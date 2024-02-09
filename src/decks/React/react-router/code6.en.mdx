@@ -2,7 +2,7 @@
 
 <Sandpack options={{ showNavigator: true }} >
 
-```jsx App.js active
+```jsx src/App.js active
 import { RouterProvider } from 'react-router-dom';
 import router from './router';
 
@@ -11,7 +11,7 @@ export default function App() {
 }
 ```
 
-```js router.js
+```js src/router.js
 import Layout from './Layout';
 import Home from './Home';
 import News from './News';
@@ -47,7 +47,7 @@ function Erreur(props) {
 }
 ```
 
-```jsx Layout.jsx
+```jsx src/Layout.jsx
 import Menu from './Menu.jsx';
 import { Outlet } from 'react-router-dom';
 
@@ -61,7 +61,7 @@ export default function Layout() {
 }
 ```
 
-```jsx Menu.jsx
+```jsx src/Menu.jsx
 import { NavLink } from 'react-router-dom';
 
 export default function Menu() {
@@ -96,7 +96,7 @@ const menuList = [
 ];
 ```
 
-```jsx Home.jsx
+```jsx src/Home.jsx
 export default function Home() {
   return (
     <>
@@ -107,7 +107,7 @@ export default function Home() {
 }
 ```
 
-```jsx News.jsx
+```jsx src/News.jsx
 export default function News() {
   return (
     <>
@@ -118,7 +118,7 @@ export default function News() {
 }
 ```
 
-```jsx Contact.jsx
+```jsx src/Contact.jsx
 export default function Contact() {
   return (
     <>

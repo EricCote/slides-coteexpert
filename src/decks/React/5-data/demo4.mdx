@@ -2,7 +2,7 @@
 
 <Sandpack >
 
-```jsx App.js active
+```jsx src/App.js active
 import { use, Suspense } from 'react';
 import DisplayMovies from './DisplayMovies';
 
@@ -33,7 +33,7 @@ function Movies() {
 }
 ```
 
-```jsx DisplayMovies.jsx
+```jsx src/DisplayMovies.jsx
 export default function DisplayMovies({ movies }) {
   return movies.length > 0 ? (
     <div className='movieCards'>

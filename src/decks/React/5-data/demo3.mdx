@@ -2,7 +2,7 @@
 
 <Sandpack >
 
-```jsx App.js active
+```jsx src/App.js active
 import { useState, useEffect } from 'react';
 import DisplayMovies from './DisplayMovies';
 
@@ -40,7 +40,7 @@ export default function App() {
 }
 ```
 
-```jsx DisplayMovies.jsx
+```jsx src/DisplayMovies.jsx
 export default function DisplayMovies({ movies, isLoading }) {
   if (isLoading) {
     return <div>Loading...</div>;

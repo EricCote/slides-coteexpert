@@ -1,8 +1,7 @@
 // @ts-nocheck
 
-//import {Linter} from 'eslint/lib/linter/linter';
-import { Linter } from 'eslint/lib/linter/linter.cjs';
 import type { Diagnostic } from '@codemirror/lint';
+import { Linter } from 'eslint';
 import type { Text } from '@codemirror/text';
 import esquery from 'esquery';
 import { rules as reactRules } from 'eslint-plugin-react-hooks';

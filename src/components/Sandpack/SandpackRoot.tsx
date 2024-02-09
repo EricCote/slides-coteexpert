@@ -12,14 +12,17 @@ import {
 //import { levelUp } from '@codesandbox/sandpack-themes';
 //import { SandpackLogLevel } from '@codesandbox/sandpack-client';
 //import { CustomPreset } from './CustomPreset';
-import { createFileMap } from './createFileMap';
+import { createFileMap, StylesCSSPath } from './createFileMap';
 //import { CustomTheme } from './Themes';
+import { useSandpackLint } from './useSandpackLint';
+import { template } from './template';
 
 type SandpackProps = {
   children: ReactNode;
   autorun?: boolean;
   options?: SandpackOptions;
   files?: object;
+  s?: number;
 };
 
 const sandboxStyle = `
@@ -78,10 +81,22 @@ function SandpackRoot(props: SandpackProps) {
     autorun = true,
     options: myOptions,
     files: additionalFiles,
+    s,
     ...rest
   } = props;
   myOptions = myOptions ?? {};
-  myOptions! = { editorHeight: '500px', ...myOptions };
+  const { lintErrors, lintExtensions } = useSandpackLint();
+
+  if (s) {
+    myOptions = { editorWidthPercentage: s, ...myOptions };
+  }
+  myOptions! = {
+    codeEditor: { extensions: [lintExtensions] },
+    editorHeight: '500px',
+    showConsoleButton: true,
+    ...myOptions,
+  };
+
   const codeSnippets = Children.toArray(children) as ReactElement[];
   let files = createFileMap(codeSnippets);
 
@@ -89,18 +104,21 @@ function SandpackRoot(props: SandpackProps) {
     files = { ...files, ...additionalFiles };
   }
 
-  files['/styles.css'] = {
-    code: [sandboxStyle, files['/styles.css']?.code ?? ''].join('\n\n'),
-    hidden: !files['/styles.css']?.visible,
+  files[StylesCSSPath] = {
+    code: [sandboxStyle, files[StylesCSSPath]?.code ?? ''].join('\n\n'),
+    hidden: !files[StylesCSSPath]?.visible,
   };
 
   return (
     <div className='sandpack sandpack--playground w-full my-8' dir='ltr'>
       <Sandpack
-        template='react'
-        files={files}
+        // template='react'
+        files={{ ...template, ...files }}
         theme={myDark}
         options={myOptions}
+        customSetup={{
+          environment: 'create-react-app',
+        }}
         {...rest}
       />
     </div>
@@ -166,15 +184,6 @@ monokaiPro +++
 neocyan +++
 nightOwl +++
 sandpackDark (sick green)
-
-
-
-
-
-
-
-
-
 
 */
 

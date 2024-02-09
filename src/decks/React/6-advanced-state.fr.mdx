@@ -38,7 +38,7 @@ Voici un exemple de formulaire impératif **sans** React. Cela utilise le [DOM](
 
 <Sandpack>
 
-```js index.js active
+```js src/index.js active
 async function handleFormSubmit(e) {
   e.preventDefault();
   disable(textarea);
@@ -110,7 +110,7 @@ form.onsubmit = handleFormSubmit;
 textarea.oninput = handleTextareaChange;
 ```
 
-```js sandbox.config.json hidden
+```js src/sandbox.config.json hidden
 {
   "hardReloadOnChange": true
 }
@@ -262,7 +262,7 @@ export default function Form({
 
 <Sandpack>
 
-```js App.js active
+```js src/App.js active
 import Form from './Form.js';
 
 let statuses = ['vide', 'taper', 'envoi', 'succès', 'erreur'];
@@ -281,7 +281,7 @@ export default function App() {
 }
 ```
 
-```js Form.js
+```js src/Form.js
 export default function Form({ status }) {
   if (status === 'succès') {
     return <h1>C'est exact!</h1>;
@@ -572,7 +572,7 @@ Voici un formulaire écrite en JS et DOM. Jouez avec pour comprendre le fonction
 
 <Sandpack>
 
-```js index.js active
+```js src/index.js active
 function handleFormSubmit(e) {
   e.preventDefault();
   if (editButton.textContent === 'Edit Profile') {
@@ -622,7 +622,7 @@ firstNameInput.oninput = handleFirstNameChange;
 lastNameInput.oninput = handleLastNameChange;
 ```
 
-```js sandbox.config.json hidden
+```js src/sandbox.config.json hidden
 {
   "hardReloadOnChange": true
 }
@@ -714,7 +714,7 @@ Voici le code sans React
 
 <Sandpack>
 
-```js index.js active
+```js src/index.js active
 function handleFormSubmit(e) {
   e.preventDefault();
   if (editButton.textContent === 'Edit Profile') {
@@ -764,7 +764,7 @@ firstNameInput.oninput = handleFirstNameChange;
 lastNameInput.oninput = handleLastNameChange;
 ```
 
-```js sandbox.config.json hidden
+```js src/sandbox.config.json hidden
 {
   "hardReloadOnChange": true
 }
@@ -816,7 +816,7 @@ Commencez par la méthode updateDOM
 
 <Sandpack>
 
-```js index.js active
+```js src/index.js active
 let firstName = 'Jane';
 let lastName = 'Jacobs';
 let isEditing = false;
@@ -880,7 +880,7 @@ firstNameInput.oninput = handleFirstNameChange;
 lastNameInput.oninput = handleLastNameChange;
 ```
 
-```js sandbox.config.json hidden
+```js src/sandbox.config.json hidden
 {
   "hardReloadOnChange": true
 }
@@ -1618,7 +1618,7 @@ export default function TravelPlan() {
 }
 ```
 
-```js places.js active
+```js src/places.js active
 export const initialTravelPlan = {
   id: 0,
   title: '(Root)',
@@ -1929,7 +1929,7 @@ export default function TravelPlan() {
 }
 ```
 
-```js places.js active
+```js src/places.js active
 export const initialTravelPlan = {
   0: {
     id: 0,
@@ -2268,7 +2268,7 @@ function PlaceTree({ id, parentId, placesById, onComplete }) {
 }
 ```
 
-```js places.js
+```js src/places.js
 export const initialTravelPlan = {
   0: {
     id: 0,
@@ -2612,7 +2612,7 @@ function PlaceTree({ id, parentId, placesById, onComplete }) {
 }
 ```
 
-```js places.js
+```js src/places.js
 export const initialTravelPlan = {
   0: {
     id: 0,
@@ -2898,7 +2898,7 @@ La composante `Clock` deçoit deux props: `color` et `time`. Quand on sélection
 
 <Sandpack>
 
-```js Clock.js active
+```js src/Clock.js active
 import { useState } from 'react';
 
 export default function Clock(props) {
@@ -2907,7 +2907,7 @@ export default function Clock(props) {
 }
 ```
 
-```js App.js hidden
+```js src/App.js hidden
 import { useState, useEffect } from 'react';
 import Clock from './Clock.js';
 
@@ -2955,7 +2955,7 @@ Y aurait-il un état redondant?
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import AddItem from './AddItem.js';
 import PackingList from './PackingList.js';
@@ -3023,7 +3023,7 @@ export default function TravelPlan() {
 }
 ```
 
-```js AddItem.js hidden
+```js src/AddItem.js hidden
 import { useState } from 'react';
 
 export default function AddItem({ onAddItem }) {
@@ -3048,7 +3048,7 @@ export default function AddItem({ onAddItem }) {
 }
 ```
 
-```js PackingList.js hidden
+```js src/PackingList.js hidden
 import { useState } from 'react';
 
 export default function PackingList({ items, onChangeItem, onDeleteItem }) {
@@ -3103,7 +3103,7 @@ Le code fonctionne, mais avec un un petit problème: si on clique sur "Star" ou 
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import { initialLetters } from './data.js';
 import Letter from './Letter.js';
@@ -3150,7 +3150,7 @@ export default function MailClient() {
 }
 ```
 
-```js Letter.js
+```js src/Letter.js
 export default function Letter({
   letter,
   isHighlighted,
@@ -3180,7 +3180,7 @@ export default function Letter({
 }
 ```
 
-```js data.js
+```js src/data.js
 export const initialLetters = [
   {
     id: 0,
@@ -3230,7 +3230,7 @@ Changez la structure de l'étate pour permettre la sélection multiple. (Quelle 
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import { letters } from './data.js';
 import Letter from './Letter.js';
@@ -3271,7 +3271,7 @@ export default function MailClient() {
 }
 ```
 
-```js Letter.js
+```js src/Letter.js
 export default function Letter({ letter, onToggle, isSelected }) {
   return (
     <li className={isSelected ? 'selected' : ''}>
@@ -3290,7 +3290,7 @@ export default function Letter({ letter, onToggle, isSelected }) {
 }
 ```
 
-```js data.js
+```js src/data.js
 export const letters = [
   {
     id: 0,
@@ -3799,7 +3799,7 @@ function List({ items }) {
 }
 ```
 
-```js data.js
+```js src/data.js
 export function filterItems(items, query) {
   query = query.toLowerCase();
   return items.filter((item) =>
@@ -4888,7 +4888,7 @@ Dans cette application, le composant `<Chat>` contient un champ de saisie contro
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -4914,7 +4914,7 @@ const contacts = [
 ];
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ selectedContact, contacts, onSelect }) {
   return (
     <section className='contact-list'>
@@ -4936,7 +4936,7 @@ export default function ContactList({ selectedContact, contacts, onSelect }) {
 }
 ```
 
-```js Chat.js
+```js src/Chat.js
 import { useState } from 'react';
 
 export default function Chat({ contact }) {
@@ -4993,7 +4993,7 @@ Ceci réinitialise l'état du `<Chat>`. Le re-rendu génère le composant `<Chat
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -5019,7 +5019,7 @@ const contacts = [
 ];
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ selectedContact, contacts, onSelect }) {
   return (
     <section className='contact-list'>
@@ -5041,7 +5041,7 @@ export default function ContactList({ selectedContact, contacts, onSelect }) {
 }
 ```
 
-```js Chat.js
+```js src/Chat.js
 import { useState } from 'react';
 
 export default function Chat({ contact }) {
@@ -5111,7 +5111,7 @@ Cet exemple affiche un message quand on clique le bouton. Mais, cela réinitiali
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 
 export default function App() {
@@ -5178,7 +5178,7 @@ It almost works, but there is a bug. If you fill in the "First name" input and t
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 
 export default function App() {
@@ -5247,7 +5247,7 @@ When you select a different contact (for example, Alice), the state updates but 
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import ContactList from './ContactList.js';
 import EditContact from './EditContact.js';
@@ -5288,7 +5288,7 @@ const initialContacts = [
 ];
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ contacts, selectedId, onSelect }) {
   return (
     <section>
@@ -5310,7 +5310,7 @@ export default function ContactList({ contacts, selectedId, onSelect }) {
 }
 ```
 
-```js EditContact.js
+```js src/EditContact.js
 import { useState } from 'react';
 
 export default function EditContact({ initialData, onSave }) {
@@ -5475,7 +5475,7 @@ Fix it so that the expanded state is associated with each contact, regardless of
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import Contact from './Contact.js';
 
@@ -5517,7 +5517,7 @@ const contacts = [
 ];
 ```
 
-```js Contact.js
+```js src/Contact.js
 import { useState } from 'react';
 
 export default function Contact({ contact }) {
@@ -5589,7 +5589,7 @@ Dans l'exemple suivant, le composant `TaskApp` contient, dans son état, un tabl
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useState } from 'react';
 import AddTask from './AddTask.js';
 import TaskList from './TaskList.js';
@@ -5645,7 +5645,7 @@ const initialTasks = [
 ];
 ```
 
-```js AddTask.js hidden
+```js src/AddTask.js hidden
 import { useState } from 'react';
 
 export default function AddTask({ onAddTask }) {
@@ -5670,7 +5670,7 @@ export default function AddTask({ onAddTask }) {
 }
 ```
 
-```js TaskList.js hidden
+```js src/TaskList.js hidden
 import { useState } from 'react';
 
 export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
@@ -6002,7 +6002,7 @@ On appelle `reduce()` avec un `initialState` et un tableau d'`actions` pour calc
 
 <Sandpack>
 
-```js index.js active
+```js src/index.js active
 import tasksReducer from './tasksReducer.js';
 
 let initialState = [];
@@ -6019,7 +6019,7 @@ const output = document.getElementById('output');
 output.textContent = JSON.stringify(finalState, null, 2);
 ```
 
-```js tasksReducer.js
+```js src/tasksReducer.js
 export default function tasksReducer(tasks, action) {
   switch (action.type) {
     case 'added': {
@@ -6107,7 +6107,7 @@ C'est complété! Ici, le réducteur est en bas du fichier.
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from 'react';
 import AddTask from './AddTask.js';
 import TaskList from './TaskList.js';
@@ -6188,7 +6188,7 @@ const initialTasks = [
 ];
 ```
 
-```js AddTask.js hidden
+```js src/AddTask.js hidden
 import { useState } from 'react';
 
 export default function AddTask({ onAddTask }) {
@@ -6213,7 +6213,7 @@ export default function AddTask({ onAddTask }) {
 }
 ```
 
-```js TaskList.js hidden
+```js src/TaskList.js hidden
 import { useState } from 'react';
 
 export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
@@ -6297,7 +6297,7 @@ Le même exemple, avec le réducteur dans son propre fichier séparé.
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from 'react';
 import AddTask from './AddTask.js';
 import TaskList from './TaskList.js';
@@ -6349,7 +6349,7 @@ const initialTasks = [
 ];
 ```
 
-```js tasksReducer.js
+```js src/tasksReducer.js
 export default function tasksReducer(tasks, action) {
   switch (action.type) {
     case 'added': {
@@ -6381,7 +6381,7 @@ export default function tasksReducer(tasks, action) {
 }
 ```
 
-```js AddTask.js hidden
+```js src/AddTask.js hidden
 import { useState } from 'react';
 
 export default function AddTask({ onAddTask }) {
@@ -6406,7 +6406,7 @@ export default function AddTask({ onAddTask }) {
 }
 ```
 
-```js TaskList.js hidden
+```js src/TaskList.js hidden
 import { useState } from 'react';
 
 export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
@@ -6524,7 +6524,7 @@ Tout comme la mise à jour des objects dans l'état régulier, on peut utiliser 
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useImmerReducer } from 'use-immer';
 import AddTask from './AddTask.js';
 import TaskList from './TaskList.js';
@@ -6599,7 +6599,7 @@ const initialTasks = [
 ];
 ```
 
-```js AddTask.js hidden
+```js src/AddTask.js hidden
 import { useState } from 'react';
 
 export default function AddTask({ onAddTask }) {
@@ -6624,7 +6624,7 @@ export default function AddTask({ onAddTask }) {
 }
 ```
 
-```js TaskList.js hidden
+```js src/TaskList.js hidden
 import { useState } from 'react';
 
 export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
@@ -6768,7 +6768,7 @@ L'action devrait avoir une propriété `type: 'changed_selection'`, ainsi qu'une
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from 'react';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -6802,7 +6802,7 @@ const contacts = [
 ];
 ```
 
-```js messengerReducer.js
+```js src/messengerReducer.js
 export const initialState = {
   selectedId: 0,
   message: 'Hello',
@@ -6830,7 +6830,7 @@ export function messengerReducer(state, action) {
 }
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ contacts, selectedId, dispatch }) {
   return (
     <section className='contact-list'>
@@ -6852,7 +6852,7 @@ export default function ContactList({ contacts, selectedId, dispatch }) {
 }
 ```
 
-```js Chat.js
+```js src/Chat.js
 import { useState } from 'react';
 
 export default function Chat({ contact, message, dispatch }) {
@@ -6908,7 +6908,7 @@ Currently, pressing "Send" doesn't do anything. Add an event handler to the "Sen
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from 'react';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -6942,7 +6942,7 @@ const contacts = [
 ];
 ```
 
-```js messengerReducer.js
+```js src/messengerReducer.js
 export const initialState = {
   selectedId: 0,
   message: 'Hello',
@@ -6970,7 +6970,7 @@ export function messengerReducer(state, action) {
 }
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ contacts, selectedId, dispatch }) {
   return (
     <section className='contact-list'>
@@ -6995,7 +6995,7 @@ export default function ContactList({ contacts, selectedId, dispatch }) {
 }
 ```
 
-```js Chat.js active
+```js src/Chat.js active
 import { useState } from 'react';
 
 export default function Chat({ contact, message, dispatch }) {
@@ -7093,7 +7093,7 @@ The `[key]: value` [computed property](https://developer.mozilla.org/en-US/docs/
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from 'react';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -7127,7 +7127,7 @@ const contacts = [
 ];
 ```
 
-```js messengerReducer.js
+```js src/messengerReducer.js
 export const initialState = {
   selectedId: 0,
   message: 'Hello',
@@ -7161,7 +7161,7 @@ export function messengerReducer(state, action) {
 }
 ```
 
-```js ContactList.js
+```js src/ContactList.js
 export default function ContactList({ contacts, selectedId, dispatch }) {
   return (
     <section className='contact-list'>
@@ -7186,7 +7186,7 @@ export default function ContactList({ contacts, selectedId, dispatch }) {
 }
 ```
 
-```js Chat.js
+```js src/Chat.js
 import { useState } from 'react';
 
 export default function Chat({ contact, message, dispatch }) {
@@ -7276,7 +7276,7 @@ Recall that a reducer function takes two arguments--the current state and the ac
 
 <Sandpack>
 
-```js App.js
+```js src/App.js
 import { useReducer } from './MyReact.js';
 import Chat from './Chat.js';
 import ContactList from './ContactList.js';
@@ -7310,7 +7310,7 @@ const contacts = [
 ];
 ```
 
-```js messengerReducer.js
+```js src/messengerReducer.js
 export const initialState = {
   selectedId: 0,
   messages: {
@@ -7353,7 +7353,7 @@ export function messengerReducer(state, action) {
 }
 ```
 
-```js MyReact.js active
+```js src/MyReact.js active
 import { useState } from 'react';
 
 export function useReducer(reducer, initialState) {
@@ -7365,7 +7365,7 @@ export function useReducer(reducer, initialState) {
 }
 ```
 
-```js ContactList.js hidden
+```js src/ContactList.js hidden
 export default function ContactList({ contacts, selectedId, dispatch }) {
   return (
     <section className='contact-list'>
@@ -7390,7 +7390,7 @@ export default function ContactList({ contacts, selectedId, dispatch }) {
 }
 ```
 
-```js Chat.js hidden
+```js src/Chat.js hidden
 import { useState } from 'react';
 
 export default function Chat({ contact, message, dispatch }) {
