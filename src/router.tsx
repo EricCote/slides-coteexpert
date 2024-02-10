@@ -22,6 +22,8 @@ const components = {
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           columnGap: 10,
+          alignItems: 'center',
+
           ...style,
         }}
       >
