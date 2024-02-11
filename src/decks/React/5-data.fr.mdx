@@ -647,13 +647,13 @@ input {
 
 ## Explications
 
-Imagine the `ChatRoom` component is a part of a larger app with many different screens. The user starts their journey on the `ChatRoom` page. The component mounts and calls `connection.connect()`. Then imagine the user navigates to another screen--for example, to the Settings page. The `ChatRoom` component unmounts. Finally, the user clicks Back and `ChatRoom` mounts again. This would set up a second connection--but the first connection was never destroyed! As the user navigates across the app, the connections would keep piling up.
+Le composant `ChatRoom` est une application ayant plusieurs écrans. L'utilisateur démarre avec la page `ChatRoom`. Au montage (mount), le composant appelle `connection.connect()`. Par la suite,l'utilisateur navigue vers la page `paramètre`. Le composant `ChatRoom` démonte (unmount). Enfin, l'utilisateur retourne à `ChatRoom`, montant à nouveau le composant. Ceci créé une nouvelle connexion, mais la premièere connexion n'a jamais été détruite. À mesure qu'on navigue, on accumule les connexions.
 
-Bugs like this are easy to miss without extensive manual testing. To help you spot them quickly, in development React remounts every component once immediately after its initial mount.
+Ces bogues sont subtils et difficiles à trouver. Mais en mode <StrictMode>, c'est plus facile à trouver, car on monte le composant deux fois successivement.
 
-Seeing the `"✅ Connecting..."` log twice helps you notice the real issue: your code doesn't close the connection when the component unmounts.
+Afficher `"✅ Connecting..."` deux fois de suite permet de saisir qu'on a oublié de fermer la connexion au démontage.
 
-To fix the issue, return a _cleanup function_ from your Effect:
+Il faut donc créer une fonction de cleanup (nettoyage) dans l'effet.
 
 ```js {4-6}
 useEffect(() => {
@@ -665,9 +665,7 @@ useEffect(() => {
 }, []);
 ```
 
-React will call your cleanup function each time before the Effect runs again, and one final time when the component unmounts (gets removed). Let's see what happens when the cleanup function is implemented:
-
----
+## React appelle la fonction _cleanup_ juste avant que le prochain Effect n'exécute, et une dernière fois avant que le composant soit démonté (au moment où l'on retire celui-ci.)
 
 ## Exemple réparé
 
@@ -710,7 +708,11 @@ input {
 
 </Sandpack>
 
-Now you get three console logs in development:
+---
+
+### Résultat
+
+Les logs sont maintenant:
 
 1. `"✅ Connecting..."`
 2. `"❌ Disconnected."`
