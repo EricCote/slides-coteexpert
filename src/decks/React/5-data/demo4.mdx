@@ -3,7 +3,7 @@
 <Sandpack >
 
 ```jsx src/App.js active
-import { use, Suspense } from 'react';
+import { use, useState, Suspense } from 'react';
 import DisplayMovies from './DisplayMovies';
 
 async function getMovies() {
@@ -12,9 +12,16 @@ async function getMovies() {
 }
 
 export default function App() {
+  const [, setReload] = useState({});
+  function refresh() {
+    setReload({});
+  }
+
   return (
     <>
       <h1>MCU Movies</h1>
+      <button onClick={refresh}>Refresh Movies</button>
+
       <Suspense fallback={<div>Loading...</div>}>
         <Movies />
       </Suspense>
