@@ -1047,16 +1047,18 @@ export default function App() {
 
 ## Explications
 
-- Commentez le _cleanup_ de l'exemple de la diapo précédente.
+- Commentez (ou enlevez) le _cleanup_ de l'exemple de la diapo précédente.
 - Que se passe-t-il?
+
+<hr />
+
+- Ce comportement est lié aux Closures de JavaScript.
 
 ---
 
-## DeepDive
+## Chaque rendu génère des Effects
 
-#### Each render has its own Effects {/* each-render-has-its-own-effects */}
-
-You can think of `useEffect` as "attaching" a piece of behavior to the render output. Consider this Effect:
+`useEffect` "attache" un comportement à la suite du rendu.
 
 ```js
 export default function ChatRoom({ roomId }) {
@@ -1070,93 +1072,88 @@ export default function ChatRoom({ roomId }) {
 }
 ```
 
-Let's see what exactly happens as the user navigates around the app.
-
 ---
 
-#### Initial render {/* initial-render */}
+## Rendu initial
 
-The user visits `<ChatRoom roomId="general" />`. Let's [mentally substitute](/learn/state-as-a-snapshot#rendering-takes-a-snapshot-in-time) `roomId` with `'general'`:
+L'utilisateur visite `<ChatRoom roomId="general" />`. Ce qui génère:
 
 ```js
-// JSX for the first render (roomId = "general")
+// JSX pour le premier rendu (roomId = "general")
 return <h1>Welcome to general!</h1>;
 ```
 
-**The Effect is _also_ a part of the rendering output.** The first render's Effect becomes:
+L'Effect est immédiatement exécuté suite au rendu
 
 ```js
-// Effect for the first render (roomId = "general")
+// Effect du premier rendu (roomId = "general")
 () => {
   const connection = createConnection('general');
   connection.connect();
   return () => connection.disconnect();
 },
-  // Dependencies for the first render (roomId = "general")
+  // Dépendance du premier rendu (roomId = "general")
   ['general'];
 ```
 
-React runs this Effect, which connects to the `'general'` chat room.à
+Ceci nous connecte au chat `'general'`
 
 ---
 
-#### Re-render with same dependencies {/* re-render-with-same-dependencies */}
+## Second rendu avec les mêmes dépendances
 
-Let's say `<ChatRoom roomId="general" />` re-renders. The JSX output is the same:
+Au re-rendu de `<ChatRoom roomId="general" />`, le même jsx est généré.
 
 ```js
-// JSX for the second render (roomId = "general")
+// JSX pour le second rendu (roomId = "general")
 return <h1>Welcome to general!</h1>;
 ```
 
-React sees that the rendering output has not changed, so it doesn't update the DOM.
-
-The Effect from the second render looks like this:
+React réalise que le second rendu est le même, et ne modifie pas le DOM.
 
 ```js
-// Effect for the second render (roomId = "general")
+// Effect pour le 2e rendu (roomId = "general")
 () => {
   const connection = createConnection('general');
   connection.connect();
   return () => connection.disconnect();
 },
-  // Dependencies for the second render (roomId = "general")
+  // Dépendances du 2e rendu (roomId = "general")
   ['general'];
 ```
 
-React compares `['general']` from the second render with `['general']` from the first render. **Because all dependencies are the same, React _ignores_ the Effect from the second render.** It never gets called.
+- React compare le `['general']` du rendu précédent `['general']`
+- **Puisque toutes les dépendances sont les mêmes, React saute l'Effect.**
 
 ---
 
-#### Re-render with different dependencies {/* re-render-with-different-dependencies */}
+#### 3e rendu avec dépendances différentes
 
-Then, the user visits `<ChatRoom roomId="travel" />`. This time, the component returns different JSX:
+Quand l'utilisateur visite `<ChatRoom roomId="travel" />`, le composant génère un rendu différent:
 
 ```js
-// JSX for the third render (roomId = "travel")
+// JSX pour le 3e rendu (roomId = "travel")
 return <h1>Welcome to travel!</h1>;
 ```
 
-React updates the DOM to change `"Welcome to general"` into `"Welcome to travel"`.
-
-The Effect from the third render looks like this:
+React modfie le DOM de `"Welcome to general"` à `"Welcome to travel"`.
 
 ```js
-// Effect for the third render (roomId = "travel")
+// Effect pour le 3e rendu (roomId = "travel")
 () => {
   const connection = createConnection('travel');
   connection.connect();
   return () => connection.disconnect();
 },
-  // Dependencies for the third render (roomId = "travel")
+  // Dépendances du 3e rendu (roomId = "travel")
   ['travel'];
 ```
 
-React compares `['travel']` from the third render with `['general']` from the second render. One dependency is different: `Object.is('travel', 'general')` is `false`. The Effect can't be skipped.
+-`['travel']` est différent de `['general']`. L'Effect n'est pas sauté
 
-**Before React can apply the Effect from the third render, it needs to clean up the last Effect that _did_ run.** The second render's Effect was skipped, so React needs to clean up the first render's Effect. If you scroll up to the first render, you'll see that its cleanup calls `disconnect()` on the connection that was created with `createConnection('general')`. This disconnects the app from the `'general'` chat room.
+- **Le _Cleanup_ est appelé juste avant l'exécution de l'Effect** Ça déconnecte `'general'
 
-After that, React runs the third render's Effect. It connects to the `'travel'` chat room.
+- L'Effect exécute et se connecte sur `'travel'`
 
 ---
 
