@@ -48,7 +48,7 @@ export default function DisplayMovies({ movies, isLoading }) {
   return movies.length > 0 ? (
     <div className='movieCards'>
       {movies.map((movie) => (
-        <div>
+        <div key={movie.id}>
           <h3>{movie.title}</h3>
           <img src={movie.cover_url} />
           <p>
