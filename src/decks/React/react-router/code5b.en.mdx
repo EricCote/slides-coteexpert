@@ -1,27 +1,49 @@
-## React Naïve Routing
+## Navigation Routing
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
 import Menu from './Menu';
-import Route, { AllRoutes } from './Route';
+import Route from './Route';
+import useNavigation from './useNavigation';
 
-//todo: in the returned data, replace the "AllRoutes" with a single "Route"
-
-//the problem here: when we click on the menu,
-//the browser loads our app again, instead of hiding/showing
-//the current page/component.
-//But there's no need to reload, since a SPA loads
-//all components at load time.
 export default function App() {
-  const currentPage = window.location.pathname;
+  const currentPage = useNavigation();
 
   return (
     <>
       <Menu />
-      <AllRoutes page={currentPage} />
+      <Route page={currentPage} />
     </>
   );
+}
+```
+
+```js src/useNavigation.jsx
+import { useSyncExternalStore } from 'react';
+
+function subscribePageChange(callback) {
+  function navHandler(evt) {
+    if (evt.canIntercept) {
+      evt.intercept({
+        //in that case, intercept the navigation (cancels navigation)
+        handler: () => {
+          callback();
+        },
+      });
+    }
+  }
+
+  navigation.addEventListener('navigate', navHandler);
+  return () => navigation.removeEventListener('navigate', navHandler);
+}
+
+function getCurrentPage() {
+  return new URL(navigation.currentEntry.url).pathname;
+}
+
+export default function useNavigation() {
+  return useSyncExternalStore(subscribePageChange, getCurrentPage);
 }
 ```
 
@@ -31,8 +53,6 @@ import News from './News';
 import Contact from './Contact';
 
 export default function Route({ page }) {
-  // Routes are managed here.
-  // Note that /about will do a 404.
   switch (page) {
     case '/home':
     case '/':
@@ -46,22 +66,6 @@ export default function Route({ page }) {
       return <div>404 error</div>;
   }
 }
-
-export function AllRoutes() {
-  return (
-    <>
-      <Home />
-      <hr />
-      <News />
-      <hr />
-      <Contact />
-      <hr />
-      <Home />
-      <hr />
-      <div>404 error</div>
-    </>
-  );
-}
 ```
 
 ```jsx src/Menu.jsx
@@ -71,7 +75,7 @@ export default function Menu() {
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.pathname ? 'active' : ''}
+            className={menuItem.url === location.hash ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}
@@ -167,3 +171,7 @@ ul.menu {
 ```
 
 </Sandpack>
+
+Incompatible with Code SandBox "back button" or url bar
+
+Works with browser right-click "back" menu. Or inspect.

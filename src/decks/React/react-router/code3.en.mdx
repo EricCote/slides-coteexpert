@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import Route from './Route';
 
-//todo: fix the error of multiple navigations while using strict mode
 export default function App() {
   const [currentPage, setCurrentPage] = useState(window.location.hash);
 
@@ -18,6 +17,7 @@ export default function App() {
   useEffect(() => {
     //Handle the "hashchange" event
     window.addEventListener('hashchange', changePage);
+    return () => window.removeEventListener('hashchange', changePage);
   }, []);
 
   return (
@@ -148,7 +148,7 @@ ul.menu {
 }
 
 .menu .active {
-  background-color: #04aa6d;
+  background-color: royalblue;
 }
 ```
 

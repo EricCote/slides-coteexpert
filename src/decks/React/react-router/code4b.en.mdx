@@ -1,27 +1,64 @@
-## React Naïve Routing
+## History Routing
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
 import Menu from './Menu';
-import Route, { AllRoutes } from './Route';
+import Route from './Route';
+import useHistory, { clickHandler } from './useHistory';
 
-//todo: in the returned data, replace the "AllRoutes" with a single "Route"
-
-//the problem here: when we click on the menu,
-//the browser loads our app again, instead of hiding/showing
-//the current page/component.
-//But there's no need to reload, since a SPA loads
-//all components at load time.
 export default function App() {
-  const currentPage = window.location.pathname;
+  const currentPage = useHistory();
 
   return (
     <>
-      <Menu />
-      <AllRoutes page={currentPage} />
+      <Menu onClick={clickHandler} />
+      <Route page={currentPage} />
     </>
   );
+}
+```
+
+```js src/useHistory.js
+import { useSyncExternalStore } from 'react';
+
+// setup the history API to get notifications when page changes
+function subscribeHistory(callback) {
+  const currentPage = window.location.pathname;
+  window.addEventListener('popstate', callback);
+  history.replaceState(currentPage, '', currentPage);
+  return () => window.removeEventListener('popstate', callback);
+}
+
+// Returns the current page
+function getCurrentPage() {
+  return history.state;
+}
+
+//click handler that uses the history API instead of navigating
+export function clickHandler(evt) {
+  //create a url object from the link text
+  const url = new URL(evt.target.href);
+  if (
+    //if hostname is the same, but with a different path,
+    //then handle the navigation
+    url.hostname === window.location.hostname &&
+    url.pathname !== window.location.pathname
+  ) {
+    evt.preventDefault(); //cancel the navigation
+    //Add destination in history API
+    history.pushState(url.pathname, '', url.pathname);
+    history.go(0); //popstate event will fire
+  } else if (
+    url.hostname === window.location.hostname &&
+    url.pathname === window.location.pathname
+  ) {
+    evt.preventDefault(); //cancel if we navigate to the same page twice
+  }
+}
+
+export default function useHistory() {
+  return useSyncExternalStore(subscribeHistory, getCurrentPage);
 }
 ```
 
@@ -31,8 +68,6 @@ import News from './News';
 import Contact from './Contact';
 
 export default function Route({ page }) {
-  // Routes are managed here.
-  // Note that /about will do a 404.
   switch (page) {
     case '/home':
     case '/':
@@ -46,33 +81,18 @@ export default function Route({ page }) {
       return <div>404 error</div>;
   }
 }
-
-export function AllRoutes() {
-  return (
-    <>
-      <Home />
-      <hr />
-      <News />
-      <hr />
-      <Contact />
-      <hr />
-      <Home />
-      <hr />
-      <div>404 error</div>
-    </>
-  );
-}
 ```
 
 ```jsx src/Menu.jsx
-export default function Menu() {
+export default function Menu({ onClick }) {
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.pathname ? 'active' : ''}
+            className={menuItem.url === location.hash ? 'active' : ''}
             href={menuItem.url}
+            onClick={onClick}
           >
             {menuItem.name}
           </a>
@@ -106,8 +126,8 @@ const menuList = [
 export default function Home() {
   return (
     <>
-      <h1>Home page</h1>
-      <p>This is the Home page!</p>
+      <h1>Home Page</h1>
+      <p>This is the home page!</p>
     </>
   );
 }

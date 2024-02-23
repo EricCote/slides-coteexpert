@@ -1,25 +1,20 @@
-## React Naïve Routing
+## Hash Routing
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
+import { useEffect, useState } from 'react';
+import useHashChange from './useHashChange';
 import Menu from './Menu';
-import Route, { AllRoutes } from './Route';
+import Route from './Route';
 
-//todo: in the returned data, replace the "AllRoutes" with a single "Route"
-
-//the problem here: when we click on the menu,
-//the browser loads our app again, instead of hiding/showing
-//the current page/component.
-//But there's no need to reload, since a SPA loads
-//all components at load time.
 export default function App() {
-  const currentPage = window.location.pathname;
+  const currentPage = useHashChange();
 
   return (
     <>
       <Menu />
-      <AllRoutes page={currentPage} />
+      <Route page={currentPage} />
     </>
   );
 }
@@ -31,35 +26,34 @@ import News from './News';
 import Contact from './Contact';
 
 export default function Route({ page }) {
-  // Routes are managed here.
-  // Note that /about will do a 404.
   switch (page) {
-    case '/home':
-    case '/':
+    case '#home':
+    case '#':
     case '':
       return <Home />;
-    case '/news':
+    case '#news':
       return <News />;
-    case '/contact':
+    case '#contact':
       return <Contact />;
     default:
       return <div>404 error</div>;
   }
 }
+```
 
-export function AllRoutes() {
-  return (
-    <>
-      <Home />
-      <hr />
-      <News />
-      <hr />
-      <Contact />
-      <hr />
-      <Home />
-      <hr />
-      <div>404 error</div>
-    </>
+```jsx src/useHashChange.jsx
+import { useSyncExternalStore } from 'react';
+
+function subscribeHashChange(onHashChange) {
+  window.addEventListener('hashchange', onHashChange);
+  return () => window.removeEventListener('hashchange', onHashChange);
+}
+
+export default function useHashChange() {
+  return useSyncExternalStore(
+    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
+    () => window.location.hash, // How to ge value on client
+    () => window?.location.hash // How to get the value on the server
   );
 }
 ```
@@ -71,7 +65,7 @@ export default function Menu() {
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.pathname ? 'active' : ''}
+            className={menuItem.url === location.hash ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}
@@ -85,19 +79,19 @@ export default function Menu() {
 const menuList = [
   {
     name: 'Home',
-    url: '/',
+    url: '#',
   },
   {
     name: 'News',
-    url: '/news',
+    url: '#news',
   },
   {
     name: 'Contact',
-    url: '/contact',
+    url: '#contact',
   },
   {
     name: 'About',
-    url: '/about',
+    url: '#about',
   },
 ];
 ```
@@ -129,7 +123,7 @@ export default function Contact() {
   return (
     <>
       <h1>Contact page</h1>
-      <p>This is the Contact page!</p>
+      <p>This is the contact page!</p>
     </>
   );
 }
