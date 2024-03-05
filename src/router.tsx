@@ -7,7 +7,7 @@ import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/React/5-data.fr.mdx';
+import Status from './decks/React/5-data/5-effect-lifecycle.fr.mdx';
 import { useLanguage } from './components/slides/LanguageProvider';
 
 const components = {
