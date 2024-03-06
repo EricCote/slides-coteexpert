@@ -500,9 +500,9 @@ function ChatRoom({ roomId }) {
 
 ---
 
-## Ajouter une valeur réactive à l'Effect
+## Ajout des valeurs réactives à l'Effect
 
-Modifiez le ChatRoom ou le URL:
+- Quand on modifie roomId ou serverUrl, cela re-synchronise.
 
 <Sandpack>
 
@@ -580,8 +580,6 @@ button {
 
 </Sandpack>
 
-On se re-synchronise au moment de la modification de roomId, ou du url
-
 ---
 
 ## Que signifie un tableau de dépendances vide?
@@ -606,7 +604,7 @@ function ChatRoom() {
 
 - On n'utilise plus de valeurs réactives.
 - Le tableau des dépendances peut être vide (`[]`)
-- Exécute au moment du montage
+- Exécute l'Effect au moment du montage
   - La fonction Cleanup exécute au moment du démontage
   - En mode dev, le montage et synchro a lieu deux fois
 
@@ -731,7 +729,8 @@ function ChatRoom({ roomId, selectedServerUrl }) {
 
 ## React s'assure que chaque valeur réactive soit une dépendance
 
-- Si le linter est bien configuré pour React, le code suivant provoque un avertissement, car `roomId` et `serverUrl` sont réactifs
+- Si le linter est bien configuré pour React, le code suivant provoque un avertissement
+- `roomId` et `serverUrl` sont réactifs. Ils doivent être dans la liste de dépendances
 
 <Sandpack>
 
@@ -814,9 +813,7 @@ button {
 
 ## Réparer le bogue en ajoutant les dépendances
 
-This may look like a React error, but really React is pointing out a bug in your code. Both `roomId` and `serverUrl` may change over time, but you're forgetting to re-synchronize your Effect when they change. You will remain connected to the initial `roomId` and `serverUrl` even after the user picks different values in the UI.
-
-To fix the bug, follow the linter's suggestion to specify `roomId` and `serverUrl` as dependencies of your Effect:
+On ajoute `roomId` et `serverUrl` en dependances de l'effect
 
 {/* prettier-ignore */}
 ```js {9}
@@ -833,21 +830,27 @@ function ChatRoom({ roomId }) { // roomId is reactive
 }
 ```
 
-Try this fix in the sandbox above. Verify that the linter error is gone, and the chat re-connects when needed.
+- Réparez le code de la diapo précédente
 
 ---
 
-## Note
+## Valeurs stables
 
-In some cases, React _knows_ that a value never changes even though it's declared inside the component. For example, the [`set` function](/reference/react/useState#setstate) returned from `useState` and the ref object returned by [`useRef`](/reference/react/useRef) are _stable_--they are guaranteed to not change on a re-render. Stable values aren't reactive, so you may omit them from the list. Including them is allowed: they won't change, so it doesn't matter.
+- Certaines valeurs ne changeront pas même quand elles sont déclarées dans un composant
+  - La fonction `setState` retournée par `useState()`
+  - L'objet `ref` retourné par `useRef()`
+- Ces valeurs sont _stables_
+  - Ne changeront pas au prochain re-rendu
+  - Ne sont pas des valeurs réactives
+  - Pas besoin de les ajouter au tableau de dépendances
+  - Si on les ajoute, cela ne change rien à l'exécution
 
 ---
 
-## Comment éviter la re-synchronisation
+## Éviter la re-synchronisation en éliminant la réactivité
 
-In the previous example, you've fixed the lint error by listing `roomId` and `serverUrl` as dependencies.
-
-**However, you could instead "prove" to the linter that these values aren't reactive values,** i.e. that they _can't_ change as a result of a re-render. For example, if `serverUrl` and `roomId` don't depend on rendering and always have the same values, you can move them outside the component. Now they don't need to be dependencies:
+- On remplace les valeurs réactives par des valeurs qui ne changent pas
+- Ex: des valeurs qui proviennent à l'extérieur du composant
 
 ```js {1,2,11}
 const serverUrl = 'https://localhost:1234'; // serverUrl is not reactive
@@ -867,9 +870,10 @@ function ChatRoom() {
 
 ---
 
-## Déplacer ces valeurs dans l'effect
+## Éviter la re-synchronisation en déclarant dans l'Effect
 
-Ces valeurs peuvent être déclarées dans l'Effect. Ces valeurs ne sont pas utilisées pendant le rendu, elles ne sont pas réactives.
+- Ces valeurs peuvent être déclarées dans l'Effect
+- Ces valeurs ne sont pas utilisées pendant le rendu, elles ne sont pas réactives.
 
 ```js {3,4,10}
 function ChatRoom() {
@@ -890,23 +894,39 @@ function ChatRoom() {
 
 ## Détails sur les valeurs réactives
 
-**Effects are reactive blocks of code.** They re-synchronize when the values you read inside of them change. Unlike event handlers, which only run once per interaction, Effects run whenever synchronization is necessary.
-
-**You can't "choose" your dependencies.** Your dependencies must include every [reactive value](#all-variables-declared-in-the-component-body-are-reactive) you read in the Effect. The linter enforces this. Sometimes this may lead to problems like infinite loops and to your Effect re-synchronizing too often. Don't fix these problems by suppressing the linter! Here's what to try instead:
-
-- **Check that your Effect represents an independent synchronization process.** If your Effect doesn't synchronize anything, [it might be unnecessary.](/learn/you-might-not-need-an-effect) If it synchronizes several independent things, [split it up.](#each-effect-represents-a-separate-synchronization-process)
-
-- **If you want to read the latest value of props or state without "reacting" to it and re-synchronizing the Effect,** you can split your Effect into a reactive part (which you'll keep in the Effect) and a non-reactive part (which you'll extract into something called an _Effect Event_). [Read about separating Events from Effects.](/learn/separating-events-from-effects)
-
-- **Avoid relying on objects and functions as dependencies.** If you create objects and functions during rendering and then read them from an Effect, they will be different on every render. This will cause your Effect to re-synchronize every time. [Read more about removing unnecessary dependencies from Effects.](/learn/removing-effect-dependencies)
+- **Les Effects sont des blocs de code réactifs**
+- Permet de re-synchroniser quand la valeur change
+- Différent des gestionnaires d'événement
+  - Un gestionnaire d'événement roule à chaque interaction
+  - Un Effect roule quand la synchronisation est nécessaire, après une modification des dépendances
 
 ---
 
-## Attention
+## Bonnes pratiques
 
-The linter is your friend, but its powers are limited. The linter only knows when the dependencies are _wrong_. It doesn't know _the best_ way to solve each case. If the linter suggests a dependency, but adding it causes a loop, it doesn't mean the linter should be ignored. You need to change the code inside (or outside) the Effect so that that value isn't reactive and doesn't _need_ to be a dependency.
+- **On ne peut choisir les dépendances**
+  - Les dépendances incluent toutes les valeurs réactives utilisées dans l'Effect
+  - Le linter nous aide à déterminer les dépendances
+- **Validez que votre Effect représente un processus de synchronisation indépendant**
+  - Si cela ne synchronise rien, on n'a pas besoin d'un Effect
+  - Si cela synchronise plusieurs éléments, il faut séparer dans des Effects isolés)
+- **Pour lire la valeur d'une prop ou d'un state sans être réactif, ni re-synchroniser l'Effect**
+  - On sépare l'Effect en deux
+  - Une partie réactive (dans l'Effect)
+  - Une partie non-réactive (dans l'_Effect Event_)
+- **Evitez d'utiliser des dépendances de type objet ou fonction**
+  - Si on créé des objets ou des fonctions pendant le rendu, ils seront différents dans les re-rendus futurs
+  - L'effect sera re-synchronisé à chaque fois
+  - On devrait éliminer les dépendances non-nécessaires
 
-If you have an existing codebase, you might have some Effects that suppress the linter like this:
+---
+
+## Attention aux boucles infinies
+
+- Le Linter n'est pas parfait
+- Le Linter indique parfois des dépendances additionnelles
+- Ajouter ces dépendances pourrait causer une boucle infinie
+- On pourrait vouloir ignorer le linter avec un commentaire:
 
 ```js {3-4}
 useEffect(() => {
@@ -916,20 +936,23 @@ useEffect(() => {
 }, []);
 ```
 
-On the [next](/learn/separating-events-from-effects) [pages](/learn/removing-effect-dependencies), you'll learn how to fix this code without breaking the rules. It's always worth fixing!
+- L'alternative préférable serait de modifier le code pour que la valeur ne soit pas réactive et ne nécessite plus d'être une dépendance.
 
 ---
 
 ## En résumé
 
-- Components can mount, update, and unmount.
-- Each Effect has a separate lifecycle from the surrounding component.
-- Each Effect describes a separate synchronization process that can _start_ and _stop_.
-- When you write and read Effects, think from each individual Effect's perspective (how to start and stop synchronization) rather than from the component's perspective (how it mounts, updates, or unmounts).
-- Values declared inside the component body are "reactive".
-- Reactive values should re-synchronize the Effect because they can change over time.
-- The linter verifies that all reactive values used inside the Effect are specified as dependencies.
-- All errors flagged by the linter are legitimate. There's always a way to fix the code to not break the rules.
+- Les composants peuvent être montés (mount), mis à jour (update) et démontés (unmount)
+- Chaque Effect a un cycle de vie séparé de son composant
+- Chaque Effect décrit un processus de synchro qui peut _démarrer_ ou _arrêter_
+- Pour écrire des effects
+  - Pensez à la perspective de l'Effect (démarrer et arrêter la synchro)
+  - Plutôt que la perspective du composant (mount, update, unmount)
+- Les valeurs déclarées dans un composant sont réactives
+- Les valeurs réactives provoquent la re-synchronisatio quand elles changent
+- Le Linter valide que les valeurs réactives sont spécifiées dans le tableau de dépendance
+- Toutes les erreurs rapportées par le linter sont légitimes
+- Il y a toujours moyen de modifier le code pour ne plus briser les règles
 
 ---
 
@@ -937,13 +960,13 @@ On the [next](/learn/separating-events-from-effects) [pages](/learn/removing-eff
 
 #### Éviter la reconnexion à chaque touche tapée
 
-In this example, the `ChatRoom` component connects to the chat room when the component mounts, disconnects when it unmounts, and reconnects when you select a different chat room. This behavior is correct, so you need to keep it working.
+Le composant `ChatRoom` se connecte et déconnecte correctement quand on change quand on monte, démonte ou change le roomID.
 
-However, there is a problem. Whenever you type into the message box input at the bottom, `ChatRoom` _also_ reconnects to the chat. (You can notice this by clearing the console and typing into the input.) Fix the issue so that this doesn't happen.
+Mais, quand on tape un message dans la boîte en bas, cela re-connecte au chat à nouveau. Ces re-connexions ne sont pas désirables.
 
 <Hint>
 
-You might need to add a dependency array for this Effect. What dependencies should be there?
+Faudrait ajouter un tableau de dépendances à l'Effect
 
 </Hint>
 
@@ -1021,15 +1044,15 @@ button {
 
 ---
 
-#### Switch synchronization on and off {/* switch-synchronization-on-and-off */}
+## Activer et désactiver la synchro
 
-In this example, an Effect subscribes to the window [`pointermove`](https://developer.mozilla.org/en-US/docs/Web/API/Element/pointermove_event) event to move a pink dot on the screen. Try hovering over the preview area (or touching the screen if you're on a mobile device), and see how the pink dot follows your movement.
+Dans cet exemple, un Effect s'abonne à l'événement `pointermove` pour déplacer un point rose.
 
-There is also a checkbox. Ticking the checkbox toggles the `canMove` state variable, but this state variable is not used anywhere in the code. Your task is to change the code so that when `canMove` is `false` (the checkbox is ticked off), the dot should stop moving. After you toggle the checkbox back on (and set `canMove` to `true`), the box should follow the movement again. In other words, whether the dot can move or not should stay synchronized to whether the checkbox is checked.
+Il y a une cas à cocher qui modifie l'état `canMove`. Cela ne fait rien présentement. Il faudrait arrêter le déplacement quand `canMove` est à false. On veut synchroniser le comportement de l'app dépendant de la case à cocher.
 
 <Hint>
 
-You can't declare an Effect conditionally. However, the code inside the Effect can use conditions!
+Un Effect ne peut être appelé de façon conditionnelle, mais le code dans cet Effect peut utiliser des conditions
 
 </Hint>
 
@@ -1090,15 +1113,13 @@ body {
 
 ---
 
-#### Investigate a stale value bug {/* investigate-a-stale-value-bug */}
+## Réparer un bogue
 
-In this example, the pink dot should move when the checkbox is on, and should stop moving when the checkbox is off. The logic for this has already been implemented: the `handleMove` event handler checks the `canMove` state variable.
-
-However, for some reason, the `canMove` state variable inside `handleMove` appears to be "stale": it's always `true`, even after you tick off the checkbox. How is this possible? Find the mistake in the code and fix it.
+Dans cet exemple, le point suit la souris, quelle que soit la valeur de la case à cocher. Réparez le bogue pour que le point arrête de suivre la souris quand la case n'est pas pas cochée.
 
 <Hint>
 
-If you see a linter rule being suppressed, remove the suppression! That's where the mistakes usually are.
+Il y a une supression de la règle du Linter. C'est un indice qu'on a possiblement un bogue à cet endroit.
 
 </Hint>
 
