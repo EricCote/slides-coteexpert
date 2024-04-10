@@ -7,7 +7,8 @@ import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/React/5-data/5-effect-lifecycle.fr.mdx';
+import Status from './decks/React/5-data/8-custom-hooks.fr.mdx';
+import Status2 from './decks/React/5-data/6-effects-and-events.fr.mdx';
 import { useLanguage } from './components/slides/LanguageProvider';
 
 const components = {
@@ -20,7 +21,7 @@ const components = {
         className={className}
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
           columnGap: 10,
           alignItems: 'center',
           ...style,

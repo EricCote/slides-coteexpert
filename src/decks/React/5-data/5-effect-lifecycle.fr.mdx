@@ -1184,15 +1184,15 @@ body {
 
 ---
 
-#### Fix a connection switch {/* fix-a-connection-switch */}
+## Réparer la connexion
 
-In this example, the chat service in `chat.js` exposes two different APIs: `createEncryptedConnection` and `createUnencryptedConnection`. The root `App` component lets the user choose whether to use encryption or not, and then passes down the corresponding API method to the child `ChatRoom` component as the `createConnection` prop.
+Le service `chat.js` expose deux APIs: `createEncryptedConnection` et `createUnencryptedConnection`. Le composant `App` permet de choisir le niveau d'encryption, et passe cet état au composant `ChatRoom` dans la prop `createConnection`.
 
-Notice that initially, the console logs say the connection is not encrypted. Try toggling the checkbox on: nothing will happen. However, if you change the selected room after that, then the chat will reconnect _and_ enable encryption (as you'll see from the console messages). This is a bug. Fix the bug so that toggling the checkbox _also_ causes the chat to reconnect.
+La case à cocher ne semble rien faire lors d'un clic. Mais elle fonctionne si on modifie la chambre. Pour réparer le bogue, on voudrait se reconnecter dès qu'on clique la case à cocher.
 
 <Hint>
 
-Suppressing the linter is always suspicious. Could this be a bug?
+On supprime un avertissement du Linter, c'est suspect.
 
 </Hint>
 
@@ -1291,17 +1291,17 @@ label {
 
 ---
 
-#### Populate a chain of select boxes {/* populate-a-chain-of-select-boxes */}
+## Remplir une chaine de boîtes de sélection
 
-In this example, there are two select boxes. One select box lets the user pick a planet. Another select box lets the user pick a place _on that planet._ The second box doesn't work yet. Your task is to make it show the places on the chosen planet.
+La première boîte permet de choisir une planète. La seconde devrait permettre de sélectionner une place. Mais elle ne fait rien pour le moment.
 
-Look at how the first select box works. It populates the `planetList` state with the result from the `"/planets"` API call. The currently selected planet's ID is kept in the `planetId` state variable. You need to find where to add some additional code so that the `placeList` state variable is populated with the result of the `"/planets/" + planetId + "/places"` API call.
+Il faut ajouter le code pour aller chercher la liste de places. La liste `placeList` est remplie par un API nommé `"/planets/" + planetId + "/places"`.
 
-If you implement this right, selecting a planet should populate the place list. Changing a planet should change the place list.
+Changer la planète devrait changer la liste des places.
 
 <Hint>
 
-If you have two independent synchronization processes, you need to write two separate Effects.
+Il y a deux processus de synchronisation indépendants. Il faut donc deux Effects séparés.
 
 </Hint>
 

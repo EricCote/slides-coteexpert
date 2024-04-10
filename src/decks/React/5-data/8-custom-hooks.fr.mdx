@@ -1,0 +1,2488 @@
+---
+title: 'Hooks Personnalisés'
+---
+
+# Hooks Personnalisés
+
+---
+
+## Intro
+
+- React est fourni avec ses Hooks
+  - `useState`
+  - `useContext`
+  - `useEffect`
+- Parfois, on désire des hooks spécifiques:
+  - Aller chercher des données sur un service
+  - Gérer quand on est en Ligne
+  - Se connecter à du clavardage
+- On peut créer nos propres hooks pour nos besoins
+
+---
+
+## Contenu
+
+- Comment écrire des hooks personnalisés
+- Réutiliser la logique entre les composants
+- Comment nommer et structurer les Hooks personnalisés
+- Quand extraire les hooks personnalisés
+
+---
+
+## Partage de code entre les composants
+
+- Imaginons une application qui doit détecter si le réseau et disponible
+- Il faut 2 choses:
+  1. Un état (state) qui détermine si le réseau est en ligne
+  1. Un Effect qui s'abonne aux événements `online` et `offline` et qui met à jour l'état
+- On garde le composant synchronisé avec l'état du réseau
+
+---
+
+## Code
+
+<Sandpack>
+
+```js
+import { useState, useEffect } from 'react';
+
+export default function StatusBar() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return <h1>{isOnline ? '✅ Online' : '❌ Disconnected'}</h1>;
+}
+```
+
+</Sandpack>
+
+Testez en modifiant l'état du réseau, et le `StatusBar` se met à jour
+
+---
+
+## Copier le code dans un autre composant
+
+- On pourrait vouloir une logique similaire pour afficher le bouton `Save` différemment, dépendant si on est en ligne ou hors ligne.
+
+<Sandpack>
+
+```js
+import { useState, useEffect } from 'react';
+
+export default function SaveButton() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  function handleSaveClick() {
+    console.log('✅ Progress saved');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? 'Save progress' : 'Reconnecting...'}
+    </button>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+### Extraire un Hook d'un composant
+
+- Si on veut réutilser le code, on pourrait créer un hook nommé `useOnlineStatus`
+- Cela simplifie le code des composants
+
+```js {2,7}
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  return <h1>{isOnline ? '✅ Online' : '❌ Disconnected'}</h1>;
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+
+  function handleSaveClick() {
+    console.log('✅ Progress saved');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? 'Save progress' : 'Reconnecting...'}
+    </button>
+  );
+}
+```
+
+---
+
+## Création du Hook
+
+- La fonction retourne la valeur de `isOnline`.
+
+```js {2-16}
+function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  return isOnline;
+}
+```
+
+---
+
+## Code
+
+<Sandpack>
+
+```js
+import { useOnlineStatus } from './useOnlineStatus.js';
+
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  return <h1>{isOnline ? '✅ Online' : '❌ Disconnected'}</h1>;
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+
+  function handleSaveClick() {
+    console.log('✅ Progress saved');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? 'Save progress' : 'Reconnecting...'}
+    </button>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <SaveButton />
+      <StatusBar />
+    </>
+  );
+}
+```
+
+```js src/useOnlineStatus.js
+import { useState, useEffect } from 'react';
+
+export function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  return isOnline;
+}
+```
+
+</Sandpack>
+
+---
+
+## Résultat
+
+- Avec le hook personnalisé, les composants ont moins de logique répétitive.
+- Le code est plus descriptif
+  - On décrit ce l'on veut comme info (l'état du réseau)
+  - Plutôt que de décrire comment obtenir l'info (un abonnement à l'événement navigateur)
+  - Le hook cache les détails, comme la connexion à un système externe
+
+---
+
+## Le nom d'un hook débute toujours par `use`
+
+- **Les composants React débutent toujours par une lettre majuscule**
+  - ex: `StatusBar`, `SaveButton`.
+  - retourne du JSX
+- **Les hook débutent toujours par `use`, suivi d'une majuscule**
+  - ext: `useState`, `useOnlineStatus`
+  - retourne une valeur simple ou complexe.
+    <hr />
+- Cette convention aide à déterminer où se trouve l'État et les Effects d'un composant
+  - `getColor()` ne peut contenir un état
+  - `useOnlineStatus()` contient d'autres hooks
+
+---
+
+## Linter et les hooks
+
+- Avec un linter bien configuré, il faut respecter la nomenclature des hooks.
+- Le linter retourne une erreur quand on renomme `useOnlineStatus` à `getOnlineStatus`.
+- Un hook doit être appelé par:
+  - un composant
+  - un autre hook
+
+---
+
+## Deep Dive: Ne pas ajouter `use` à toutes les fonctions
+
+- Une fonction qui n'utilise pas de hooks n'a pas besoin d'être un hook
+- Dans ce cas, on évite d'utiliser le préfixe `use`
+- Dans l'exemple suivant, `useSorted` n'utilise pas de Hooks
+- Il faudrait nommer la fonction `getSorted`:
+
+```js
+// 🔴 Avoid: A Hook that doesn't use Hooks
+function useSorted(items) {
+  return items.slice().sort();
+}
+
+// ✅ Good: A regular function that doesn't use Hooks
+function getSorted(items) {
+  return items.slice().sort();
+}
+```
+
+---
+
+## Plus flexible quand ce n'est pas un hook
+
+- Une fonction est plus flexible qu'un hook
+- On peut appeler une fonction dans une condition ou boucle
+
+```js
+function List({ items, shouldSort }) {
+  let displayedItems = items;
+  if (shouldSort) {
+    // ✅ It's ok to call getSorted() conditionally because it's not a Hook
+    displayedItems = getSorted(items);
+  }
+  // ...
+}
+```
+
+- Si une fonction utilise un hook, il faut la convertir en hook
+- On renomme cette fonction avec le préfixe `use`.
+
+```js
+// ✅ Good: A Hook that uses other Hooks
+function useAuth() {
+  return useContext(Auth);
+}
+```
+
+---
+
+## Un Hook pour le futur
+
+- On pourrait créer un hook qui n'appelle pas d'autres hooks
+- Ça peut être utile pour le futur si on planifie modifier le code pour ajouter des hooks
+
+```js {3-4}
+// ✅ Good: A Hook that will likely use some other Hooks later
+function useAuth() {
+  // TODO: Replace with this line when authentication is implemented:
+  // return useContext(Auth);
+  return TEST_USER;
+}
+```
+
+En étant un hook, on ne peut plus l'appeler d'un bloc conditionnel ou une boucle
+
+---
+
+## Partager du code étatique, sans partager l'état
+
+- On pourrait penser que la même variable d'état `isOnline` est partagé
+- Mais ce n'est PAS le cas
+
+<TwoColumns>
+
+```js {2,7}
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  // ...
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+  // ...
+}
+```
+
+```js {2-5,10-13}
+function StatusBar() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    // ...
+  }, []);
+  // ...
+}
+
+function SaveButton() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    // ...
+  }, []);
+  // ...
+}
+```
+
+</TwoColumns>
+
+- C'est deux variables d'états et des Effect, qui sont indépendants
+- Ils sont synchronisés sur la même valeur externe
+
+---
+
+## Autre exemple qui utilise de l'état
+
+- Voici un formulaire `Form` avec des états séparés
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [firstName, setFirstName] = useState('Mary');
+  const [lastName, setLastName] = useState('Poppins');
+
+  function handleFirstNameChange(e) {
+    setFirstName(e.target.value);
+  }
+
+  function handleLastNameChange(e) {
+    setLastName(e.target.value);
+  }
+
+  return (
+    <>
+      <label>
+        First name:
+        <input value={firstName} onChange={handleFirstNameChange} />
+      </label>
+      <label>
+        Last name:
+        <input value={lastName} onChange={handleLastNameChange} />
+      </label>
+      <p>
+        <b>
+          Good morning, {firstName} {lastName}.
+        </b>
+      </p>
+    </>
+  );
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+# Répétition du code
+
+1. Il y a deux états (`firstName` et `lastName`).
+1. Il y a deux gestionnaires d'événements (`handleFirstNameChange` et `handleLastNameChange`).
+1. Il y a deux blocs JSX qui utilise des attributs `value` et `onChange`.
+
+---
+
+## Remplacer l'état par un hook
+
+- On peut extraire cette logique répétitive dans un hook `useFormInput`:
+
+<Sandpack>
+
+```js
+import { useFormInput } from './useFormInput.js';
+
+export default function Form() {
+  const firstNameProps = useFormInput('Mary');
+  const lastNameProps = useFormInput('Poppins');
+
+  return (
+    <>
+      <label>
+        First name:
+        <input {...firstNameProps} />
+      </label>
+      <label>
+        Last name:
+        <input {...lastNameProps} />
+      </label>
+      <p>
+        <b>
+          Good morning, {firstNameProps.value} {lastNameProps.value}.
+        </b>
+      </p>
+    </>
+  );
+}
+```
+
+```js src/useFormInput.js active
+import { useState } from 'react';
+
+export function useFormInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+
+  function handleChange(e) {
+    setValue(e.target.value);
+  }
+
+  const inputProps = {
+    value: value,
+    onChange: handleChange,
+  };
+
+  return inputProps;
+}
+```
+
+```css
+label {
+  display: block;
+}
+input {
+  margin-left: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Le code est appelé deux fois, créant deux états
+
+- On déclare une variable d'état nommée `value`
+- Le composant Form appelle `useFormInput` deux fois
+
+```js
+function Form() {
+  const firstNameProps = useFormInput('Mary');
+  const lastNameProps = useFormInput('Poppins');
+  // ...
+```
+
+- C'est comme déclarer 2 variables d'états séparées
+- Un hook personnalisé partage la _logique d'état_, mais pas _l'état_
+- Chaque appel au hook personalisé est indépendant
+- Si on désire partager l'état, il faut remonter l'état dans l'arborescence et le passer vers le bas avec des props (ou un contexte)
+
+---
+
+## Passer des valeurs réactives à travers les hooks
+
+- Les hooks ré-exécutent à chaque re-rendu du composant
+- Ils utilisent les props et l'état courant
+- Les hooks doivent être **purs**
+  - Comme le code dans le corps d'un composant
+- Le code suivant n'utilise pas de hooks (pour le moment)
+
+<Sandpack>
+
+```js src/App.js
+import { useState } from 'react';
+import ChatRoom from './ChatRoom.js';
+
+export default function App() {
+  const [roomId, setRoomId] = useState('general');
+  return (
+    <>
+      <label>
+        Choose the chat room:{' '}
+        <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+          <option value='general'>general</option>
+          <option value='travel'>travel</option>
+          <option value='music'>music</option>
+        </select>
+      </label>
+      <hr />
+      <ChatRoom roomId={roomId} />
+    </>
+  );
+}
+```
+
+```js src/ChatRoom.js active
+import { useState, useEffect } from 'react';
+import { createConnection } from './chat.js';
+import { showNotification } from './notifications.js';
+
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.on('message', (msg) => {
+      showNotification('New message: ' + msg);
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]);
+
+  return (
+    <>
+      <label>
+        Server URL:
+        <input
+          value={serverUrl}
+          onChange={(e) => setServerUrl(e.target.value)}
+        />
+      </label>
+      <h1>Welcome to the {roomId} room!</h1>
+    </>
+  );
+}
+```
+
+```js src/chat.js
+export function createConnection({ serverUrl, roomId }) {
+  // A real implementation would actually connect to the server
+  if (typeof serverUrl !== 'string') {
+    throw Error('Expected serverUrl to be a string. Received: ' + serverUrl);
+  }
+  if (typeof roomId !== 'string') {
+    throw Error('Expected roomId to be a string. Received: ' + roomId);
+  }
+  let intervalId;
+  let messageCallback;
+  return {
+    connect() {
+      console.log(
+        '✅ Connecting to "' + roomId + '" room at ' + serverUrl + '...'
+      );
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (messageCallback) {
+          if (Math.random() > 0.5) {
+            messageCallback('hey');
+          } else {
+            messageCallback('lol');
+          }
+        }
+      }, 3000);
+    },
+    disconnect() {
+      clearInterval(intervalId);
+      messageCallback = null;
+      console.log(
+        '❌ Disconnected from "' + roomId + '" room at ' + serverUrl + ''
+      );
+    },
+    on(event, callback) {
+      if (messageCallback) {
+        throw Error('Cannot add the handler twice.');
+      }
+      if (event !== 'message') {
+        throw Error('Only "message" event is supported.');
+      }
+      messageCallback = callback;
+    },
+  };
+}
+```
+
+```js src/notifications.js
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
+
+export function showNotification(message, theme = 'dark') {
+  Toastify({
+    text: message,
+    duration: 2000,
+    gravity: 'top',
+    position: 'right',
+    style: {
+      background: theme === 'dark' ? 'black' : 'white',
+      color: theme === 'dark' ? 'white' : 'black',
+    },
+  }).showToast();
+}
+```
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "toastify-js": "1.12.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```css
+input {
+  display: block;
+  margin-bottom: 20px;
+}
+button {
+  margin-left: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Déplacer l'Effect dans un hook personnalisé
+
+```js {2-13}
+export function useChatRoom({ serverUrl, roomId }) {
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      showNotification('New message: ' + msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]);
+}
+```
+
+---
+
+## Appeler le hook
+
+Le composant `ChatRoom` appelle le hook personalisé sans se soucier de son fonctionnement.
+
+```js {4-7}
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl,
+  });
+
+  return (
+    <>
+      <label>
+        Server URL:
+        <input
+          value={serverUrl}
+          onChange={(e) => setServerUrl(e.target.value)}
+        />
+      </label>
+      <h1>Welcome to the {roomId} room!</h1>
+    </>
+  );
+}
+```
+
+- Ça semble plus simple (cela fait la même chose)
+
+---
+
+## Même code, avec hook personnalisé
+
+- La logique réagit aux changements de props et d'états
+
+<Sandpack>
+
+```js src/App.js
+import { useState } from 'react';
+import ChatRoom from './ChatRoom.js';
+
+export default function App() {
+  const [roomId, setRoomId] = useState('general');
+  return (
+    <>
+      <label>
+        Choose the chat room:{' '}
+        <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+          <option value='general'>general</option>
+          <option value='travel'>travel</option>
+          <option value='music'>music</option>
+        </select>
+      </label>
+      <hr />
+      <ChatRoom roomId={roomId} />
+    </>
+  );
+}
+```
+
+```js src/ChatRoom.js active
+import { useState } from 'react';
+import { useChatRoom } from './useChatRoom.js';
+
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl,
+  });
+
+  return (
+    <>
+      <label>
+        Server URL:
+        <input
+          value={serverUrl}
+          onChange={(e) => setServerUrl(e.target.value)}
+        />
+      </label>
+      <h1>Welcome to the {roomId} room!</h1>
+    </>
+  );
+}
+```
+
+```js src/useChatRoom.js
+import { useEffect } from 'react';
+import { createConnection } from './chat.js';
+import { showNotification } from './notifications.js';
+
+export function useChatRoom({ serverUrl, roomId }) {
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      showNotification('New message: ' + msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]);
+}
+```
+
+```js src/chat.js
+export function createConnection({ serverUrl, roomId }) {
+  // A real implementation would actually connect to the server
+  if (typeof serverUrl !== 'string') {
+    throw Error('Expected serverUrl to be a string. Received: ' + serverUrl);
+  }
+  if (typeof roomId !== 'string') {
+    throw Error('Expected roomId to be a string. Received: ' + roomId);
+  }
+  let intervalId;
+  let messageCallback;
+  return {
+    connect() {
+      console.log(
+        '✅ Connecting to "' + roomId + '" room at ' + serverUrl + '...'
+      );
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (messageCallback) {
+          if (Math.random() > 0.5) {
+            messageCallback('hey');
+          } else {
+            messageCallback('lol');
+          }
+        }
+      }, 3000);
+    },
+    disconnect() {
+      clearInterval(intervalId);
+      messageCallback = null;
+      console.log(
+        '❌ Disconnected from "' + roomId + '" room at ' + serverUrl + ''
+      );
+    },
+    on(event, callback) {
+      if (messageCallback) {
+        throw Error('Cannot add the handler twice.');
+      }
+      if (event !== 'message') {
+        throw Error('Only "message" event is supported.');
+      }
+      messageCallback = callback;
+    },
+  };
+}
+```
+
+```js src/notifications.js
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
+
+export function showNotification(message, theme = 'dark') {
+  Toastify({
+    text: message,
+    duration: 2000,
+    gravity: 'top',
+    position: 'right',
+    style: {
+      background: theme === 'dark' ? 'black' : 'white',
+      color: theme === 'dark' ? 'white' : 'black',
+    },
+  }).showToast();
+}
+```
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "toastify-js": "1.12.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```css
+input {
+  display: block;
+  margin-bottom: 20px;
+}
+button {
+  margin-left: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Chaînage de hooks
+
+- On prend la valeur de retour d'un hook
+
+```js {2}
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl
+  });
+  // ...
+```
+
+- On passe cette valeur à l'autre hook
+
+```js {6}
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl
+  });
+  // ...
+```
+
+---
+
+## Passer des gestionnaires d'événements aux hooks personnalisés
+
+- Présentement, le gestionnaire d'événement est déclaré directement dans le hook
+
+```js {9-11}
+export function useChatRoom({ serverUrl, roomId }) {
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      showNotification('New message: ' + msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]);
+}
+```
+
+---
+
+## Ramener le gestionnaire d'événement dans le composant
+
+- On pourrait vouloir déplacer cette logique dans le composant
+
+```js {7-9}
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl,
+    onReceiveMessage(msg) {
+      showNotification('New message: ' + msg);
+    }
+  });
+  // ...
+```
+
+---
+
+## Modifier le hook pour recevoir l'événement
+
+```js {1,10,13}
+export function useChatRoom({ serverUrl, roomId, onReceiveMessage }) {
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      onReceiveMessage(msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl, onReceiveMessage]); // ✅ All dependencies declared
+}
+```
+
+- Pas idéal: le chat se re-synchronyse (déconnecte et reconnecte) à chaque re-rendu
+
+---
+
+## Encapsuler l'événement dans un Événement d'Effect
+
+- On peut encapsuler le gestionnaire d'événement dans un événement d'Effect
+- On peut alors l'enlever de la liste des dépendances
+- Cela ne reconnecte plus à chaque re-rendu
+
+```js {1,4,5,15,18}
+import { useEffect, useEffectEvent } from 'react';
+// ...
+
+export function useChatRoom({ serverUrl, roomId, onReceiveMessage }) {
+  const onMessage = useEffectEvent(onReceiveMessage);
+
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      onMessage(msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]); // ✅ All dependencies declared
+}
+```
+
+---
+
+## Code avec événement d'Effect
+
+<Sandpack>
+
+```js src/App.js
+import { useState } from 'react';
+import ChatRoom from './ChatRoom.js';
+
+export default function App() {
+  const [roomId, setRoomId] = useState('general');
+  return (
+    <>
+      <label>
+        Choose the chat room:{' '}
+        <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+          <option value='general'>general</option>
+          <option value='travel'>travel</option>
+          <option value='music'>music</option>
+        </select>
+      </label>
+      <hr />
+      <ChatRoom roomId={roomId} />
+    </>
+  );
+}
+```
+
+```js src/ChatRoom.js active
+import { useState } from 'react';
+import { useChatRoom } from './useChatRoom.js';
+import { showNotification } from './notifications.js';
+
+export default function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  useChatRoom({
+    roomId: roomId,
+    serverUrl: serverUrl,
+    onReceiveMessage(msg) {
+      showNotification('New message: ' + msg);
+    },
+  });
+
+  return (
+    <>
+      <label>
+        Server URL:
+        <input
+          value={serverUrl}
+          onChange={(e) => setServerUrl(e.target.value)}
+        />
+      </label>
+      <h1>Welcome to the {roomId} room!</h1>
+    </>
+  );
+}
+```
+
+```js src/useChatRoom.js
+import { useEffect } from 'react';
+import { experimental_useEffectEvent as useEffectEvent } from 'react';
+import { createConnection } from './chat.js';
+
+export function useChatRoom({ serverUrl, roomId, onReceiveMessage }) {
+  const onMessage = useEffectEvent(onReceiveMessage);
+
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    connection.on('message', (msg) => {
+      onMessage(msg);
+    });
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]);
+}
+```
+
+```js src/chat.js
+export function createConnection({ serverUrl, roomId }) {
+  // A real implementation would actually connect to the server
+  if (typeof serverUrl !== 'string') {
+    throw Error('Expected serverUrl to be a string. Received: ' + serverUrl);
+  }
+  if (typeof roomId !== 'string') {
+    throw Error('Expected roomId to be a string. Received: ' + roomId);
+  }
+  let intervalId;
+  let messageCallback;
+  return {
+    connect() {
+      console.log(
+        '✅ Connecting to "' + roomId + '" room at ' + serverUrl + '...'
+      );
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (messageCallback) {
+          if (Math.random() > 0.5) {
+            messageCallback('hey');
+          } else {
+            messageCallback('lol');
+          }
+        }
+      }, 3000);
+    },
+    disconnect() {
+      clearInterval(intervalId);
+      messageCallback = null;
+      console.log(
+        '❌ Disconnected from "' + roomId + '" room at ' + serverUrl + ''
+      );
+    },
+    on(event, callback) {
+      if (messageCallback) {
+        throw Error('Cannot add the handler twice.');
+      }
+      if (event !== 'message') {
+        throw Error('Only "message" event is supported.');
+      }
+      messageCallback = callback;
+    },
+  };
+}
+```
+
+```js src/notifications.js
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
+
+export function showNotification(message, theme = 'dark') {
+  Toastify({
+    text: message,
+    duration: 2000,
+    gravity: 'top',
+    position: 'right',
+    style: {
+      background: theme === 'dark' ? 'black' : 'white',
+      color: theme === 'dark' ? 'white' : 'black',
+    },
+  }).showToast();
+}
+```
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "experimental",
+    "react-dom": "experimental",
+    "react-scripts": "latest",
+    "toastify-js": "1.12.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```css
+input {
+  display: block;
+  margin-bottom: 20px;
+}
+button {
+  margin-left: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Quand utiliser des Hooks personnalisés
+
+- Pas besoin d'isoler un hook personnalisé pour chaque ligne de code dupliquée
+- On peut tolérer un peu de duplication
+- Ex: inutile d'isoler un hook `useFormInput` quand on n'a qu'un seul champ dans le formulaire (un seul `useState` est nécessaire)
+- Isoler un Effect peut rendre notre code plus clair
+
+---
+
+## Exemple: Gérer formulaire sans hook personnalisé
+
+- Imaginons un composant `ShippingForm` avec deux listes déloulantes:
+  - Une liste de villes
+  - Une liste de quartiers qui change d'après la ville sélectionnée
+
+<TwoColumns style={{fontSize:"0.9em",alignItems: "top"}}>
+
+```js {3-16}
+function ShippingForm({ country }) {
+  const [cities, setCities] = useState(null);
+  // This Effect fetches cities for a country
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/cities?country=${country}`)
+      .then(response => response.json())
+      .then(json => {
+        if (!ignore) {
+          setCities(json);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [country]);
+```
+
+```js {3-18}
+const [city, setCity] = useState(null);
+const [areas, setAreas] = useState(null);
+// This Effect fetches areas for the selected city
+useEffect(() => {
+  if (city) {
+    let ignore = false;
+    fetch(`/api/areas?city=${city}`)
+      .then((response) => response.json())
+      .then((json) => {
+        if (!ignore) {
+          setAreas(json);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }
+}, [city]);
+
+// ...
+```
+
+</TwoColumns>
+
+- Le code est répétitif, mais c'est correct de garder ces Effects séparés
+- Quand on synchronise des choses différentes, on les sépare dans des Effects distincts
+
+---
+
+## Ajouter un hook
+
+- On pourrait extraire la logique commune dans un hook `useData`:
+
+```js {2-18}
+function useData(url) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (url) {
+      let ignore = false;
+      fetch(url)
+        .then((response) => response.json())
+        .then((json) => {
+          if (!ignore) {
+            setData(json);
+          }
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [url]);
+  return data;
+}
+```
+
+---
+
+## Remplacer les Effects par des appels au hook `useData`
+
+```js {2,4}
+function ShippingForm({ country }) {
+  const cities = useData(`/api/cities?country=${country}`);
+  const [city, setCity] = useState(null);
+  const areas = useData(city ? `/api/areas?city=${city}` : null);
+  // ...
+```
+
+- Le flot de données est plus clair avec des hooks personnalisés
+- Les Effects sont encapsulés, difficile de faire l'erreur d'ajouter des dépendances superflues au tableau de dépendances
+- Les effects auront tendance à être encapsulées dans des hooks personnalisés
+
+---
+
+## Deep Dive: créer les Hooks sur des cas concrets de haut niveau
+
+- On débute en choisissant un nom du hook
+- Si le nom à choisir n'est pas clair, l'Effect est trop fortement couplé au reste du composant
+- Il faut simplifier avant d'isoler
+- Un bon nom de hook indique ce qu'il fait, ce qu'il prend comme paramètre, ce qu'il retourne
+
+  - ✅ `useData(url)`
+  - ✅ `useImpressionLog(eventName, extraData)`
+  - ✅ `useChatRoom(options)`
+    <hr />
+
+- Quand on synchronise avec un système externe, le nom sera plus technique, en utilisant du jargon spécifique à ce système
+  - ✅ `useMediaQuery(query)`
+  - ✅ `useSocket(url)`
+  - ✅ `useIntersectionObserver(ref, options)`
+
+---
+
+## Évitez des hooks de type "lifecycle"
+
+Ces noms encapsulent `useEffect`, sans ajouter de valeur:
+
+- 🔴 `useMount(fn)`
+- 🔴 `useEffectOnce(fn)`
+- 🔴 `useUpdateEffect(fn)`
+
+---
+
+## Mauvaise pratique: hook useMount
+
+- Un hook `useMount` pourrait garantir que le code ne roule que sur "on mount" (le montage):
+
+<div style={{fontSize:'0.8em'}}>
+
+```js {4-5,12-13}
+function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  // 🔴 Avoid: using custom "lifecycle" Hooks
+  useMount(() => {
+    const connection = createConnection({ roomId, serverUrl });
+    connection.connect();
+  });
+  // ...
+}
+
+// 🔴 Avoid: creating custom "lifecycle" Hooks
+function useMount(fn) {
+  useEffect(() => {
+    fn();
+  }, []); // 🔴 React Hook useEffect has a missing dependency: 'fn'
+}
+```
+
+</div>
+
+- **`useMount` n'utilise pas le paradigme React**
+- Dans cet exemple, on ne réagit pas aux changements de `roomId` ou `serverUrl`
+- Le linter ne peut avertir, car on ne valide les dépendances que pour les appels à `useEffect`
+
+---
+
+## On préfère utiliser useEffect plutôt que useMount
+
+<div style={{fontSize:'0.8em'}}>
+
+```js
+function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  // ✅ Good: two raw Effects separated by purpose
+
+  useEffect(() => {
+    const connection = createConnection({ serverUrl, roomId });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [serverUrl, roomId]);
+
+  useEffect(() => {
+    post('/analytics/event', { eventName: 'visit_chat', roomId });
+  }, [roomId]);
+
+  // ...
+}
+```
+
+</div>
+
+- Alternative: On pourrait extraire des hooks personnalisés
+
+<div style={{fontSize:'0.8em'}}>
+
+```js
+function ChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState('https://localhost:1234');
+
+  // ✅ Great: custom Hooks named after their purpose
+  useChatRoom({ serverUrl, roomId });
+  useImpressionLog('visit_chat', { roomId });
+  // ...
+}
+```
+
+</div>
+
+---
+
+## Bon patron pour les hooks personnalisés
+
+- Un bon hook personnalisé rend le code plus déclaratif
+- Il contraint son usage à des scénarios spécifiques
+- `useChatRoom(options)` se connecte à un ChatRoom
+- `useImpressionLog(eventName, extraData)` est utilisé pour envoyer de la télémétrie analytique
+- Si le hook est très abstrait, sans contraintes, cela va créer générer des problèmes d'architecture à la longue
+
+---
+
+## Bonne pratique: Encapsuler les Effects dans des hooks personnalisés
+
+- Les Effects sont des "échappatoires" (escape hatch)
+- On les utilise pour "sortir de React", quand il n'y a pas d'autres moyens
+- L'équipe de React va réduire le nombre d'Effect dans le code
+  - Les futures versions de React fourniront des fonctionnalités additionnelles
+- Encapsuler les effects dans des hooks personnalisés rend la mise à jour future plus facile
+
+---
+
+## Code avec Effect encapsulé dans hook
+
+Revenons à cet exemple
+
+<Sandpack>
+
+```js
+import { useOnlineStatus } from './useOnlineStatus.js';
+
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  return <h1>{isOnline ? '✅ Online' : '❌ Disconnected'}</h1>;
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+
+  function handleSaveClick() {
+    console.log('✅ Progress saved');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? 'Save progress' : 'Reconnecting...'}
+    </button>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <SaveButton />
+      <StatusBar />
+    </>
+  );
+}
+```
+
+```js src/useOnlineStatus.js active
+import { useState, useEffect } from 'react';
+
+export function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  return isOnline;
+}
+```
+
+</Sandpack>
+
+---
+
+## Problèmes du Code
+
+- Dans le code précédent, `useOnlineStatus` est codé avec `useState` et `useEffect`
+- Le code n'est pas parfait
+  - On assume qu'au moment du montage, `isOnline` est à `true`
+  - Mais le réseau pourrait être déjà déconnecté
+  - On pourrait alors utiliser `navigator.onLine` pour retourner l'état du réseau
+  - Mais cet appel ne fonctionnerait pas sur la génération serveur de HTML
+
+---
+
+## Solution possible
+
+- React 18 inclut un API dédié nommé `useSyncExternalStore` qui gère ces problèmes
+
+<Sandpack>
+
+```js
+import { useOnlineStatus } from './useOnlineStatus.js';
+
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  return <h1>{isOnline ? '✅ Online' : '❌ Disconnected'}</h1>;
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+
+  function handleSaveClick() {
+    console.log('✅ Progress saved');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? 'Save progress' : 'Reconnecting...'}
+    </button>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <SaveButton />
+      <StatusBar />
+    </>
+  );
+}
+```
+
+```js src/useOnlineStatus.js active
+import { useSyncExternalStore } from 'react';
+
+function subscribe(callback) {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
+}
+
+export function useOnlineStatus() {
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine, // How to get the value on the client
+    () => true // How to get the value on the server
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Détails
+
+- Aucunement besoin de changer nos composants
+- Seul le hook change (on passe de `useEffect` à `useSyncExternalStore`)
+
+```js {2,7}
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  // ...
+}
+
+function SaveButton() {
+  const isOnline = useOnlineStatus();
+  // ...
+}
+```
+
+- Encapsuler les Effects dans des hooks personnalisés est bénéfique:
+
+1. Le flot de données des Effects est plus explicite
+1. Le focus du composant sera sur l'intention, plutôt que les détails des Effects
+1. Quand React ajoute de nouvelles fonctionalités, on pourra enlever les Effects sans affecter les composants
+
+- Il existe aussi plusieurs hooks fournis par la communauté
+
+---
+
+## Deep Dive: React fournira une solution pour le chargement les données
+
+Le code de React 19 ressemblera à ceci:
+
+```js {1,4,6}
+import { use } from 'react'; // Not available yet!
+
+function ShippingForm({ country }) {
+  const cities = use(fetch(`/api/cities?country=${country}`));
+  const [city, setCity] = useState(null);
+  const areas = city ? use(fetch(`/api/areas?city=${city}`)) : null;
+  // ...
+```
+
+- L'approche avec useEffect existera encore
+- Le code existant sera compatible
+
+---
+
+## Plus d'une approche possible
+
+- Imaginons un composant qui veut utiliser une animation fade-in, utilisant l'API `requestAnimationFrame`
+- On débute avec un Effect qui démarre une boucle pour l'animation
+- À chaque frame, on change l'opacité du noeud DOM, provenant du ref, jusqu'à `1`
+
+<Sandpack>
+
+```js
+import { useState, useEffect, useRef } from 'react';
+
+function Welcome() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const duration = 1000;
+    const node = ref.current;
+
+    let startTime = performance.now();
+    let frameId = null;
+
+    function onFrame(now) {
+      const timePassed = now - startTime;
+      const progress = Math.min(timePassed / duration, 1);
+      onProgress(progress);
+      if (progress < 1) {
+        // We still have more frames to paint
+        frameId = requestAnimationFrame(onFrame);
+      }
+    }
+
+    function onProgress(progress) {
+      node.style.opacity = progress;
+    }
+
+    function start() {
+      onProgress(0);
+      startTime = performance.now();
+      frameId = requestAnimationFrame(onFrame);
+    }
+
+    function stop() {
+      cancelAnimationFrame(frameId);
+      startTime = null;
+      frameId = null;
+    }
+
+    start();
+    return () => stop();
+  }, []);
+
+  return (
+    <h1 className='welcome' ref={ref}>
+      Welcome
+    </h1>
+  );
+}
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>{show ? 'Remove' : 'Show'}</button>
+      <hr />
+      {show && <Welcome />}
+    </>
+  );
+}
+```
+
+```css
+label,
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+html,
+body {
+  min-height: 300px;
+}
+.welcome {
+  opacity: 0;
+  color: white;
+  padding: 50px;
+  text-align: center;
+  font-size: 50px;
+  background-image: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Isoler vers un hook personnalisé
+
+Pour rendre le composant plus lisible, on isole la logique dans un hook personnalisé `useFadeIn`
+
+<Sandpack>
+
+```js
+import { useState, useEffect, useRef } from 'react';
+import { useFadeIn } from './useFadeIn.js';
+
+function Welcome() {
+  const ref = useRef(null);
+
+  useFadeIn(ref, 1000);
+
+  return (
+    <h1 className='welcome' ref={ref}>
+      Welcome
+    </h1>
+  );
+}
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>{show ? 'Remove' : 'Show'}</button>
+      <hr />
+      {show && <Welcome />}
+    </>
+  );
+}
+```
+
+```js src/useFadeIn.js
+import { useEffect } from 'react';
+
+export function useFadeIn(ref, duration) {
+  useEffect(() => {
+    const node = ref.current;
+
+    let startTime = performance.now();
+    let frameId = null;
+
+    function onFrame(now) {
+      const timePassed = now - startTime;
+      const progress = Math.min(timePassed / duration, 1);
+      onProgress(progress);
+      if (progress < 1) {
+        // We still have more frames to paint
+        frameId = requestAnimationFrame(onFrame);
+      }
+    }
+
+    function onProgress(progress) {
+      node.style.opacity = progress;
+    }
+
+    function start() {
+      onProgress(0);
+      startTime = performance.now();
+      frameId = requestAnimationFrame(onFrame);
+    }
+
+    function stop() {
+      cancelAnimationFrame(frameId);
+      startTime = null;
+      frameId = null;
+    }
+
+    start();
+    return () => stop();
+  }, [ref, duration]);
+}
+```
+
+```css
+label,
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+html,
+body {
+  min-height: 300px;
+}
+.welcome {
+  opacity: 0;
+  color: white;
+  padding: 50px;
+  text-align: center;
+  font-size: 50px;
+  background-image: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Isoler vers un second hook
+
+- On sous-divise `useFadeIn` avec `useAnimationLoop`
+
+<Sandpack>
+
+```js
+import { useState, useEffect, useRef } from 'react';
+import { useFadeIn } from './useFadeIn.js';
+
+function Welcome() {
+  const ref = useRef(null);
+
+  useFadeIn(ref, 1000);
+
+  return (
+    <h1 className='welcome' ref={ref}>
+      Welcome
+    </h1>
+  );
+}
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>{show ? 'Remove' : 'Show'}</button>
+      <hr />
+      {show && <Welcome />}
+    </>
+  );
+}
+```
+
+```js src/useFadeIn.js active
+import { useState, useEffect } from 'react';
+import { experimental_useEffectEvent as useEffectEvent } from 'react';
+
+export function useFadeIn(ref, duration) {
+  const [isRunning, setIsRunning] = useState(true);
+
+  useAnimationLoop(isRunning, (timePassed) => {
+    const progress = Math.min(timePassed / duration, 1);
+    ref.current.style.opacity = progress;
+    if (progress === 1) {
+      setIsRunning(false);
+    }
+  });
+}
+
+function useAnimationLoop(isRunning, drawFrame) {
+  const onFrame = useEffectEvent(drawFrame);
+
+  useEffect(() => {
+    if (!isRunning) {
+      return;
+    }
+
+    const startTime = performance.now();
+    let frameId = null;
+
+    function tick(now) {
+      const timePassed = now - startTime;
+      onFrame(timePassed);
+      frameId = requestAnimationFrame(tick);
+    }
+
+    tick();
+    return () => cancelAnimationFrame(frameId);
+  }, [isRunning]);
+}
+```
+
+```css
+label,
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+html,
+body {
+  min-height: 300px;
+}
+.welcome {
+  opacity: 0;
+  color: white;
+  padding: 50px;
+  text-align: center;
+  font-size: 50px;
+  background-image: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+}
+```
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "experimental",
+    "react-dom": "experimental",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Isoler vers une classe
+
+- Plutôt que d'isoler le code dans des hooks, on pourrait isoler le code dans des classes
+
+<Sandpack>
+
+```js
+import { useState, useEffect, useRef } from 'react';
+import { useFadeIn } from './useFadeIn.js';
+
+function Welcome() {
+  const ref = useRef(null);
+
+  useFadeIn(ref, 1000);
+
+  return (
+    <h1 className='welcome' ref={ref}>
+      Welcome
+    </h1>
+  );
+}
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>{show ? 'Remove' : 'Show'}</button>
+      <hr />
+      {show && <Welcome />}
+    </>
+  );
+}
+```
+
+```js src/useFadeIn.js active
+import { useState, useEffect } from 'react';
+import { FadeInAnimation } from './animation.js';
+
+export function useFadeIn(ref, duration) {
+  useEffect(() => {
+    const animation = new FadeInAnimation(ref.current);
+    animation.start(duration);
+    return () => {
+      animation.stop();
+    };
+  }, [ref, duration]);
+}
+```
+
+```js src/animation.js
+export class FadeInAnimation {
+  constructor(node) {
+    this.node = node;
+  }
+  start(duration) {
+    this.duration = duration;
+    this.onProgress(0);
+    this.startTime = performance.now();
+    this.frameId = requestAnimationFrame(() => this.onFrame());
+  }
+  onFrame() {
+    const timePassed = performance.now() - this.startTime;
+    const progress = Math.min(timePassed / this.duration, 1);
+    this.onProgress(progress);
+    if (progress === 1) {
+      this.stop();
+    } else {
+      // We still have more frames to paint
+      this.frameId = requestAnimationFrame(() => this.onFrame());
+    }
+  }
+  onProgress(progress) {
+    this.node.style.opacity = progress;
+  }
+  stop() {
+    cancelAnimationFrame(this.frameId);
+    this.startTime = null;
+    this.frameId = null;
+    this.duration = 0;
+  }
+}
+```
+
+```css
+label,
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+html,
+body {
+  min-height: 300px;
+}
+.welcome {
+  opacity: 0;
+  color: white;
+  padding: 50px;
+  text-align: center;
+  font-size: 50px;
+  background-image: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+}
+```
+
+</Sandpack>
+
+- Les Effects permettent de connecter React vers des systèmes externes.
+- On nécessite parfois plus de coordinations entre les Effects
+  - (pour chainer différentes animations)
+  - Il serait alors logique d'extraire le code hors des Effects et Hook.
+- Ce code isolé devient alors un "système externe"
+- Les Effets peuvent alors demeurer simple
+- Ils envoient des messages pour interagir avec le système externe
+
+---
+
+## Simplifier avec des animations CSS
+
+On pourrait éviter toute la complexité du JavaScript en utilisant une animation CSS
+
+<Sandpack>
+
+```js
+import { useState, useEffect, useRef } from 'react';
+import './welcome.css';
+
+function Welcome() {
+  return <h1 className='welcome'>Welcome</h1>;
+}
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>{show ? 'Remove' : 'Show'}</button>
+      <hr />
+      {show && <Welcome />}
+    </>
+  );
+}
+```
+
+```css src/styles.css
+label,
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+html,
+body {
+  min-height: 300px;
+}
+```
+
+```css src/welcome.css active
+.welcome {
+  color: white;
+  padding: 50px;
+  text-align: center;
+  font-size: 50px;
+  background-image: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+
+  animation: fadeIn 1000ms;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+```
+
+</Sandpack>
+
+- Les hooks ne sont pas nécessaires ici!
+
+---
+
+## Résumé
+
+- Custom Hooks let you share logic between components.
+- Custom Hooks must be named starting with `use` followed by a capital letter.
+- Custom Hooks only share stateful logic, not state itself.
+- You can pass reactive values from one Hook to another, and they stay up-to-date.
+- All Hooks re-run every time your component re-renders.
+- The code of your custom Hooks should be pure, like your component's code.
+- Wrap event handlers received by custom Hooks into Effect Events.
+- Don't create custom Hooks like `useMount`. Keep their purpose specific.
+- It's up to you how and where to choose the boundaries of your code.
+
+---
+
+## Défi: Extraire un hook useCounter
+
+This component uses a state variable and an Effect to display a number that increments every second. Extract this logic into a custom Hook called `useCounter`. Your goal is to make the `Counter` component implementation look exactly like this:
+
+```js
+export default function Counter() {
+  const count = useCounter();
+  return <h1>Seconds passed: {count}</h1>;
+}
+```
+
+You'll need to write your custom Hook in `useCounter.js` and import it into the `Counter.js` file.
+
+<Sandpack>
+
+```js
+import { useState, useEffect } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <h1>Seconds passed: {count}</h1>;
+}
+```
+
+```js src/useCounter.js
+// Write your custom Hook in this file!
+```
+
+</Sandpack>
+
+---
+
+## Rendre le délai configurable
+
+In this example, there is a `delay` state variable controlled by a slider, but its value is not used. Pass the `delay` value to your custom `useCounter` Hook, and change the `useCounter` Hook to use the passed `delay` instead of hardcoding `1000` ms.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+import { useCounter } from './useCounter.js';
+
+export default function Counter() {
+  const [delay, setDelay] = useState(1000);
+  const count = useCounter();
+  return (
+    <>
+      <label>
+        Tick duration: {delay} ms
+        <br />
+        <input
+          type='range'
+          value={delay}
+          min='10'
+          max='2000'
+          onChange={(e) => setDelay(Number(e.target.value))}
+        />
+      </label>
+      <hr />
+      <h1>Ticks: {count}</h1>
+    </>
+  );
+}
+```
+
+```js src/useCounter.js
+import { useState, useEffect } from 'react';
+
+export function useCounter() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return count;
+}
+```
+
+</Sandpack>
+
+---
+
+## Extraire `useInterval` hors de `useCounter`
+
+Currently, your `useCounter` Hook does two things. It sets up an interval, and it also increments a state variable on every interval tick. Split out the logic that sets up the interval into a separate Hook called `useInterval`. It should take two arguments: the `onTick` callback, and the `delay`. After this change, your `useCounter` implementation should look like this:
+
+```js
+export function useCounter(delay) {
+  const [count, setCount] = useState(0);
+  useInterval(() => {
+    setCount((c) => c + 1);
+  }, delay);
+  return count;
+}
+```
+
+Write `useInterval` in the `useInterval.js` file and import it into the `useCounter.js` file.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+import { useCounter } from './useCounter.js';
+
+export default function Counter() {
+  const count = useCounter(1000);
+  return <h1>Seconds passed: {count}</h1>;
+}
+```
+
+```js src/useCounter.js
+import { useState, useEffect } from 'react';
+
+export function useCounter(delay) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((c) => c + 1);
+    }, delay);
+    return () => clearInterval(id);
+  }, [delay]);
+  return count;
+}
+```
+
+```js src/useInterval.js
+// Write your Hook here!
+```
+
+</Sandpack>
+
+---
+
+## Réparer l'intervalle qui réinitialise
+
+In this example, there are _two_ separate intervals.
+
+The `App` component calls `useCounter`, which calls `useInterval` to update the counter every second. But the `App` component _also_ calls `useInterval` to randomly update the page background color every two seconds.
+
+For some reason, the callback that updates the page background never runs. Add some logs inside `useInterval`:
+
+```js {2,5}
+useEffect(() => {
+  console.log('✅ Setting up an interval with delay ', delay);
+  const id = setInterval(onTick, delay);
+  return () => {
+    console.log('❌ Clearing an interval with delay ', delay);
+    clearInterval(id);
+  };
+}, [onTick, delay]);
+```
+
+Do the logs match what you expect to happen? If some of your Effects seem to re-synchronize unnecessarily, can you guess which dependency is causing that to happen? Is there some way to [remove that dependency](/learn/removing-effect-dependencies) from your Effect?
+
+After you fix the issue, you should expect the page background to update every two seconds.
+
+<Hint>
+
+It looks like your `useInterval` Hook accepts an event listener as an argument. Can you think of some way to wrap that event listener so that it doesn't need to be a dependency of your Effect?
+
+</Hint>
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "experimental",
+    "react-dom": "experimental",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js
+import { useCounter } from './useCounter.js';
+import { useInterval } from './useInterval.js';
+
+export default function Counter() {
+  const count = useCounter(1000);
+
+  useInterval(() => {
+    const randomColor = `hsla(${Math.random() * 360}, 100%, 50%, 0.2)`;
+    document.body.style.backgroundColor = randomColor;
+  }, 2000);
+
+  return <h1>Seconds passed: {count}</h1>;
+}
+```
+
+```js src/useCounter.js
+import { useState } from 'react';
+import { useInterval } from './useInterval.js';
+
+export function useCounter(delay) {
+  const [count, setCount] = useState(0);
+  useInterval(() => {
+    setCount((c) => c + 1);
+  }, delay);
+  return count;
+}
+```
+
+```js src/useInterval.js
+import { useEffect } from 'react';
+import { experimental_useEffectEvent as useEffectEvent } from 'react';
+
+export function useInterval(onTick, delay) {
+  useEffect(() => {
+    const id = setInterval(onTick, delay);
+    return () => {
+      clearInterval(id);
+    };
+  }, [onTick, delay]);
+}
+```
+
+</Sandpack>
+
+---
+
+## Ajouter un mouvement sacadé
+
+In this example, the `usePointerPosition()` Hook tracks the current pointer position. Try moving your cursor or your finger over the preview area and see the red dot follow your movement. Its position is saved in the `pos1` variable.
+
+In fact, there are five (!) different red dots being rendered. You don't see them because currently they all appear at the same position. This is what you need to fix. What you want to implement instead is a "staggered" movement: each dot should "follow" the previous dot's path. For example, if you quickly move your cursor, the first dot should follow it immediately, the second dot should follow the first dot with a small delay, the third dot should follow the second dot, and so on.
+
+You need to implement the `useDelayedValue` custom Hook. Its current implementation returns the `value` provided to it. Instead, you want to return the value back from `delay` milliseconds ago. You might need some state and an Effect to do this.
+
+After you implement `useDelayedValue`, you should see the dots move following one another.
+
+<Hint>
+
+You'll need to store the `delayedValue` as a state variable inside your custom Hook. When the `value` changes, you'll want to run an Effect. This Effect should update `delayedValue` after the `delay`. You might find it helpful to call `setTimeout`.
+
+Does this Effect need cleanup? Why or why not?
+
+</Hint>
+
+<Sandpack>
+
+```js
+import { usePointerPosition } from './usePointerPosition.js';
+
+function useDelayedValue(value, delay) {
+  // TODO: Implement this Hook
+  return value;
+}
+
+export default function Canvas() {
+  const pos1 = usePointerPosition();
+  const pos2 = useDelayedValue(pos1, 100);
+  const pos3 = useDelayedValue(pos2, 200);
+  const pos4 = useDelayedValue(pos3, 100);
+  const pos5 = useDelayedValue(pos3, 50);
+  return (
+    <>
+      <Dot position={pos1} opacity={1} />
+      <Dot position={pos2} opacity={0.8} />
+      <Dot position={pos3} opacity={0.6} />
+      <Dot position={pos4} opacity={0.4} />
+      <Dot position={pos5} opacity={0.2} />
+    </>
+  );
+}
+
+function Dot({ position, opacity }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        backgroundColor: 'pink',
+        borderRadius: '50%',
+        opacity,
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        pointerEvents: 'none',
+        left: -20,
+        top: -20,
+        width: 40,
+        height: 40,
+      }}
+    />
+  );
+}
+```
+
+```js src/usePointerPosition.js
+import { useState, useEffect } from 'react';
+
+export function usePointerPosition() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    function handleMove(e) {
+      setPosition({ x: e.clientX, y: e.clientY });
+    }
+    window.addEventListener('pointermove', handleMove);
+    return () => window.removeEventListener('pointermove', handleMove);
+  }, []);
+  return position;
+}
+```
+
+```css
+body {
+  min-height: 300px;
+}
+```
+
+</Sandpack>
