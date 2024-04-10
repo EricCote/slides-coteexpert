@@ -3,13 +3,23 @@
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
-import { useEffect, useState } from 'react';
-import useHashChange from './useHashChange';
+import { useSyncExternalStore } from 'react';
 import Menu from './Menu';
 import Route from './Route';
 
+// Function subscribing to external changes
+// Similar to an effect subscription
+function subscribeHashChange(onHashChange) {
+  window.addEventListener('hashchange', onHashChange);
+  return () => window.removeEventListener('hashchange', onHashChange);
+}
+
 export default function App() {
-  const currentPage = useHashChange();
+  const currentPage = useSyncExternalStore(
+    subscribeHashChange,
+    () => window.location.hash,
+    () => window?.location.hash
+  );
 
   return (
     <>
@@ -38,23 +48,6 @@ export default function Route({ page }) {
     default:
       return <div>404 error</div>;
   }
-}
-```
-
-```jsx src/useHashChange.jsx
-import { useSyncExternalStore } from 'react';
-
-function subscribeHashChange(onHashChange) {
-  window.addEventListener('hashchange', onHashChange);
-  return () => window.removeEventListener('hashchange', onHashChange);
-}
-
-export default function useHashChange() {
-  return useSyncExternalStore(
-    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
-    () => window.location.hash, // How to ge value on client
-    () => window?.location.hash // How to get the value on the server
-  );
 }
 ```
 
