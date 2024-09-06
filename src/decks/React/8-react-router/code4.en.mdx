@@ -1,4 +1,4 @@
-## History Routing
+## History Routing with useEffect
 
 <Sandpack options={{ showNavigator: true }} >
 
@@ -80,7 +80,7 @@ export default function Menu({ onClick }) {
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === location.pathname ? 'active' : ''}
             href={menuItem.url}
             onClick={onClick}
           >

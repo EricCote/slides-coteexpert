@@ -1,4 +1,4 @@
-## Hash Routing
+## Hash Routing with custom hook
 
 <Sandpack options={{ showNavigator: true }} >
 
@@ -15,6 +15,23 @@ export default function App() {
       <Menu />
       <Route page={currentPage} />
     </>
+  );
+}
+```
+
+```jsx src/useHashChange.jsx
+import { useSyncExternalStore } from 'react';
+
+function subscribeHashChange(onHashChange) {
+  window.addEventListener('hashchange', onHashChange);
+  return () => window.removeEventListener('hashchange', onHashChange);
+}
+
+export default function useHashChange() {
+  return useSyncExternalStore(
+    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
+    () => window.location.hash, // How to get value on client
+    () => window?.location.hash // How to get the value on the server
   );
 }
 ```
@@ -40,31 +57,15 @@ export default function Route({ page }) {
 }
 ```
 
-```jsx src/useHashChange.jsx
-import { useSyncExternalStore } from 'react';
-
-function subscribeHashChange(onHashChange) {
-  window.addEventListener('hashchange', onHashChange);
-  return () => window.removeEventListener('hashchange', onHashChange);
-}
-
-export default function useHashChange() {
-  return useSyncExternalStore(
-    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
-    () => window.location.hash, // How to ge value on client
-    () => window?.location.hash // How to get the value on the server
-  );
-}
-```
-
 ```jsx src/Menu.jsx
 export default function Menu() {
+  const hash = location.hash === '' ? '#' : location.hash;
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === hash ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}

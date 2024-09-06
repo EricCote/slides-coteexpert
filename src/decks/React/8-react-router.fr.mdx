@@ -70,7 +70,7 @@ Offre de la formation depuis 2018.
 
 ---
 
-import Code1 from './4-react-router/code1.fr.mdx';
+import Code1 from './8-react-router/code1.fr.mdx';
 
 <Code1 components={props.components} />
 
@@ -82,48 +82,52 @@ import Code1 from './4-react-router/code1.fr.mdx';
 - On sépare le URL en différentes parties:
 
 <div>
-  <span className='color1 hover-bold'>https</span> ://
-  <span className='color2 hover-bold'>server.com</span>
-  <span className='color3 hover-bold'>/simple/doc</span> ?
-  <span className='color4 hover-bold'>p1=a&p2=b</span>
-  <span className='color5 hover-bold'>#frag</span>
+  <b>
+    <span className='color1 hover-bold'>https</span> ://
+    <span className='color2 hover-bold'>server.com</span>
+    <span className='color3 hover-bold'>/simple/doc</span> ?
+    <span className='color4 hover-bold'>p1=a&p2=b</span>
+    <span className='color5 hover-bold'>#frag</span>
+  </b>
 </div>
-<table>
-  <thead>
-    <tr>
-      <th>Part</th>
-      <th>Standard Name</th>
-      <th>JavaScript Name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className='color1'>
-      <td>https</td>
-      <td>scheme</td>
-      <td>protocol</td>
-    </tr>
-    <tr className='color2'>
-      <td>server.com</td>
-      <td>authority</td>
-      <td>host || hostName</td>
-    </tr>
-    <tr className='color3'>
-      <td>/simple/doc</td>
-      <td>path</td>
-      <td>pathname</td>
-    </tr>
-    <tr className='color4'>
-      <td>p1=a&amp;p2=b</td>
-      <td>query</td>
-      <td>search || searchParams</td>
-    </tr>
-    <tr className='color5'>
-      <td>frag</td>
-      <td>fragment</td>
-      <td>hash</td>
-    </tr>
-  </tbody>
-</table>
+<div style={{ display: 'flex', flexDirection: 'column' }}>
+  <table>
+    <thead>
+      <tr>
+        <th>Part</th>
+        <th>Standard Name</th>
+        <th>JavaScript Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className='color1'>
+        <td>https</td>
+        <td>scheme</td>
+        <td>protocol</td>
+      </tr>
+      <tr className='color2'>
+        <td>server.com</td>
+        <td>authority</td>
+        <td>host || hostName</td>
+      </tr>
+      <tr className='color3'>
+        <td>/simple/doc</td>
+        <td>path</td>
+        <td>pathname</td>
+      </tr>
+      <tr className='color4'>
+        <td>p1=a&amp;p2=b</td>
+        <td>query</td>
+        <td>search || searchParams</td>
+      </tr>
+      <tr className='color5'>
+        <td>frag</td>
+        <td>fragment</td>
+        <td>hash</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ---
 
@@ -133,19 +137,21 @@ Dans le protocole http[s], on combine le `path` et le `query` de la requête.
 
 ex:<span className='color1'> `GET /doc/path?p1=a&p2=b HTTP/1.1` </span>
 
-Le Fragment (hash) n'est pas envoyé avec la requête. Il reste sur le client. Le fragment agit différemment dépendant du média.
+Le Fragment (hash) n'est **PAS** envoyé avec la requête. Il reste sur le client. Le fragment agit différemment dépendant du média.
 
+<div style={{ display: 'flex', flexDirection: 'column' }}>
 | Media                                                    |                                                                                                                                                   |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <span className='color2'>`document.pdf#page=4`</span>    | Aller page 4                                                                                                                                      |
 | <span className='color3'>`intro.mp4#t=43`</span>         | Aller seconde 43                                                                                                                                  |
 | <span className='color4'>`document.html#location`</span> | Aller à la _location_ <br /> <span className='color5'>`<h3 id="location">`</span> ou <br /> <span className='color3'>`<a name="location">`</span> |
+</div>
 
 ---
 
 ## Rendu conditionnel en React
 
-Avec du JavaScript, on peut changer le rendu de react. On afficher le composant en fonction de la page demandée.
+Avec du JavaScript, on peut changer le rendu de react. On affiche le composant en fonction de la page demandée.
 
 ```js
 const page = window.location.pathname;
@@ -166,7 +172,7 @@ switch (page) {
 
 ---
 
-import Code2 from './4-react-router/code2.en.mdx';
+import Code2 from './8-react-router/code2.en.mdx';
 
 <Code2 components={props.components} />
 
@@ -237,32 +243,46 @@ Ceci modifiant le DOM, il faut donc lier le gestionnaire d'événement dans un `
 
 ---
 
-import Code3 from './4-react-router/code3.en.mdx';
+import Code3 from './8-react-router/code3.en.mdx';
 
 <Code3 components={props.components} />
 
 ---
 
+import Code3b from './8-react-router/code3b.en.mdx';
+
+<Code3b components={props.components} />
+
+---
+
+import Code3c from './8-react-router/code3c.en.mdx';
+
+<Code3c components={props.components} />
+
+---
+
 ## Mais...
 
-<div>
 <img
   src='/img/hashpath.jpeg'
-  style={{ marginInlineStart: 30, marginBottom: 30, width: 300, float: 'right' }}
+  style={{
+    marginInlineStart: 30,
+    marginBottom: 30,
+    width: 300,
+    float: 'right',
+  }}
 />
 
 Les gens préfèrent les liens avec un _path_ (`/`), SANS le _hash_ (`#`).
 
-Un lien avec path permet d'être compatible avec les outils React que:
+Un lien avec path permet d'être compatible avec les approches React telles que:
 
 - **SSG** (Static-Side Generation)
 - **SSR** (Server-Side Rendering)
 
 Voir _NextJS_, _Remix_ et _Gatsby_.
 
-(**Note:** certains prétendent que les engins de recherche favorisent les _path_ plutôt que les _hash_, mais d'autres prétendent que ce n'est pas le cas.)
-
-</div>
+(**Note:** certaines sources prétendent que les engins de recherche favorisent les _path_ plutôt que les _hash_, mais d'autres prétendent que ce n'est pas le cas.)
 
 ---
 
@@ -303,9 +323,15 @@ function clickHandler(evt) {
 
 ---
 
-import Code4 from './4-react-router/code4.en.mdx';
+import Code4 from './8-react-router/code4.en.mdx';
 
 <Code4 components={props.components} />
+
+---
+
+import Code4b from './8-react-router/code4b.en.mdx';
+
+<Code4b components={props.components} />
 
 ---
 
@@ -343,9 +369,15 @@ window.navigation.addEventListener('navigate', (evt) => {
 
 ---
 
-import Code5 from './4-react-router/code5.en.mdx';
+import Code5 from './8-react-router/code5.en.mdx';
 
 <Code5 components={props.components} />
+
+---
+
+import Code5b from './8-react-router/code5b.en.mdx';
+
+<Code5b components={props.components} />
 
 ---
 
@@ -399,7 +431,7 @@ Composant racine qui gère les routes, l'état (state), les contextes et les re-
 
 ## `<Link to="about">About Us</Link>`
 
-Composant génèrant un hyperlien, capture l'événement clic prenant en charge le "History API".
+Composant générant un hyperlien, capture l'événement clic prenant en charge le "History API".
 
 <hr />
 
@@ -501,15 +533,21 @@ On peut aussi partager cet url, ou créer un favori ou un raccourci.
 
 ---
 
-import Code6 from './4-react-router/code6.en.mdx';
+import Code6 from './8-react-router/code6.en.mdx';
 
 <Code6 components={props.components} />
 
 ---
 
-import Code7 from './4-react-router/code7.en.mdx';
+import Code7 from './8-react-router/code7.en.mdx';
 
 <Code7 components={props.components} />
+
+---
+
+import Code7b from './8-react-router/code7b.en.mdx';
+
+<Code7b components={props.components} />
 
 ---
 
@@ -634,18 +672,6 @@ action = async function ({ request }) {
   return redirect(`/person/{newPerson.id}`);
 };
 ```
-
----
-
-## Prochain événement
-
-<div>
-<img
-  src='/img/debug.jpeg'
-  style={{ float: 'right'}}
-/>
-
-</div>
 
 ---
 

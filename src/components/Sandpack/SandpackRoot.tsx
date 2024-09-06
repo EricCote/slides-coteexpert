@@ -12,7 +12,7 @@ import {
 //import { levelUp } from '@codesandbox/sandpack-themes';
 //import { SandpackLogLevel } from '@codesandbox/sandpack-client';
 //import { CustomPreset } from './CustomPreset';
-import { createFileMap, StylesCSSPath } from './createFileMap';
+import { createFileMap, StylesCSSPath, AppJSPath } from './createFileMap';
 //import { CustomTheme } from './Themes';
 //import { useSandpackLint } from './useSandpackLint';
 import { template } from './template';
@@ -78,7 +78,7 @@ ul {
 function SandpackRoot(props: SandpackProps) {
   let {
     children,
-    autorun = true,
+    // autorun = true,
     options: myOptions,
     files: additionalFiles,
     s,
@@ -108,6 +108,15 @@ function SandpackRoot(props: SandpackProps) {
     code: [sandboxStyle, files[StylesCSSPath]?.code ?? ''].join('\n\n'),
     hidden: !files[StylesCSSPath]?.visible,
   };
+
+  // To set the active file in the fallback we have to find the active files first.
+  // If there are no active files we fallback to App.js as default.
+  let activeFiles = Object.keys(files).filter(
+    (f) => files[f].active === true && files[f].hidden === false
+  );
+  if (!activeFiles.length) {
+    files[AppJSPath].active = true;
+  }
 
   return (
     <div className='sandpack sandpack--playground w-full my-8' dir='ltr'>

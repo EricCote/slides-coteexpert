@@ -1,0 +1,538 @@
+---
+title: 'Interaction et Événements'
+date: '2023-02-22'
+---
+
+# Interaction et Événements
+
+---
+
+## Ajouter interactions
+
+1. Pour gérer le click, on déclare une fonction `handleClick` qui affiche une alerte
+2. On ajoute `onClick={handleClick}` au `<button>`
+
+<Sandpack s="70" >
+
+```js
+export default function Boutons() {
+  function handleClick() {
+    alert('On a cliqué!');
+  }
+
+  return (
+    <>
+      <button>Je ne fais rien</button>
+      <button onClick={handleClick}>Je réagis</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Gestionnaire d'événement
+
+**Rappel** on peut passer une fonction dans les props.
+
+`handleClick` est une fonction de type **gestionnaire d'événements** (event handler)
+
+Les gestionnaires d'événements sont souvent:
+
+- Définis dans nos composants
+- Décrits par un nom qui débute par `handle`
+  - Exemple: `onClick={handleClick}`, `onMouseEnter={handleMouseEnter}`
+
+---
+
+## À la volée (inline)
+
+On peut définir un gestionnaire d'événements en ligne, à la volée, directement dans le JSX.
+
+```js
+<button onClick={function handleClick() {
+  alert('On a cliqué!');
+}}>
+```
+
+On préfère souvent la syntaxe flèche, plus simple.
+
+```js
+<button onClick={() => {
+  alert('On a cliqué!');
+}}>
+```
+
+Cette méthode en ligne (à la volée) est souvent utilisée pour les fonctions courtes.
+
+---
+
+## Passage des gestionnaires d'événements
+
+import './table.css';
+
+<table className="my-tbl">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Passer fonction ✅</th>
+      <th>Appeler fonction ❌</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Par nom</th>
+      <td>
+```js
+<button onClick={handleClick}>
+```
+</td>
+<td>
+```js
+<button onClick={handleClick()}>
+```
+  </td>
+</tr>
+<tr>
+  <th>À la volée</th>
+  <td> 
+```js
+<button onClick={() => alert('...')}>
+```
+  </td>
+  <td>
+```js
+<button onClick={alert('...')}>
+``` 
+  </td>
+    </tr>
+
+  </tbody>
+</table>
+
+<hr />
+
+Les fonctions doivent être passées, PAS appelées. Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement.
+
+`<button onClick={handleClick}>` passe la fonction `handleClick`.
+
+`<button onClick={() => alert('...')}>` passe la fonction `() => alert('...')`.
+
+---
+
+## Lire des props dans le gestionnaire d'événements
+
+Quand les gestionnaires d'événements sont définis dans le composant,
+ils ont accès aux props et variables du composant. (Magie du closure)
+
+<Sandpack s='70'>
+
+```js
+function handleClick() {
+  alert(message);
+}
+
+function AlertButton({ message, children }) {
+  return <button onClick={() => alert(message)}>{children}</button>;
+}
+
+export default function Toolbar() {
+  return (
+    <div>
+      <AlertButton message='On joue le film'>Jouer Film</AlertButton>
+      <AlertButton message='On télécharge'>Téléchager Image</AlertButton>
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Passer le gestionnaire d'événements dans les props
+
+Il est possible de passer un gestionnaire d'événements dans les props
+
+<Sandpack s="70">
+
+```js
+function Button({ onClick, children }) {
+  return <button onClick={onClick}>{children}</button>;
+}
+
+function PlayButton({ movieName }) {
+  function handlePlayClick() {
+    alert(`On joue ${movieName}!`);
+  }
+
+  return <Button onClick={handlePlayClick}>Jouer "{movieName}"</Button>;
+}
+
+function UploadButton() {
+  return (
+    <Button onClick={() => alert('On télécharge une image')}>
+      Upload Image
+    </Button>
+  );
+}
+
+export default function Toolbar() {
+  return (
+    <div>
+      <PlayButton movieName='SpiderMan 2' />
+      <UploadButton />
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Nommer les props de gestionnaire d'événements
+
+Par convention, vos gestionnaires d'événements commencent par `on`. ex: `onClick`.
+
+Dans cet exemple, on utilise onSmash:
+
+<Sandpack s="70">
+
+```js
+function Button({ onSmash, children }) {
+  return <button onClick={onSmash}>{children}</button>;
+}
+
+export default function App() {
+  return (
+    <div>
+      <Button onSmash={() => alert('Je joue film!')}>Jouer film</Button>
+      <Button onSmash={() => alert('Je télécharge!')}>Télécharger image</Button>
+    </div>
+  );
+}
+```
+
+```css
+button {
+  margin-right: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Propagation d'événements
+
+Un événement peut se gérer à différents niveaux.
+
+Devinez l'ordre des événements de l'exemple suivant:
+
+<Sandpack s="70">
+
+```js
+export default function Toolbar() {
+  return (
+    <div
+      className='Toolbar'
+      onClick={() => {
+        alert('On a cliqué sur la barre!');
+      }}
+    >
+      <button onClick={() => alert('Je joue!')}>Jouer film</button>
+      <button onClick={() => alert('Je télécharge!')}>Télécharger Image</button>
+    </div>
+  );
+}
+```
+
+```css
+.Toolbar {
+  background: #aaa;
+  padding: 5px;
+}
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+Les événements se propagent du gestionnaire le plus spécifique au gestionnaire parent.
+
+**Exception:** l'événement onScroll ne se propage pas.
+
+---
+
+## Interrompre la propagation
+
+Les gestionnaires d'événements reçoivent un **event object** nommé `e` par convention (e pour "event").
+
+Une méthode nommée `e.stopPropagation()` permet de stopper la propagation vers le parent.
+
+<Sandpack s='70'>
+
+```js
+function Button({ onClick, children }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function Toolbar() {
+  return (
+    <div
+      className='Toolbar'
+      onClick={() => {
+        alert('On a cliqué sur la barre!');
+      }}
+    >
+      <Button onClick={() => alert('Je joue!')}>Jouer film</Button>
+      <Button onClick={() => alert('Je télécharge!')}>Télécharger Image</Button>
+    </div>
+  );
+}
+```
+
+```css
+.Toolbar {
+  background: #aaa;
+  padding: 5px;
+}
+button {
+  margin: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Événements en capture plutôt qu'en propagation.
+
+Il existe deux facons de s'attacher avec le gestionnaires d'événement:
+
+1. En **capture**, du parent plus générique vers l'enfant plus spécifique (on descend)
+2. En **propagation**, de l'enfant plus spécifique vers le parent plus générique (on remonte)
+
+Normalement, on gère les événements en mode **propagation**. Mais dans de **rares** situations, on préférera gérer un événement en mode **capture**.
+
+```js
+<div
+  onClickCapture={() => {
+    /* Ceci est géré avant les boutons */
+  }}
+>
+  <button onClick={(e) => e.stopPropagation()} />
+  <button onClick={(e) => e.stopPropagation()} />
+</div>
+```
+
+---
+
+## Capture et propagation
+
+<img src='https://miro.medium.com/v2/resize:fit:1064/1*B0k6-J5ZwfmsxZDXAOCT2Q.jpeg' />
+
+---
+
+## Passer des gestionnaires ET stopper la propagation
+
+Ce gestionnaire roule le code qui stoppe la propagation **et ensuite** appelle la prop `onClick` passée par le parent.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js {4-6}
+function Button({ onClick, children }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. Ce patron est une **alternative** à la propagation. Contrairement à la propagation, ce n'est pas automatique. Mais c'est plus clair quel code est appelé et dans quel ordre.
+
+</aside>
+
+---
+
+## Comportement par défaut (formulaire)
+
+Certains événements du naviagateur sont associés à un comportement. Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
+
+<Sandpack>
+
+```js
+export default function Signup() {
+  return (
+    <form onSubmit={() => alert('On envoie!')}>
+      <input />
+      <button>Envoyer</button>
+    </form>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Prévenir le comportment par défaut
+
+Utiliser `e.preventDefault()` empêche le déclenchement du comportement.
+
+<Sandpack>
+
+```js
+export default function Signup() {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert('On envoie!');
+      }}
+    >
+      <input />
+      <button>Envoyer</button>
+    </form>
+  );
+}
+```
+
+```css
+button {
+  margin-left: 5px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Ne pas confondre les deux:
+
+- [`e.stopPropagation()`](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) empêche les gestionnaire d'événements parents de se déclencher
+- [`e.preventDefault()` ](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) empêche le comportement par défaut de se déclencher. (Pour les quelques composants qui ont un comportement par défaut.)
+
+---
+
+## Gestionnaire d'événements et Effets de bord
+
+On peut mettre des effets de bord dans un gestionnaire d'événement.
+
+En fait, c'est la **meilleure place**, car un gestionnaire n'a pas besoin d'être pur (contrairement au rendu de composants.)
+
+---
+
+## Défi #1
+
+Cliquer le bouton devrait basculer le fond entre blanc et noir. Ça ne fonctionne pas. Réparez le problème (Ne modifiez pas `handleClick`, son code est correct.)
+
+<Sandpack>
+
+```js
+export default function LightSwitch() {
+  function handleClick() {
+    let bodyStyle = document.body.style;
+    if (bodyStyle.backgroundColor === 'black') {
+      bodyStyle.backgroundColor = 'white';
+    } else {
+      bodyStyle.backgroundColor = 'black';
+    }
+  }
+
+  return <button onClick={handleClick()}>Interrupteur de lumière</button>;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi #2
+
+Le composant `ColorSwitch` génère un bouton qui doit changer la couleur de page. Il faut attacher le gestionnaire d'événements `onChangeColor` à l'événement `onClick` du bouton.
+
+Après le succès, on remarque que le bouton incrémente aussi le compteur de page. Que faudrait-il faire pour que `onChangeColor` ne puisse plus incrémenter le compteur?
+
+<Sandpack>
+
+```js src/ColorSwitch.js active
+export default function ColorSwitch({ onChangeColor }) {
+  return <button>Changer couleur</button>;
+}
+```
+
+```js src/App.js hidden
+import { useState } from 'react';
+import ColorSwitch from './ColorSwitch.js';
+
+export default function App() {
+  const [clicks, setClicks] = useState(0);
+
+  function handleClickOutside() {
+    setClicks((c) => c + 1);
+  }
+
+  function getRandomLightColor() {
+    let r = 150 + Math.round(100 * Math.random());
+    let g = 150 + Math.round(100 * Math.random());
+    let b = 150 + Math.round(100 * Math.random());
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function handleChangeColor() {
+    let bodyStyle = document.body.style;
+    bodyStyle.backgroundColor = getRandomLightColor();
+  }
+
+  return (
+    <div style={{ width: '100%', height: '100%' }} onClick={handleClickOutside}>
+      <ColorSwitch onChangeColor={handleChangeColor} />
+      <br />
+      <br />
+      <h2>Nombre de clics sur la page: {clicks}</h2>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---

@@ -9,18 +9,22 @@ export default function Menu() {
     <LocalTheme theme='auto'>
       <Navbar expand='lg' bg='body' className='mb-4'>
         <Container>
-          <Navbar.Brand as='h1' className='me-auto'>
+          <Navbar.Brand as='h1'>
             <Link
               to='/'
               className='text-decoration-none'
               style={{ fontSize: '3rem' }}
             >
-              AFI-Expertise
+              React Academy
             </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
-            <Nav activeKey={location.pathname} variant='pills'>
+            <Nav
+              activeKey={location.pathname}
+              variant='pills'
+              className='me-auto'
+            >
               <DarkModeMenu />
             </Nav>
           </Navbar.Collapse>

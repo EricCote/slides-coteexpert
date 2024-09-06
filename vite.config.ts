@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import path from 'path';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
-import rehypePrism from './src/components/Codeblock-prism/rehype-prism';
+import rehypePretty from './src/components/Codeblock-pretty/rehype-pretty';
 import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides';
 import { read } from 'to-vfile';
 import { matter } from 'vfile-matter';
@@ -48,7 +48,16 @@ export default defineConfig(
             [remarkMdxFrontmatter],
           ],
           rehypePlugins: [
-            rehypePrism,
+            [
+              rehypePretty,
+              {
+                defaultLang: 'js',
+                theme: {
+                  dark: 'dark-plus',
+                  light: 'catppuccin-latte',
+                },
+              },
+            ],
             [
               rehypeSimpleSlides,
               {
@@ -71,7 +80,6 @@ export default defineConfig(
       preserveSymlinks: true,
       alias: {
         '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
-        '~prism-themes': path.resolve(__dirname, 'node_modules/prism-themes'),
       },
     },
   }

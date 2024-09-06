@@ -66,7 +66,7 @@ Multiple courses
 - Programming Languages (JavaScript? TypeScript? Python? other?)
 - Web Experience (Beginner? Advanced?)
 - SPA Experience (None? React? Angular? Vue? Svelte?)
-- Backend Service Experience (ASP.NET Web API? Azure Functions? Python Flask? Express? Other?)
+- Backend Service Experience (ASP.NET Web API? Azure Functions? Python Flask? Laravel? Express? Other?)
 - Expectations (What do you need to build?)
 
 ---
@@ -78,7 +78,8 @@ Multiple courses
 - Decompose your app with reusable components
 - Allows the creation of SPA (Single Page Apps)
 - JSX needs to convert to JavaScript using a compiler tool (Babel, Parcel, SWC...)
-- To build a React app, one should use a toolbox or Framework (Vite, Next, Gatsby, Remix...)
+- To build a React app, one should use a _toolbox_ (Vite, Astro) or _Framework_ (Next, Gatsby, Remix, TanStack Start
+- Or a _MetaFramework_ (Epic Stack, T3, Redwood, Meteor, Ionic, Wasp)
 
 ---
 
@@ -91,6 +92,7 @@ Multiple courses
 - 2017: React 16 (Fiber rendering)
 - 2020: React 17 (Hooks)
 - 2022: React 18 (Concurrent rendering)
+- 2024: React 19 (Actions, Server Components)
 
 ---
 
@@ -115,9 +117,10 @@ https://github.com/chentsulin/awesome-react-renderer
 - **Backwards-compatible** new React versions avoid breaking existing apps
 - **Popular** Used by a lot of apps, easy to find guidance on the internet
 - **Opinion-less** React doesn't care about routing, data-loading, styles, etc.
+- **SPA** Compatible with Single Page Application
 - **SSR** Compatible with Server-Side Rendering
-- **SSG** Compatible with Static-Site Generation
-- **RSC**: compatible with React Server Components
+- **SSG** Compatible with Static Site Generation
+- **RSC** Compatible with React Server Components
 
 ---
 
@@ -151,8 +154,9 @@ https://github.com/chentsulin/awesome-react-renderer
   - Create-React-App (deprecated in 2023)
   - Vite
   - Gatsby
-  - Next js
+  - Next.js
   - Remix
+  - TanStack Start
   - T3
   - Epic Stack
 
@@ -164,13 +168,15 @@ https://github.com/chentsulin/awesome-react-renderer
 
   - **ESLint** (dbaeumer.vscode-eslint): Validates the js code with rules
   - **Prettier** (esbenp.prettier-vscode): Formats web files (css, js, html)
+    {/* prettier-ignore */}
+  {/*
   - **Simple React Snippets** (burkeholland.simple-react-snippets): adds some code snippets
     - UsefulSnippets:
       - **imr, imrs, imrse:** import React, \{useState, useEffect\}
       - **ffc, sfc:** Create React components
       - **uef, usf:** useEffect, useState
 
----
+## {/* prettier-ignore */}
 
 ## Configure VS Code (1/2)
 
@@ -184,13 +190,6 @@ https://github.com/chentsulin/awesome-react-renderer
   - **Prettier:** Jsx Single Quote: true
   - **Prettier:** Single Quote: true
   - **Emmet:** Include Language: `"javascript": "javascriptreact"` and `"typescript": "typescriptreact"`
-
-  - **Editor:** Tab Size: 2 or 4
-  - **Editor:** Default Formatter: Prettier - `esbenp.prettier-vscode`
-  - **Editor:** Format On Save: true
-  - **Prettier:** Jsx Single Quote: true
-  - **Prettier:** Single Quote: true
-  - **Emmet:** Include Language: `"javascript": "javascriptreact"`
 
 ---
 
@@ -247,13 +246,13 @@ This creates a new folder. Navigate to the new folder.
 
 - **node_modules** : contains dependencies and sub-dependencies. **Don't touch.** Use `npm install` or `npm update` to manage.
 - **src**: contains .js, .ts, .jsx, .css, and .svg files that are compiled by vite
-- **public**: contains files that are served but not compiled by vite (png, pdf, etc)
+- **public**: contains files that are served, but not compiled by Vite (png, jpg, pdf, etc)
 
 ---
 
 ## Start in dev mode
 
-The following commands are launched from the \*_project root_. (where `package.json` is stored)
+The following commands are launched from the _project root_. (where `package.json` is stored)
 
 You'll need to install the dependencies
 
@@ -285,11 +284,13 @@ This starts a web server in dev mode. Type the letter <kbd>o</kbd> and <kbd>ente
 
 - JSX : _JavaScript eXtension_
 - JSX is similar to HTML
-- JSX is stricter than HTML
+- JSX is stricter than HTML (similar to XHTML)
 - Convert to HTML to JSX using a tool:
   https://transform.tools/html-to-jsx
 
 ---
+
+## JSX is Popular
 
 - JSX became popular with React
 - Used by other SPA technologies:
@@ -306,7 +307,7 @@ This starts a web server in dev mode. Type the letter <kbd>o</kbd> and <kbd>ente
 
 Typical JSX
 
-```js
+```jsx
 <h3 title='alarm'>This alarm is set to {alarmTime}</h3>
 ```
 
@@ -391,8 +392,8 @@ Then browse to: http://localhost:4173 (`o` and `enter` starts the browser)
 
 **Please note:**
 
-- Preview Web Server doesn't have Hot Module Reloading (HMR)
-- If you change some JavaScript, you'll have to **build** again and **reload** the page
+- No **Hot Module Reloading** (HMR)
+- If you change some code, you'll have to **build** again and **reload** the page
 
 ---
 

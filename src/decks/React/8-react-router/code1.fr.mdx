@@ -1,4 +1,4 @@
-## Server Routing
+## Routage Serveur
 
 <Sandpack options={{ showNavigator: true }} >
 
@@ -21,7 +21,7 @@ export default function Menu() {
   return (
     <ul className='menu'>
       <li>
-        <a class='active' href='/'>
+        <a className='active' href='/'>
           Home
         </a>
       </li>
@@ -82,19 +82,19 @@ export default function Home() {
   return (
     <div>
       <h1>Home page</h1>
-      <p>The way a web server is configured in SPA mode:</p>
+      <p>Règles d'un serveur web en mode SPA:</p>
       <ul>
-        <li>If a folder or page exists on disk, serve it.</li>
         <li>
-          If it doesn't exist, serve the default page instead (index.html)
+          Si un dossier ou fichier existe sur le disque, on retourne le contenu.
         </li>
+        <li>Si ça n'existe pas, on sert la page par défaut (index.html)</li>
         <ul>
           <li>
-            Unless there is an extension in the request (.png .css .js .html)
-            then serve a 404.
+            À moins qu'il n'y ait une extension (.png .css .js .html) on sert
+            une erreur 404.
           </li>
         </ul>
-        <li>Different SPA frameworks might have slightly different rules</li>
+        <li>Différents Frameworks SPA ont différentes règles</li>
       </ul>
     </div>
   );

@@ -62,7 +62,7 @@ Offre de la formation depuis 2018.
 - Langages de programmation (JavaScript? Python? autre?)
 - Expérience Web (Débutant? Avancé?)
 - Expérience avec une technologie SPA (Aucune? React? Angular? Vue? Svelte?)
-- Expérience à batir un service Backend (ASP.NET Web API? Azure Functions? Python Flask? Express? Autre?)
+- Expérience à batir un service Backend (ASP.NET Web API? Azure Functions? Python Flask? Laravel? Express? Autre?)
 - Attentes pour la formation (Que désirez-vous bâtir?)
 
 ---
@@ -74,19 +74,21 @@ Offre de la formation depuis 2018.
 - Découpage en composants réutilisables
 - Permet le développement de SPA (Single Page Apps)
 - Nécessite de convertir le JSX en JavaScript avec un outil (Babel, Parcel, SWC...)
-- Il faut donc utiliser une _boîte à outil_ ou un _Framework_ (Vite, Next, Gatsby, Remix...)
+- Il faut donc utiliser une _boîte à outil_ (Vite, Astro) ou un _Framework_ (Next, Gatsby, Remix, TanStack Start)
+- Un _MetaFramework_ (Epic Stack, T3, Redwood, Meteor, Ionic, Wasp)
 
 ---
 
 ## Historique de React
 
-- Créé en 2011 par Jordan Walke chez Faceboook
+- Créé en 2011 par Jordan Walke chez Faceboook-Meta
 - Utilisé en 2012 pour réécrire Instagram.
-- 2013: React devient Open Source
+- 2013: React est lancé, devient Open Source
 - 2015: React Native permet de développer des apps mobiles
-- 2017: Sortie majeure de React 16 (Fiber rendering)
-- 2020: Sortie majeure de React 17 (Hooks)
-- 2022: Sortie majeure de React 18 (permet le “concurrent mode”)
+- 2017: React 16 (Fiber rendering)
+- 2020: React 17 (Hooks)
+- 2022: React 18 (permet le “concurrent mode”)
+- 2024: React 19 (Actions, Server Components)
 
 ---
 
@@ -111,9 +113,10 @@ https://github.com/chentsulin/awesome-react-renderer
 - **Rétro-compatible** les nouvelles versions évitent de briser le code existant.
 - **Populaire** utilisé par une grande majorité d'applications. Facile de trouver de l'aide.
 - **Sans opinion** React se fout du routage, du chargement de données, des styles, etc.
+- **SPA** Compatible avec le Single Page Application
 - **SSR** Compatible avec le Server-Side Rendering
-- **SSG** Compatible avec le Static-Site Generation
-- **RSC**: compatible avec les React Server Components
+- **SSG** Compatible avec le Static Site Generation
+- **RSC** Compatible avec les React Server Components
 
 ---
 
@@ -147,8 +150,9 @@ https://github.com/chentsulin/awesome-react-renderer
   - Create-React-App (déprécié en 2023)
   - Vite
   - Gatsby
-  - Next js
+  - Next.js
   - Remix
+  - TanStack Start
   - T3
   - Epic Stack
 
@@ -236,7 +240,7 @@ On se déplace vers le nouveau dossier et on peut ouvrir code dans le dossier co
 
 - **node_modules** : contient les dépendances et sous-dépendances. **Ne pas toucher.** Utilisez `npm install` ou `npm update` pour gérer le contenu.
 - **src**: contient les fichiers .js, .tsx, .jsx, .css et .svg qui sont compilés par Vite.
-- **public**: contient les fichiers qui sont inclus sans être modifiés par Vite. (png, pdf, etc)
+- **public**: contient les fichiers qui sont publiés sur le serveur web, sans être compilés par Vite. (png, jpg, pdf, etc)
 
 ---
 
@@ -290,7 +294,7 @@ Ceci démarre un serveur web en mode dev. Taper la lettre <kbd>o</kbd> et <kbd>e
   - **Inferno** (Rapide)
   - **Svelte** (Productif)
   - **Solid** (Composable)
-- JSX n'est pas intégré au standard JavaScript (Pas encore)
+- JSX n'est pas intégré au standard JavaScript (Un jour?)
 
 ---
 
@@ -307,10 +311,10 @@ JSX est compilé par Babel (ou swc, etc):
 {/* prettier-ignore */}
 ```jsx
 React.createElement(
-    'h3', 
-    { title: 'alarme' }, 
-    "L'alarme sonne à ", 
-    alarmTime);
+  'h3', 
+  { title: 'alarme' }, 
+  "L'alarme sonne à ", 
+  alarmTime);
 ```
 
 ---
@@ -362,7 +366,7 @@ On utilise cette commande pour le mode production
 npm run build
 ```
 
-Cela génère un nouveau dossier nommé "dist". C'est ce petit dossier qu'il faut distribuer sur un serveur web.
+Cela génère un nouveau dossier nommé `dist`. C'est ce petit dossier qu'il faut distribuer sur un serveur web.
 
 **Build** pourra:
 
@@ -379,12 +383,12 @@ Pour démarrer un serveur web local pour visionner le contenu de `dist`:
 npm run preview
 ```
 
-On peut alors naviguer vers http://localhost:4173 (`o` et `enter` démarre le navigateur)
+On peut alors naviguer vers http://localhost:4173 (<kbd>o</kbd> et <kbd>enter</kbd> démarre le navigateur)
 
 **Note:**
 
-- Preview Web Server ne permet pas le **Hot Module Reloading** (HMR)
-- Quand on change du JavaScript, il faut faire un nouveau **build** et ensuite **recharger** la page
+- pas de **Hot Module Reloading** (HMR)
+- Si on change du code, il faut faire un nouveau **build** et ensuite **recharger** la page
 
 ---
 

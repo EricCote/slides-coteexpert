@@ -22,7 +22,6 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
-    errorBoundary: { Erreur },
     children: [
       {
         index: true,
@@ -36,14 +35,15 @@ const router = createBrowserRouter([
         path: 'contact',
         element: <Contact />,
       },
+      { path: '*', element: <NotFound /> },
     ],
   },
 ]);
 
 export default router;
 
-function Erreur(props) {
-  return <div>Erreur 404</div>;
+function NotFound(props) {
+  return <div>My 404 Error</div>;
 }
 ```
 

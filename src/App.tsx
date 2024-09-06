@@ -1,5 +1,5 @@
 import '~bootstrap/dist/css/bootstrap.min.css';
-import '~prism-themes/themes/prism-coldark-dark.min.css';
+//import '~prism-themes/themes/prism-coldark-dark.min.css';
 //import '@codesandbox/sandpack-react/dist/index.css';
 import './components/slides/slides.css';
 

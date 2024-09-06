@@ -7,23 +7,26 @@ import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/React/5-data/8-custom-hooks.fr.mdx';
-import Status2 from './decks/React/5-data/6-effects-and-events.fr.mdx';
+import Status from './decks/React/10-data/8-custom-hooks.fr.mdx';
+//import Status2 from './decks/React/5-data/6-effects-and-events.fr.mdx';
 import { useLanguage } from './components/slides/LanguageProvider';
 
 const components = {
   Sandpack,
   Diagram,
   Illustration,
-  TwoColumns({ className, children, style }: any) {
+  Alert({ type = 'primary', children }: { type: string; children: any }) {
+    return <div className={`alert alert-${type} px-5 py-4 `}>{children}</div>;
+  },
+  TwoColumns({ className, children, style, top = false }: any) {
     return (
       <aside
         className={className}
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
-          columnGap: 10,
-          alignItems: 'center',
+          columnGap: '1em',
+          alignItems: top ? 'top' : 'center',
           ...style,
         }}
       >
@@ -132,7 +135,7 @@ function MyLoader() {
         });
         return module;
       }),
-    [subject, doc, lang]
+    [subject, doc, lang, subfolder, subsubfolder]
   );
 
   return (
@@ -151,7 +154,7 @@ function Language() {
   const { lang } = useParams();
   const [, setLanguage] = useLanguage();
 
-  useEffect(() => setLanguage(lang ?? 'en'), [lang]);
+  useEffect(() => setLanguage(lang ?? 'en'), [lang, setLanguage]);
 
   return (
     <>

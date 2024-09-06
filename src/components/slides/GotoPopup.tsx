@@ -31,12 +31,12 @@ const textes: TranslationObject = {
 //this flag will only register the event handler once when in StrictMode (dev mode)
 let isEventRegistered = false;
 
+const options = { capture: true };
+
 function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
   const txtNombre = useRef<HTMLInputElement>();
   let [lang] = useLanguage();
-
-  let options = { capture: true };
 
   function handleClose() {
     setShow(false);
@@ -113,7 +113,6 @@ function GotoPopup() {
     if (show) {
       txtNombre.current!.focus();
       txtNombre.current!.select();
-    } else {
     }
   }, [show]);
 

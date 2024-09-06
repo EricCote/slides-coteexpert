@@ -1,24 +1,27 @@
-## Hash Routing
+## Hash Routing with useSyncExternal store
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import Menu from './Menu';
 import Route from './Route';
 
+// Function subscribing to external changes
+// Similar to an effect subscription.
+// This manages a change that is managed OUTSIDE of React.
+// The param fn (onHashChange) is provided by React and will
+// schedule a re-render if the snapshot data has changed (similar to setState)
+function subscribeHashChange(onHashChange) {
+  window.addEventListener('hashchange', onHashChange);
+  return () => window.removeEventListener('hashchange', onHashChange);
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(window.location.hash);
-
-  function changePage(evt) {
-    setCurrentPage(window.location.hash);
-  }
-
-  useEffect(() => {
-    //Handle the "hashchange" event
-    window.addEventListener('hashchange', changePage);
-    return () => window.removeEventListener('hashchange', changePage);
-  }, []);
+  const currentPage = useSyncExternalStore(
+    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
+    () => window.location.hash // How to get value
+  );
 
   return (
     <>
@@ -52,12 +55,13 @@ export default function Route({ page }) {
 
 ```jsx src/Menu.jsx
 export default function Menu() {
+  const hash = location.hash === '' ? '#' : location.hash;
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === hash ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}

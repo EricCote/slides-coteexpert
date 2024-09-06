@@ -1,49 +1,41 @@
-## Navigation Routing
+## Navigation Routing with useEffect
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
+import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import Route from './Route';
-import useNavigation from './useNavigation';
 
 export default function App() {
-  const currentPage = useNavigation();
+  const [currentPage, setCurrentPage] = useState(window.location.pathname);
+
+  //with the Navigation API, the code is simpler.
+  //No need for a <Link to="/dest"> component,
+  //nor to handle click events on hyperlinks.
+
+  function navigationHandler(evt) {
+    if (!evt.canIntercept) return; //is it a local page that we can intercept?
+    evt.intercept({
+      //in that case, intercept the navigation (cancels navigation)
+      handler: () => {
+        //Simpy setState, React will then to re-render
+        setCurrentPage(new URL(evt.destination.url).pathname);
+      },
+    });
+  }
+
+  useEffect(() => {
+    //Manage the navigate event
+    window.navigation.addEventListener('navigate', navigationHandler);
+  }, []);
 
   return (
     <>
-      <Menu />
+      <Menu active={currentPage} />
       <Route page={currentPage} />
     </>
   );
-}
-```
-
-```js src/useNavigation.jsx
-import { useSyncExternalStore } from 'react';
-
-function subscribePageChange(callback) {
-  function navHandler(evt) {
-    if (evt.canIntercept) {
-      evt.intercept({
-        //in that case, intercept the navigation (cancels navigation)
-        handler: () => {
-          callback();
-        },
-      });
-    }
-  }
-
-  navigation.addEventListener('navigate', navHandler);
-  return () => navigation.removeEventListener('navigate', navHandler);
-}
-
-function getCurrentPage() {
-  return new URL(navigation.currentEntry.url).pathname;
-}
-
-export default function useNavigation() {
-  return useSyncExternalStore(subscribePageChange, getCurrentPage);
 }
 ```
 
@@ -69,13 +61,13 @@ export default function Route({ page }) {
 ```
 
 ```jsx src/Menu.jsx
-export default function Menu() {
+export default function Menu({ active }) {
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === active ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}

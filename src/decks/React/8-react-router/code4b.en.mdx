@@ -1,41 +1,64 @@
-## Navigation Routing
+## History Routing with useSyncExternalStore
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
-import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import Route from './Route';
+import useHistory, { clickHandler } from './useHistory';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(window.location.pathname);
-
-  //with the Navigation API, the code is simpler.
-  //No need for a <Link to="/dest"> component,
-  //nor to handle click events on hyperlinks.
-
-  function navigationHandler(evt) {
-    if (!evt.canIntercept) return; //is it a local page that we can intercept?
-    evt.intercept({
-      //in that case, intercept the navigation (cancels navigation)
-      handler: () => {
-        //Simpy setState, React will then to re-render
-        setCurrentPage(new URL(evt.destination.url).pathname);
-      },
-    });
-  }
-
-  useEffect(() => {
-    //Manage the navigate event
-    window.navigation.addEventListener('navigate', navigationHandler);
-  }, []);
+  const currentPage = useHistory();
 
   return (
     <>
-      <Menu />
+      <Menu onClick={clickHandler} />
       <Route page={currentPage} />
     </>
   );
+}
+```
+
+```js src/useHistory.js
+import { useSyncExternalStore } from 'react';
+
+// setup the history API to get notifications when page changes
+function subscribeHistory(callback) {
+  const currentPage = window.location.pathname;
+  history.replaceState(currentPage, '', currentPage);
+  window.addEventListener('popstate', callback);
+  return () => window.removeEventListener('popstate', callback);
+}
+
+// Returns the current page
+function getCurrentPage() {
+  return history.state;
+}
+
+//click handler that uses the history API instead of navigating
+export function clickHandler(evt) {
+  //create a url object from the link text
+  const url = new URL(evt.target.href);
+  if (
+    //if hostname is the same, but with a different path,
+    //then handle the navigation
+    url.hostname === window.location.hostname &&
+    url.pathname !== window.location.pathname
+  ) {
+    evt.preventDefault(); //cancel the navigation
+    //Add destination in history API
+    history.pushState(url.pathname, '', url.pathname);
+    history.go(0); //popstate event will fire
+  } else if (
+    url.hostname === window.location.hostname &&
+    url.pathname === window.location.pathname
+  ) {
+    evt.preventDefault(); //cancel if we navigate to the same page twice
+  }
+}
+
+export default function useHistory() {
+  return useSyncExternalStore(subscribeHistory, getCurrentPage);
 }
 ```
 
@@ -61,14 +84,15 @@ export default function Route({ page }) {
 ```
 
 ```jsx src/Menu.jsx
-export default function Menu() {
+export default function Menu({ onClick }) {
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === location.pathname ? 'active' : ''}
             href={menuItem.url}
+            onClick={onClick}
           >
             {menuItem.name}
           </a>
@@ -102,8 +126,8 @@ const menuList = [
 export default function Home() {
   return (
     <>
-      <h1>Home page</h1>
-      <p>This is the Home page!</p>
+      <h1>Home Page</h1>
+      <p>This is the home page!</p>
     </>
   );
 }
@@ -163,7 +187,3 @@ ul.menu {
 ```
 
 </Sandpack>
-
-Incompatible with Code SandBox "back button" or url bar
-
-Works with browser right-click "back" menu. Or inspect.

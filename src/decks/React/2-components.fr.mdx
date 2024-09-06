@@ -11,7 +11,8 @@ description: other
 
 - Un **SPA** est une _Single Page App_
   - Par exemple: Google Maps, Netflix, Instagram, Twitter, etc.
-  - Le serveur web doit être configuré pour rediriger toutes les requêtes HTTP vers la page index.
+  - Le serveur web doit être configuré pour rediriger toutes les requêtes HTTP vers la page _index_.
+- Les SPA classiques sont 100% _front-end_, avec des interactions au _backend_ via des services REST API.
   - Les SPA modernes sont plus complexes et permettent une architecture hybride, où le _backend_ joue un rôle important.
     - On appelle cette approche le **Pespa** (Progressively Enhanced Single Page Apps)
     - https://www.epicweb.dev/the-webs-next-transition
@@ -20,8 +21,8 @@ description: other
 
 ## Points d'entrée
 
-- Voici les conventions de **Vite** (Similaire à Create-React-App, CRA)
-- Une page `index.html` aura un `<div id="root"> </div>`
+- Voici les conventions de **Vite**
+- Une page `index.html` possède un `<div id="root"> </div>`
   - le `div` est vide
 - le script de démarrage se nomme `index.js`
 
@@ -54,11 +55,26 @@ rootNode.innerHTML = '<h2>Bonjour tous!</h2>';
 ```
 
 ```js src/index.js active
-import('./styles.css'); // syntaxe Vite.
+import('./style.css'); // Vite syntax.  No React!
 
-//TODO: afficher l'heure avec ToLocaleTimeString()
 const divRoot = document.getElementById('root');
 divRoot.innerHTML = '<h1 style="color: blue">Hello World</h1>';
+
+// Play with Interval, put 2000 100 or 100 and see the browser tools.
+
+// function displayTime() {
+//   divRoot.innerHTML = `<p>The current time is ${new Date().toLocaleTimeString()}</p>`;
+// }
+
+// setInterval(displayTime, 1000);
+```
+
+```css src/style.css
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  padding: 0;
+}
 ```
 
 </Sandpack>
@@ -117,8 +133,9 @@ root.render(<h1 style={{ color: 'blue' }}>Bonjour Tous!</h1>);
 
 //----
 
-// the "commit" phase will determine the minimal DOM update, by comparing the
-// current and previous renders. See the inspect tools in browser
+// the "commit" phase will determine the minimal DOM update,
+// by comparing the current and previous renders.
+// See the inspect tools in browser
 
 function DisplayTime() {
   root.render(<p>The current time is {new Date().toLocaleTimeString()}</p>);
@@ -189,7 +206,7 @@ root.render(
 
 **Règle** Quand on écrit le JSX sur plusieurs lignes, il faut entourer de parenthèses ()
 
-<TwoColumns>
+<TwoColumns style={{alignItems: 'stretch'}}>
 
 ```js
 export default function Bonjour() {
@@ -212,7 +229,7 @@ export default function Bonjour() {
 
 ## Le JSX ne permet qu'une seule racine
 
-<TwoColumns>
+<TwoColumns style={{alignItems: 'stretch'}}>
 
 ```js
 // Erreur: deux racines  🚫
@@ -236,7 +253,7 @@ export default function Bonjour() {
 
 Le fragment permet d'englober sans générer d'élément dans le DOM
 
-<TwoColumns>
+<TwoColumns style={{alignItems: 'stretch'}}>
 
 ```js
 // Fragment avec importation ✅
@@ -408,7 +425,8 @@ img {
 - Pour l'importation, l'extension `.js` ou `.jsx` est optionnelle.
 
 ```js
-import Composant from './Composant';
+import Composant from './Composant.js';  ✅
+import Composant from './Composant';  ✅ ✅
 ```
 
 ---
@@ -457,35 +475,27 @@ import './table.css';
   <thead>
     <tr>
       <th>Syntaxe</th>
-      <th>Export</th>
+      <th >Export</th>
       <th>Import</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>par défaut</th>
-      <td>
-```js
-export default function Button() {}
-```
+      <th >par défaut</th>
+      <td >
+`export default function Button() {}`
 </td>
 <td>
-```js
-import  Button  from './button.js';
-```
+`import  Button  from './button.js';`
   </td>
 </tr>
 <tr>
   <th>Nommée</th>
-  <td> 
-```js
-export         function Button() {}
-```
+  <td > 
+`export         function Button() {}`
   </td>
   <td>
-```js
-import {Button} from './button.js';
-``` 
+`import {Button} from './button.js';` 
   </td>
     </tr>
 
@@ -577,7 +587,7 @@ JSX est converti en JavaScript par la boîte à outils. Les attributs sont alors
 
 `stroke-width` devient `strokeWidth`, `class` devient `className` (car `class` est un mot-réservé en JS).
 
-Consultez la liste des attributs sur la [documentation React](https://beta.reactjs.org/reference/react-dom/components/common)
+Consultez la liste des attributs sur la [documentation React](https://react.dev/reference/react-dom/components/common)
 
 **Exception:** `aria-*` et `data-*`
 
@@ -859,21 +869,21 @@ On peut passer des chaînes de caractères, des objets, des tableaux, des foncti
 
 ## Lire les props
 
-<TwoColumns>
+<TwoColumns  top>
 
 ```js
-// décomposition du paramètre props
-function Avatar({ person, size }) {
-  // person et size sont accessibles
-}
-```
-
-```js
-// paramètre props
+// lecture du paramètre props   ✅
 function Avatar(props) {
   let person = props.person;
   let size = props.size;
   // ...
+}
+```
+
+```js
+// décomposition du paramètre props   ✅✅✅
+function Avatar({ person, size }) {
+  // person et size sont accessibles
 }
 ```
 
@@ -897,13 +907,12 @@ La valeur par défaut est utilisée quand `size` n'est pas présent ou quand `si
 
 ---
 
-## Pousser des props avec la syntaxe de décomposition
+## Passer des props avec la syntaxe de décomposition (spread)
 
-<TwoColumns>
+<TwoColumns top>
 
 {/* prettier-ignore */}
 ```jsx
-
 // Approche détaillée
 function Profile({ person, size, 
                    isSepia, thickBorder }) {
@@ -956,7 +965,7 @@ function Cadre({ children }) {
 
 - Les props reçus sont en lecture seulement. Il faut les considérer _immuables_.
 
-- On ne peut changer un props. Si on a besoin d'interactivité, on utilisera l'état (state).
+- On ne peut changer un props. Si on a besoin d'interactivité, on utilise plutôt l'état (state).
 
 ---
 
@@ -1356,7 +1365,7 @@ return <ul>{listeItems}</ul>;
 
 Avec une structure plus complexe, filtrons et affichons:
 
-<TwoColumns>
+<TwoColumns top>
 
 ```js
 const personnalités = [
@@ -1372,7 +1381,6 @@ const personnalités = [
     profession: 'artiste',
   },
 
-  ...
 ```
 
 ```js
@@ -1401,7 +1409,7 @@ const personnalités = [
 
 ### Filtrer les artistes
 
-`.filter` est une fonction standard.
+`.filter` est une fonction standard de js.
 
 ```js
 const artistes = personnalités.filter((p) => p.profession === 'artiste');
@@ -1435,14 +1443,14 @@ return <ul>{listeItems}</ul>;
 
 ## Note sur les fonctions flèches
 
-Si on écrit une fonction fèche avec accolades {}, il faut mettre le `return` explicitement.
+Si on écrit une fonction fèche **avec** accolades {}, il faut mettre le `return` explicitement.
 
 {/* prettier-ignore */}
 ```js
 const liste = artistes.map((p) => { return <li>...</li>; });
 ```
 
-Si on écrit une fonction flèche sans accolades, le `return` est implicite et il ne faut pas l'écrire.
+Si on écrit une fonction flèche **sans** accolades, le `return` est implicite et il ne faut pas l'écrire.
 
 ```js
 const liste = artistes.map((p) => <li>...</li>);
@@ -1454,9 +1462,9 @@ const liste = artistes.map((p) => <li>...</li>);
 
 Si on oublie de spécifier une `key` unique, un message est affiché dans la console
 
-<code style={{ color: 'red' }}>
+<div className='alert alert-danger'>
   Warning: Each child in a list should have a unique “key” prop.
-</code>
+</div>
 
 Pour éliminer le message, il faut utiliser une clé unique.
 Il faut fournir cela pour n'importe quel tableau de JSX, incluant le `map`.
@@ -1477,7 +1485,7 @@ des éléments. Ceci permet à React de mieux comprendre ce qui a été modifié
 - Les clés doivent être immuables, elles ne doivent pas être changées, ni regénérées.
 
 - `key` n'est PAS une prop, mais une caractéristique utilisée par React. Si la composante
-  a besoin de cette info, il faut alors créer une prop avec un autre nom.
+  a aussi besoin de cette info, il faut alors créer une prop avec un autre nom.
   ex: `<Profile key={id} userId={id} />`.
 
 ---
@@ -1870,7 +1878,7 @@ export default function TeaSet() {
 
 Il est plus simple de détecter quand le rendu provoque des effets de bord avec le `<StrictMode>`.
 
-Avec le `StrictMode`, quand on est en mode développement, chaque composant est rendu 2 fois. Ça rend (parfois) les effets de bord plus visible.
+Avec le `StrictMode`, quand on est en mode développement, chaque composant est rendu 2 fois. Ça rend (parfois) les effets de bord plus visibles.
 
 `StrictMode` sera ignoré en production.
 
@@ -1910,7 +1918,7 @@ Il faut éviter les effets de bord dans le **rendu**.
 
 Il est parfois nécessaire d'utiliser des effets de bord. On peut alors utiliser les gestionnaires d'événements (event handlers), tel que `onClick` ou `onChange`.
 
-Aussi, il est possible de référer une fonction dans `useEffect`, qui exécute alors immédiatement après le rendu. (C'est comme un gestionnaire d'événement. après le render.)
+Aussi, il est possible de référer une fonction dans `useEffect`, qui exécute alors immédiatement après le rendu. (Similaire à un gestionnaire d'événement, **après** le rendu.)
 
 ---
 

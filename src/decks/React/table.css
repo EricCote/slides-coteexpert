@@ -1,10 +1,25 @@
 .my-tbl > thead > tr > th {
-  padding-left: 1em;
+  padding-left: 0.5em;
 }
 .my-tbl > thead > tr > th:first-child {
   padding-left: 0em;
 }
 
-.my-tbl pre[class*='language-'] {
-  padding: 0em 1em;
+.my-tbl > thead > tr > th:first-child {
+  padding-left: 0em;
+}
+
+.my-tbl tr > *:first-child {
+  border-right: 1px solid;
+}
+.my-tbl tr > *:last-child {
+  border-left: 1px solid;
+}
+
+.my-tbl th {
+  padding-right: 0.5em;
+}
+
+.my-tbl code {
+  padding: 0em 0.5em;
 }

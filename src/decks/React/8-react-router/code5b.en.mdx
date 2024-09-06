@@ -1,32 +1,49 @@
-## Hash Routing
+## Navigation Routing with useSyncExternalStore
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
-import { useSyncExternalStore } from 'react';
 import Menu from './Menu';
 import Route from './Route';
-
-// Function subscribing to external changes
-// Similar to an effect subscription
-function subscribeHashChange(onHashChange) {
-  window.addEventListener('hashchange', onHashChange);
-  return () => window.removeEventListener('hashchange', onHashChange);
-}
+import useNavigation from './useNavigation';
 
 export default function App() {
-  const currentPage = useSyncExternalStore(
-    subscribeHashChange,
-    () => window.location.hash,
-    () => window?.location.hash
-  );
+  const currentPage = useNavigation();
 
   return (
     <>
-      <Menu />
+      <Menu active={currentPage} />
       <Route page={currentPage} />
     </>
   );
+}
+```
+
+```js src/useNavigation.jsx
+import { useSyncExternalStore } from 'react';
+
+function subscribePageChange(callback) {
+  function navHandler(evt) {
+    if (evt.canIntercept) {
+      evt.intercept({
+        //in that case, intercept the navigation (cancels navigation)
+        handler: () => {
+          callback();
+        },
+      });
+    }
+  }
+
+  navigation.addEventListener('navigate', navHandler);
+  return () => navigation.removeEventListener('navigate', navHandler);
+}
+
+function getCurrentPage() {
+  return new URL(navigation.currentEntry.url).pathname;
+}
+
+export default function useNavigation() {
+  return useSyncExternalStore(subscribePageChange, getCurrentPage);
 }
 ```
 
@@ -37,13 +54,13 @@ import Contact from './Contact';
 
 export default function Route({ page }) {
   switch (page) {
-    case '#home':
-    case '#':
+    case '/home':
+    case '/':
     case '':
       return <Home />;
-    case '#news':
+    case '/news':
       return <News />;
-    case '#contact':
+    case '/contact':
       return <Contact />;
     default:
       return <div>404 error</div>;
@@ -52,13 +69,13 @@ export default function Route({ page }) {
 ```
 
 ```jsx src/Menu.jsx
-export default function Menu() {
+export default function Menu({ active }) {
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
         <li key={menuItem.url}>
           <a
-            className={menuItem.url === location.hash ? 'active' : ''}
+            className={menuItem.url === active ? 'active' : ''}
             href={menuItem.url}
           >
             {menuItem.name}
@@ -72,19 +89,19 @@ export default function Menu() {
 const menuList = [
   {
     name: 'Home',
-    url: '#',
+    url: '/',
   },
   {
     name: 'News',
-    url: '#news',
+    url: '/news',
   },
   {
     name: 'Contact',
-    url: '#contact',
+    url: '/contact',
   },
   {
     name: 'About',
-    url: '#about',
+    url: '/about',
   },
 ];
 ```
@@ -116,7 +133,7 @@ export default function Contact() {
   return (
     <>
       <h1>Contact page</h1>
-      <p>This is the contact page!</p>
+      <p>This is the Contact page!</p>
     </>
   );
 }
@@ -154,3 +171,7 @@ ul.menu {
 ```
 
 </Sandpack>
+
+Incompatible with Code SandBox "back button" or url bar
+
+Works with browser right-click "back" menu. Or inspect.

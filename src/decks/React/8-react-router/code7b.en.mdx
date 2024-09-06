@@ -1,4 +1,4 @@
-## React Router Lazy loading
+## React Router lazy feature, no suspense
 
 <Sandpack options={{ showNavigator: true }} >
 
@@ -22,8 +22,6 @@ import {
   isRouteErrorResponse,
 } from 'react-router-dom';
 
-const Contact = lazy(() => import('./Contact.jsx'));
-
 const router = createBrowserRouter([
   {
     path: '/',
@@ -40,11 +38,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'contact',
-        element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <Contact />
-          </Suspense>
-        ),
+        lazy: () => import('./Contact.jsx'),
       },
     ],
   },
@@ -137,7 +131,7 @@ export default function News() {
 ```
 
 ```jsx src/Contact.jsx
-export default function Contact() {
+export function Component() {
   return (
     <>
       <h1>Contact page</h1>

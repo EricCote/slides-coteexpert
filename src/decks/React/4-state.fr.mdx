@@ -1,539 +1,18 @@
 ---
-title: 'Interaction et État'
+title: 'État (State)'
 date: '2023-02-22'
 ---
 
-# Interaction et état
+# État (State)
 
 ---
 
-## Ajouter interactions
-
-```jsx
-export default function Bouton() {
-  return <button>Je ne fais rien</button>;
-}
-```
-
-1. Pour gérer le click, on déclare une fonction `handleClick` qui affiche une alerte
-2. On ajoute `onClick={handleClick}` au `<button>`
-
-```jsx
-export default function Bouton() {
-  function handleClick() {
-    alert('On a cliqué!');
-  }
-
-  return <button onClick={handleClick}>Cliquez-moi</button>;
-}
-```
-
----
-
-## Gestionnaire d'événement
-
-**Rappel** on peut passer une fonction dans les props.
-
-`handleClick` est une fonction de type **gestionnaire d'événements** (event handler)
-
-Les gestionnaires d'événements sont souvent:
-
-- Définis dans nos composants
-- Décrits par un nom qui débute par `handle`
-  - Exemple: `onClick={handleClick}`, `onMouseEnter={handleMouseEnter}`
-
----
-
-## À la volée (inline)
-
-On peut définir un gestionnaire d'événements en ligne, à la volée, directement dans le JSX.
-
-```js
-<button onClick={function handleClick() {
-  alert('On a cliqué!');
-}}>
-```
-
-On préfère souvent la syntaxe flèche, plus simple.
-
-```js
-<button onClick={() => {
-  alert('On a cliqué!');
-}}>
-```
-
-Cette méthode en ligne (à la volée) est souvent utilisée pour les fonctions courtes.
-
----
-
-## Passage des gestionnaires d'événements
-
-import './table.css';
-
-<table className="my-tbl">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Passer fonction ✅</th>
-      <th>Appeler fonction ❌</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Par nom</th>
-      <td>
-```js
-<button onClick={handleClick}>
-```
-</td>
-<td>
-```js
-<button onClick={handleClick()}>
-```
-  </td>
-</tr>
-<tr>
-  <th>À la volée</th>
-  <td> 
-```js
-<button onClick={() => alert('...')}>
-```
-  </td>
-  <td>
-```js
-<button onClick={alert('...')}>
-``` 
-  </td>
-    </tr>
-
-  </tbody>
-</table>
-
-<hr />
-
-Les fonctions doivent être passées, PAS appelées. Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement.
-
-`<button onClick={handleClick}>` passe la fonction `handleClick`.
-
-`<button onClick={() => alert('...')}>` passe la fonction `() => alert('...')`.
-
----
-
-## Lire des props dans le gestionnaire d'événements
-
-Quand les gestionnaires d'événements sont définis dans le composante,
-ils ont accès aux props et variables du composant. (Magie du closure)
-
-<Sandpack>
-
-```js
-function AlertButton({ message, children }) {
-  return <button onClick={() => alert(message)}>{children}</button>;
-}
-
-export default function Toolbar() {
-  return (
-    <div>
-      <AlertButton message='On joue le film!'>Jouer Film</AlertButton>
-      <AlertButton message='On télécharge!'>Téléchager Image</AlertButton>
-    </div>
-  );
-}
-```
-
-```css
-button {
-  margin-right: 10px;
-}
-```
-
-</Sandpack>
-
----
-
-## Passer le gestionnaire d'événements dans les props
-
-Il est possible de passer un gestionnaire d'événements dans les props
-
-<Sandpack>
-
-```js
-function Button({ onClick, children }) {
-  return <button onClick={onClick}>{children}</button>;
-}
-
-function PlayButton({ movieName }) {
-  function handlePlayClick() {
-    alert(`On joue ${movieName}!`);
-  }
-
-  return <Button onClick={handlePlayClick}>Jouer "{movieName}"</Button>;
-}
-
-function UploadButton() {
-  return (
-    <Button onClick={() => alert('On télécharge une image')}>
-      Upload Image
-    </Button>
-  );
-}
-
-export default function Toolbar() {
-  return (
-    <div>
-      <PlayButton movieName='SpiderMan 2' />
-      <UploadButton />
-    </div>
-  );
-}
-```
-
-```css
-button {
-  margin-right: 10px;
-}
-```
-
-</Sandpack>
-
----
-
-## Nommer les props de gestionnaire d'événements
-
-Par convention, vos gestionnaires d'événements commencent par `on`. ex: `onClick`.
-
-Dans cet exemple, on utilise onSmash:
-
-<Sandpack>
-
-```js
-function Button({ onSmash, children }) {
-  return <button onClick={onSmash}>{children}</button>;
-}
-
-export default function App() {
-  return (
-    <div>
-      <Button onSmash={() => alert('Je joue film!')}>Jouer film</Button>
-      <Button onSmash={() => alert('Je télécharge!')}>Télécharger image</Button>
-    </div>
-  );
-}
-```
-
-```css
-button {
-  margin-right: 10px;
-}
-```
-
-</Sandpack>
-
----
-
-## Propagation d'événements
-
-Un événement peut se gérer à différents niveaux.
-
-Devinez l'ordre des événements de l'exemple suivant:
-
-<Sandpack>
-
-```js
-export default function Toolbar() {
-  return (
-    <div
-      className='Toolbar'
-      onClick={() => {
-        alert('On a cliqué sur la barre!');
-      }}
-    >
-      <button onClick={() => alert('Je joue!')}>Jouer film</button>
-      <button onClick={() => alert('Je télécharge!')}>Télécharger Image</button>
-    </div>
-  );
-}
-```
-
-```css
-.Toolbar {
-  background: #aaa;
-  padding: 5px;
-}
-button {
-  margin: 5px;
-}
-```
-
-</Sandpack>
-
-Les événements se propagent du gestionnaire le plus spécifique au gestionnaire parent.
-
-**Exception:** l'événement onScroll ne se propage pas.
-
----
-
-## Interrompre la propagation
-
-Les gestionnaires d'événements reçoivent un **event object** nommé `e` par convention (e pour "event").
-
-Une méthode nommée `e.stopPropagation()` permet de stopper la propagation vers le parent.
-
-<Sandpack>
-
-```js
-function Button({ onClick, children }) {
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-export default function Toolbar() {
-  return (
-    <div
-      className='Toolbar'
-      onClick={() => {
-        alert('On a cliqué sur la barre!');
-      }}
-    >
-      <Button onClick={() => alert('Je joue!')}>Jouer film</Button>
-      <Button onClick={() => alert('Je télécharge!')}>Télécharger Image</Button>
-    </div>
-  );
-}
-```
-
-```css
-.Toolbar {
-  background: #aaa;
-  padding: 5px;
-}
-button {
-  margin: 5px;
-}
-```
-
-</Sandpack>
-
----
-
-## Événements en capture plutôt qu'en propagation.
-
-Il existe deux facons de s'attacher avec le gestionnaires d'événement:
-
-1. En **capture**, du parent plus générique vers l'enfant plus spécifique (on descend)
-2. En **propagation**, de l'enfant plus spécifique vers le parent plus générique (on remonte)
-
-Normalement, on gère les événements en mode **propagation**. Mais dans de **rares** situations, on préférera gérer un événement en mode **capture**.
-
-```js
-<div
-  onClickCapture={() => {
-    /* Ceci est géré avant les boutons */
-  }}
->
-  <button onClick={(e) => e.stopPropagation()} />
-  <button onClick={(e) => e.stopPropagation()} />
-</div>
-```
-
----
-
-## Capture et propagation
-
-<img src='https://miro.medium.com/v2/resize:fit:1064/1*B0k6-J5ZwfmsxZDXAOCT2Q.jpeg' />
-
----
-
-## Passer des gestionnaires ET stopper la propagation
-
-Ce gestionnaire roule le code qui stoppe la propagation **et ensuite** appelle la prop `onClick` passée par le parent.
-
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
-
-```js {4,5}
-function Button({ onClick, children }) {
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-```
-
-On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. Ce patron est une **alternative** à la propagation. Contrairement à la propagation, ce n'est pas automatique. Mais c'est plus clair quel code est appelé et dans quel ordre.
-
-</aside>
-
----
-
-## Comportement par défaut (formulaire)
-
-Certains événements du naviagateur sont associés à un comportement. Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
-
-<Sandpack>
-
-```js
-export default function Signup() {
-  return (
-    <form onSubmit={() => alert('On envoie!')}>
-      <input />
-      <button>Envoyer</button>
-    </form>
-  );
-}
-```
-
-```css
-button {
-  margin-left: 5px;
-}
-```
-
-</Sandpack>
-
----
-
-## Prévenir le comportment par défaut
-
-Utiliser `e.preventDefault()` empêche le déclenchement du comportement.
-
-<Sandpack>
-
-```js
-export default function Signup() {
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        alert('On envoie!');
-      }}
-    >
-      <input />
-      <button>Envoyer</button>
-    </form>
-  );
-}
-```
-
-```css
-button {
-  margin-left: 5px;
-}
-```
-
-</Sandpack>
-
-Ne pas confondre les deux:
-
-- [`e.stopPropagation()`](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) empêche les gestionnaire d'événements parents de se déclencher
-- [`e.preventDefault()` ](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) empêche le comportement par défaut de se déclencher. (Pour les quelques composants qui ont un comportement par défaut.)
-
----
-
-## Gestionnaire d'événements et Effets de bord
-
-On peut mettre des effets de bord dans un gestionnaire d'événement.
-
-En fait, c'est la **meilleure place**, car un gestionnaire n'a pas besoin d'être pur (contrairement au rendu de composants.)
-
----
-
-## Défi #1
-
-Cliquer le bouton devrait basculer le fond entre blanc et noir. Ça ne fonctionne pas. Réparez le problème (Ne modifiez pas `handleClick`, son code est correct.)
-
-<Sandpack>
-
-```js
-export default function LightSwitch() {
-  function handleClick() {
-    let bodyStyle = document.body.style;
-    if (bodyStyle.backgroundColor === 'black') {
-      bodyStyle.backgroundColor = 'white';
-    } else {
-      bodyStyle.backgroundColor = 'black';
-    }
-  }
-
-  return <button onClick={handleClick()}>Interrupteur de lumière</button>;
-}
-```
-
-</Sandpack>
-
----
-
-## Défi #2
-
-Le composant `ColorSwitch` génère un bouton qui doit changer la couleur de page. Il faut attacher le gestionnaire d'événements `onChangeColor` à l'événement `onClick` du bouton.
-
-Après le succès, on remarque que le bouton incrémente aussi le compteur de page. Que faudrait-il faire pour que `onChangeColor` ne puisse plus incrémenter le compteur?
-
-<Sandpack>
-
-```js src/ColorSwitch.js active
-export default function ColorSwitch({ onChangeColor }) {
-  return <button>Changer couleur</button>;
-}
-```
-
-```js src/App.js hidden
-import { useState } from 'react';
-import ColorSwitch from './ColorSwitch.js';
-
-export default function App() {
-  const [clicks, setClicks] = useState(0);
-
-  function handleClickOutside() {
-    setClicks((c) => c + 1);
-  }
-
-  function getRandomLightColor() {
-    let r = 150 + Math.round(100 * Math.random());
-    let g = 150 + Math.round(100 * Math.random());
-    let b = 150 + Math.round(100 * Math.random());
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  function handleChangeColor() {
-    let bodyStyle = document.body.style;
-    bodyStyle.backgroundColor = getRandomLightColor();
-  }
-
-  return (
-    <div style={{ width: '100%', height: '100%' }} onClick={handleClickOutside}>
-      <ColorSwitch onChangeColor={handleChangeColor} />
-      <br />
-      <br />
-      <h2>Nombre de clics sur la page: {clicks}</h2>
-    </div>
-  );
-}
-```
-
-</Sandpack>
-
----
-
-import myFile from './3-code/datafile.js';
+import myFile from './4-state/datafile.js';
 
 ## Une variable ne suffit pas
 
-<Sandpack    files={{
-    "/data.js": myFile
+<Sandpack  files={{
+    "src/data.js": myFile
   }}  >
 
 ```js
@@ -561,6 +40,17 @@ export default function Gallery() {
       <p>{sculpture.description}</p>
     </>
   );
+}
+```
+
+```js src/useForceRefresh.js hidden
+import { useState } from 'react';
+
+export default function useForceRefresh() {
+  const [_, forceRefresh] = useState({});
+  return function () {
+    forceRefresh({});
+  };
 }
 ```
 
@@ -601,28 +91,23 @@ Il faut:
 1. **Conserver** les données entre les rendus
 2. **Déclencher** la génération d'un nouveau rendu (_re-rendering_)
 
-Le Hook [`useState`](https://beta.reactjs.org/reference/react/useState) fournit ces deux choses.
+Le Hook [`useState`](https://reactjs.org/reference/react/useState) fournit ces deux choses.
 
-1. **variable state** Garde les données entre les rendus.
-2. **fonction state setter** pour modifier la donnée et générer un rendu.
+1. **Variable state (État)** Garde les données entre les rendus.
+2. **Fonction state setter (Fonction modification d'état)** pour modifier la donnée et générer un rendu.
 
 ---
 
 ## Ajouter une variable State
 
-D'abord, il faut ajouter l'importation `useState`
-
 ```js
 import { useState } from 'react';
+...
+
+const [data, setData] = useState(0);
 ```
 
-Et créer le state dans le composant
-
-```js
-const [index, setIndex] = useState(0);
-```
-
-`index` est une variable d'état (pour lire), et `setIndex` est la fonction setter (pour écrire).
+`data` est une variable d'état (pour lire), et `setData` est la fonction setter (pour modifier).
 
 > La syntaxe `[` et `]` se nomme _décomposition de tableau_ ([array destructuring](https://javascript.info/destructuring-assignment)) Cela permet de lire les valeurs provenant d'un tableau. Le tableau retourné par `useState` a toujours 2 items.
 
@@ -630,7 +115,7 @@ const [index, setIndex] = useState(0);
 
 ## Modifier le state
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns top>
 
 On modifie le state dans `handleClick`:
 
@@ -640,12 +125,11 @@ function handleClick() {
 }
 ```
 
-</aside>
-
+</TwoColumns>
 Voici le code réparé:
 
 <Sandpack    files={{
-    "/data.js": myFile
+    "src/data.js": myFile
   }}  >
 
 ```js
@@ -704,21 +188,19 @@ button {
 
 ## useState, le premier Hook
 
-`useState` n'est pas le seul Hook. Toute fonction démarrant par "`use`" est un Hook.
-
-_Hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://beta.reactjs.org/learn/render-and-commit#step-1-trigger-a-render).
-
-Les _hooks_ permettent de se connecter ("hook into") dans les fonctionnalités de React.
-
-"State" est une fonctionalité, mais on en verra d'autres.
+- `useState` n'est pas le seul _hook_. Toute fonction démarrant par "`use`" est un _hook_.
+- Les _hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://reactjs.org/learn/render-and-commit#step-1-trigger-a-render).
+- Les _hooks_ permettent de se connecter ("hook into") dans les fonctionnalités de React.
+- L'état (State) est une fonctionalité, mais on en verra d'autres.
 
 ---
 
 ## Caractéristiques des Hooks
 
-<div className="alert alert-warning px-5 py-4 text-body">
-
-**Attention:** les hooks (débutant par `use`) ne peuvent être appelés qu'à partir du "top niveau" de votre composant, ou de vos propres hooks.
+<Alert type='warning'>
+  **Attention:** les hooks (débutant par `use`) ne peuvent être appelés qu'à
+  partir du "top niveau" de votre composant, ou de vos propres hooks.
+</Alert>
 
 On ne peut **PAS** appeler un hook dans:
 
@@ -727,8 +209,6 @@ On ne peut **PAS** appeler un hook dans:
 - une fonction imbriquée (gestionnaire d'événements).
 
 Même si les hooks sont des fonctions, vaut mieux considérer ceux-ci comme des déclarations des besoins de votre composant. On utilise les fonctionalités React au "top niveau" d'un composant, de la même façon qu'on importe les modules au début des fichiers.
-
-</div>
 
 ---
 
@@ -774,7 +254,7 @@ Un composant peut avoir de multiples variables d'états.
 L'exemple suivant possède deux variables d'état: un nombre `index` et un booléen `showMore` qui bascule quand on clique "Afficher Détails" .
 
 <Sandpack    files={{
-    "/data.js": myFile
+    "src/data.js": myFile
   }}  >
 
 ```js
@@ -854,7 +334,7 @@ React utilise un tableau de paires pour chaque composant. Il maintient un index 
 L'exemple suivant n'utilise **PAS** React. Mais il démontre comment fonctionne les hooks.
 
 <Sandpack    files={{
-    "/data.js": myFile
+    "src/data.js": myFile
   }}  >
 
 ```js src/index.js active
@@ -893,7 +373,7 @@ function useState(initialState) {
 }
 
 function Gallery() {
-  // Each useState() call will get the next pair.
+  // Chaque appel à useState() obtient la paire suivante.
   const [index, setIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
 
@@ -993,7 +473,7 @@ L'état est local à l'instance du composant. **Si vous affichez deux fois le m�
 Dans l'exemple suivant, le composant `Gallery` est rendu deux fois. Les états sont indépendants.
 
 <Sandpack    files={{
-    "/data.js": myFile
+    "src/data.js": myFile
   }}  >
 
 ```js
@@ -1086,7 +566,7 @@ L'état n'est lié ni à une fonction, ni à un module. Il est lié à l'instanc
 
 Le composant `Page` ne connait rien de l'état de `Gallery`. L'état est complètement privé au composant qui le déclare. Le parent ne peut le changer. On peut ajouter ou enlever de l'état sans affecter le reste des composants.
 
-Si on veut que les deux galleries partagent leurs états? La bonne pratique en React, c'est d'enlever l'état aux composants enfants pour le rajouter à leur parent partagé. On couvrira cela plus tard.
+Si on veut que les deux galleries partagent leurs états? La bonne pratique en React, c'est d'enlever l'état aux composants enfants pour le rajouter à leur parent partagé. (On couvre cela plus tard.)
 
 ---
 
@@ -1097,7 +577,7 @@ Quand on clique "Next" à la dernière image, le code plante. Réparons le code.
 Après avoir réparé le code, ajoutez un bouton "previous" pour revenir en arrière. Empêchez que ça plante à la première image.
 
 <Sandpack    files={{
-    "/data.js": myFile
+    "src/data.js": myFile
   }}  >
 
 ```js
@@ -1319,19 +799,20 @@ export default function Image() {
 - Après le rendu initial, on peut déclencher des rendus additionnels en modifiant l'état avec `setState`.
 - Modifier l'état va placer un re-rendu dans la file.
 - On peut ajouter plusieurs rendus additionnels dans la file.
+- React regroupe les éléments de la file dans **un seul rendu** (Automatic batching of renders)
 
 ---
 
 ## Étape 2: On génère un Rendu du composant
 
-- Après le déclenchement du rendu, React appelle vos composants pour déterminer quoi afficher.
+- Après le déclenchement du rendu, React appelle vos composants pour déterminer l'affichage.
 
 **"Faire un rendu", c'est React qui appelle vos composants.**
 
 - **Au rendu initial** React appelle le composant racine.
-- **Pour les rendus suivants** React appelle le composant ayant le state modifié.
+- **Pour les rendus suivants** React appelle le composant ayant l'état modifié.
 
-C'est un processus recursif. Si le composant retourne d'autres composants, ils seront aussi appelés, ainsi que leurs enfants et ainsi de suite. Le processus continue jusqu'à ce que tous les sous-composants soient rendus, et que React sache exactement quoi afficher sur l'écran.
+C'est un processus récursif. Si le composant retourne d'autres composants, ils seront aussi appelés, ainsi que leurs enfants, et ainsi de suite. Le processus continue jusqu'à ce que tous les sous-composants soient rendus, et que React sache exactement quoi afficher.
 
 ---
 
@@ -1384,9 +865,11 @@ img {
 
 ## Le Rendu est pur
 
-<div className="alert alert-warning px-5 py-4 text-body">
+<Alert type="warning">
 
 Le rendu doit toujours être une [fonction pure](https://react.dev/learn/keeping-components-pure):
+
+</Alert>
 
 - **'Mêmes entrées, mêmes sorties'** Avec les même entrées et paramètres, le composant retourne le même JSX
 - **On ne touche à rien à l'extérieur du composant** On ne doit modifier ni objets, ni variables existantes.
@@ -1395,35 +878,28 @@ Le rendu doit toujours être une [fonction pure](https://react.dev/learn/keeping
   - Quand on développe en **Strict Mode**, React appelle chaque fonction 2 fois au rendu initial.
   - Ceci aide à détecter les fonctions impures.
 
-</div>
-
 ---
 
 ## Optimiser la performance
 
-<div className="alert alert-warning px-5 py-4 text-body">
-
 - Par défaut, un changement de state provoque un re-rendu du composant
-- et de **tous ses sous-composants** (et ainsi de suite). Ça peut être lourd.
-
+- Ainsi que **tous ses sous-composants** (et ainsi de suite). Ça peut être lourd.
 - Il existe des stratégies pour optimiser la performance. Ex: `createMemo()`.
-
-</div>
 
 ---
 
 ## Étape 3: React écrit le commit vers le DOM
 
-Après le rendu (l'appel) des composants, React modifie le DOM.
+Après le rendu (l'appel) des composants, React fait un commit en modifiant le DOM.
 
 - **Pour le rendu initial** React appelle [`appendChild()`](https://developer.mozilla.org/docs/Web/API/Node/appendChild) pour ajouter les noeuds DOM.
 - **Pour les rendus suivants** React applique les modifications minimales (comparées pendant le rendu) pour que le DOM corresponde au dernier rendu généré.
 
 ---
 
-## React modifie le DOM que pour les éléments modifiés
+## React ne modifie le DOM que pour les éléments modifiés
 
-Par exemple, dans l'exemple suivant, le composant génère un re-rendu avec de nouvelles props à chaque seconde. On peut ajouter du texte au `<input>`, modifier la `value`, et le texte ne disparait pas au moment du re-rendu:
+Par exemple, dans l'exemple suivant, le composant génère un re-rendu avec de nouvelles props à chaque seconde. On peut ajouter du texte au `<input>`, modifier la `value` du `<input>`, et le texte ne disparait pas au moment du re-rendu:
 
 <Sandpack>
 
@@ -1471,11 +947,11 @@ Rappel des différentes étapes:
 
 1. **Lancer un déclencheur** qui provoque un rendu
 2. **Génèrer le rendu** du composant
-3. **Écrire le commit** vers le DOM
+3. **Écrire le commit** en modifiant le DOM
 
 - Après le commit, les modifications sont affichées.
-- Le navigateur appelle cela "_browser rendering_"
-- La documentation React appelle cela "**browser painting**"
+  - Le navigateur appelle cela "_browser rendering_"
+  - La documentation React appelle cela "**browser painting**"
 
 ---
 
@@ -1485,7 +961,7 @@ Rappel des différentes étapes:
   1. Déclencheur (Trigger)
   2. Rendu (Render)
   3. Écriture du DOM (Commit)
-- Utilisez "StrictMode" pour trouver les erreurs
+- `<StrictMode>` permet de trouver les composants impurs
 - React ne touche pas au DOM quand le rendu est le même que la fois précédente
 
 ---
@@ -1496,7 +972,7 @@ Dans plusieurs environnements, on considère que la modification d'une interface
 
 Dans React, c'est différent.
 
-Il faut aussi **modifier l'état** pour que l'interface usager soit affectée.
+Il faut **modifier l'état** pour que l'interface usager soit affectée.
 
 ---
 
@@ -1566,11 +1042,14 @@ Les props, gestionnnaires d'événements et variables locales ont été génér�
 
 Ce snapshot du UI inclut de la logique comme des gesionnaires d'événements qui spécifient ce qui ce passe quand un usager interagit. React modifie l'écran pour synchroniser ce qui est affiché et ce qui a été généré (incluant la connection à des event handlers.)
 
+<Alert >
 Quand React fait un re-rendu d'un composant:
 
 1. React appelle votre fonction.
 2. Cette fonction retourne un snapshot JSX.
 3. React modifie l'écran pour synchroniser avec le snapshot.
+
+</Alert>
 
 ---
 
@@ -1629,15 +1108,15 @@ h1 {
 
 </Sandpack>
 
-On incrémente qu'une seule fois.
+On n'incrémente qu'une seule fois.
 
 ---
 
-## Modifier le state affecte le prochain rendu
+## Modifier le state n'affecte que le prochain rendu
 
-Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d'événement `onClick` considère que la valeur de `number` demeure `0` même après l'appel à `setNumber(number + 1):
+Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d'événement `onClick` considère que la valeur de `number` demeure `0` même après l'appel à `setNumber(number + 1)`:
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns style={{gridTemplateColumns:'15em auto'}}>
 
 ```js
 <button
@@ -1652,17 +1131,17 @@ Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d
 ```
 
 <div>
-Voici ce qui est exécuté
+Voici ce qui est exécuté:
 
 1. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React modifiera `number` à `1` au prochain rendu.
+   - React ne modifiera `number` à `1` qu'au prochain rendu.
 2. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React modifiera `number` à `1` au prochain rendu.
+   - React ne modifiera `number` à `1` qu'au prochain rendu.
 3. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React modifiera `number` à `1` au prochain rendu.
+   - React ne modifiera `number` à `1` qu'au prochain rendu.
 
 </div>
-</aside>
+</TwoColumns>
 
 Même en appelant `setNumber(number + 1)` trois fois, dans le gestionnaire d'événements de _ce rendu_, le `number` demeure `0`.
 On modifie la valeur vers `1` trois fois. Le résultat final affiche `1` plutôt que `3`.
@@ -1671,7 +1150,7 @@ On modifie la valeur vers `1` trois fois. Le résultat final affiche `1` plutôt
 
 ## Autre explication
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns>
 <div>
 Une autre façon de visualiser, c'est de substituer les états avec leur valeur dans votre code.
 
@@ -1704,9 +1183,9 @@ Au prochain rendu, `number` sera `1`, Donc pour _ce rendu_ le gestionnaire d'év
 ```
 
 </div>
-</aside >
+</TwoColumns >
 
-C'est pourquoi que la progression sera `2`, `3`, `4` et ainsi de suite.
+C'est pourquoi que la progression sera `1`, `2`, `3`, `4` et ainsi de suite.
 
 ---
 
@@ -1811,7 +1290,7 @@ h1 {
 
 Si vous utilisez la méthode de substitution, on voit clairement l'état passé à l'alerte.
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns>
 
 ```js
 setNumber(0 + 5);
@@ -1822,7 +1301,7 @@ setTimeout(() => {
 
 L'état stocké dans React est changé au moment où l'alerte éxécute, mais il a été planifié au moment où la valeur n'avait pas changé. C'est le moment du snapshot.
 
-</aside>
+</TwoColumns>
 
 ---
 
@@ -1987,7 +1466,7 @@ h1 {
 
 </Sandpack>
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns>
 
 ```js
 setNumber(0 + 1);
@@ -1997,7 +1476,7 @@ setNumber(0 + 1);
 
 Chaque rendu est fixé au moment qu'il est généré, donc la valeur `number` demeure `0`, même lorsqu'on appelle `setNumber(1)` plusieurs fois.
 
-</aside>
+</TwoColumns>
 
 Il y a aussi une autre raison. **React attend que tous les gestionnaires d'événements aient fini de rouler avant de modifier l'état.**
 C'est pourquoi le re-rendu ne s'exécute _qu'après_ tous les `setNumber()`;
@@ -2012,7 +1491,7 @@ S'il n'était pas très futé, il pourrait partir à la cuisine dès que vous co
 
 Cette approche permet de modifier plusieurs variables d'états, provenant de plusieurs composants, dans un seul re-rendu. L'Interface Usager ne sera pas mis-à-jour tant qu'on aura pas complété le gestionnaire d'événements. C'est ce qu'on appelle le regroupement par lot (batching). Cette optimisation améliore les performances. Cela évite les "rendus à moitié", où seulement certaines variables ont été mises-à-jour.
 
-**React ne regroupe pas à travers de _multiples_ événements intentionnels (comme de multiples clics).** Chaque clic est géré séparément. React regroupe que là où ça fait du sens. Cela nous assure que si le premier clic désactive le fomulaire, le second clic ne soumettra pas le formulaire une seconde fois.
+**React ne regroupe pas à travers de _multiples_ événements intentionnels (comme de multiples clics).** Chaque clic est géré séparément. React ne regroupe que là où ça fait du sens. Cela nous assure que si le premier clic désactive le fomulaire, le second clic ne soumettra pas le formulaire une seconde fois.
 
 ---
 
@@ -2074,7 +1553,7 @@ Ici, `n => n + 1` est une **fonction d'updater.** Quand on passe cette fonction 
 1. React ajoute cette fonction à la file pour être traité après le gestionnaire d'événements ait terminé.
 2. Durant le prochain rendu, React passe à travers la file pour exécuter et retourner l'état modifié.
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 2fr", columnGap:10}}>
+<TwoColumns>
 
 ```js
 setNumber((n) => n + 1);
@@ -2090,13 +1569,13 @@ Voici comment React gère ces lignes de code dans le gestionnaire d'événements
 1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
 
 </div>
-</aside >
+</TwoColumns >
 
 ---
 
 ## Explications
 
-Quand vous appelez `useState` au prochain rendu, React passe à travers la file. L'état précédent `number` est `0`, React passe cette valeur à la première fonction updater (par le paramètre `n`).
+Quand on appelle `useState` au prochain rendu, React passe à travers la file. L'état précédent `number` est `0`, React passe cette valeur à la première fonction updater (par le paramètre `n`).
 
 <div style={{display: 'flex',   flexDirection: 'column'}}  >
 
@@ -2174,14 +1653,19 @@ h1 {
 
 Pendant le prochain rendu, React passe par la file d'état:
 
+<div style={{display:'flex', flexDirection: 'column'}}>
+
 | file               | `n`           | retourne    |
 | ------------------ | ------------- | ----------- |
 | "remplace par `5`" | `0` (inutile) | `5`         |
 | `n => n + 1`       | `5`           | `5 + 1 = 6` |
 
+</div>
+<hr/>
+
 React stocke `6` comme résultat final et le retourne via le `useState`
 
-> Remarquez que `setState(x)` fonctionne comme `setState(n => x)`, mais `n` n'est pas utilisé!
+Remarquez que `setState(x)` fonctionne comme `setState(n => x)`, mais `n` n'est pas utilisé!
 
 ---
 
@@ -2248,11 +1732,16 @@ h1 {
 
 Pendant le prochain rendu, React passe à travers la file
 
+<div style={{display:'flex', flexDirection: 'column'}}>
+
 | file                  | `n`           | retourne    |
 | --------------------- | ------------- | ----------- |
 | "remplacer avec `5`"  | `0` (inutile) | `5`         |
 | `n => n + 1`          | `5`           | `5 + 1 = 6` |
 | "remplacer avec `42`" | `6` (inutile) | `42`        |
+
+</div>
+<hr/>
 
 React stocke `42` comme résultat final et le retourne via le `useState`
 
@@ -2265,7 +1754,7 @@ Deux façons d'appeler `setNumber`:
 1. **Avec une fonction updater n** (i.e. `n => n + 1`) qui se fait ajouter dans la file.
 2. **Avec une valeur** (i.e. nombre `5`) ajoute "remplacer avec `5`" à la file, en ignorant ce qui est déjà présent.
 
-- C'est après la série d'événments, au début du re-rendu, que React appelle la file des **updaters**.
+- C'est après la série d'événements, au début du re-rendu, que React appelle la file des **updaters**.
 - Les **updaters** doivent être des fonctions pures
 - Ne pas mettre d'effets de bord, ni de setState.
 - En mode Strict, React exécute chaque fonction **updater** deux fois (mais exclut le second résultat)
@@ -2294,7 +1783,7 @@ setEnabled((prevEnabled) => !prevEnabled);
 
 ## Défi 1
 
-Vous travaillez sur une application de marché d'euvres d'art où les usagers peuvent soumettre plusieurs commandes simultanément à une oeuvre. Chaque fois qu'un usager clic le boutton "Acheter", le compteur "achats en attente" doit augmenter de un. Après 3 secondes, le compteur "en attente" doit diminuer et le compteur "achats complétés" doit augmenter.
+Vous travaillez sur une application de marché d'euvres d'art où les usagers peuvent soumettre plusieurs commandes simultanément à une oeuvre. Chaque fois qu'un usager clique le boutton "Acheter", le compteur "achats en attente" doit augmenter de un. Après 3 secondes, le compteur "en attente" doit diminuer et le compteur "achats complétés" doit augmenter.
 
 Par contre, le compteur "en attente" ne fonctionne pas. Quand on clique "Acheter", il diminue à "-1" (ça ne devrait pas être possible). Et si on clique rapidement, le résultat est bizarre.
 
@@ -2448,19 +1937,18 @@ Où est le problème?
 
 Le problème se situe ici:
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns top>
 
 ```js
 onPointerMove={e => {
-  position.x = e.clientX;
-  position.y = e.clientY;
+  position.x = e.clientX;  // 🚫
+  position.y = e.clientY;  // 🚫
 }}
 ```
 
 Ce code mute l'objet assigné à `position` du rendu précédent. Mais sans utiliser la fonction `setState`, React n'a pas moyen de savoir que l'objet est modifié. Donc React ne réagit pas.
 
 <div style={{textAlign:"right"}}>
-<br />
 
 Pour déclencher un re-rendu, **il faut créer un nouvel objet dans lequel on place les informations** :
 
@@ -2475,7 +1963,7 @@ onPointerMove={e => {
 }}
 ```
 
-</aside>
+</TwoColumns >
 
 ---
 
@@ -2542,9 +2030,7 @@ body {
 
 ## La mutation locale est permise
 
-<div className="alert alert-warning px-5 py-4 text-body">
-
-<aside style={{display:'grid', gridTemplateColumns:'1fr 1fr', columnGap:15}} >
+<TwoColumns top style={{gap:'2em'}}>
 
 <div>
 Ce code est **parfaitement correct** car on mute un nouvel object qui vient tout juste d'être créé.
@@ -2565,36 +2051,33 @@ setPosition({
 });
 ```
 
-</div>
-
-<div>
-
-Ce code est problématique car il modifie un objet d'état _existant_:
+Mais le code suivant est problématique car il modifie un objet d'état _existant_:
 
 ```js
-position.x = e.clientX;
-position.y = e.clientY;
+position.x = e.clientX; //🚫
+position.y = e.clientY; //🚫
 ```
 
+</div>
+
+<Alert type="info">
+
 - La mutation est un problème seulement quand on modifie des objets _existants_ dans l'état.
-- Muter un objet qui tout juste d'être créé est correct, car _aucun autre code n'y fait encore référence._
+- Muter un objet qui vient tout juste d'être créé est correct, car _aucun autre code n'y fait encore référence._
 - Muter un nouvel objet n'a pas d'impact. C'est ce qu'on appelle une "mutation locale". (On peut même faire des mutations locales durant un rendu.)
 
-</div>
+</Alert>
 
-</aside>
-</div>
+</TwoColumns>
 
 ---
 
 ## Modifier partiellement un objet
 
-Dans l'exemple précédent, l'objet `position` est toujours recréé avec les nouvelles positions.
+Que faire si on désire inclure les données existantes dans le nouvel objet?
+Exemple: modifier un seul champ d'un formulaire, tout en gardant les autres données existantes?
 
-Mais que faire si on désire inclure les données existantes dans le nouvel objet?
-Par exemple, si on désire modifier un seul champ d'un formulaire, tout en gardant les autres données existantes?
-
-Les champs de saisie ci-bas ne fonctionnent pas car les handlers `onChange` modifient l'état:
+Les champs de saisie ci-bas ne fonctionnent pas (les `onChange` ne modifient pas l'état)
 
 <Sandpack>
 
@@ -2661,7 +2144,7 @@ input {
 Par exemple, ceci modifie l'objet `person` en modifiant le "firstName" du rendu précédent.
 
 ```js
-person.firstName = e.target.value;
+person.firstName = e.target.value; // 🚫
 ```
 
 La façon fiable de modifier l'état est de créer un nouvel objet et de le passer à `setPerson`. En plus, il faut aussi **copier les données existantes**.
@@ -2768,7 +2251,7 @@ Notez que `...` (la syntaxe de décomposition, spread syntax) est "superficielle
 
 ## Utiliser qu'un seul gestionnaire d'événements pour plusieurs champs
 
-<div className="alert alert-warning px-5 py-4 text-body">
+<Alert type="warning">
 
 Il est possible d'utiliser les accolades carrées `[` et `]` dans votre objet pour spécifier une propriété avec un nom dynamique. Voici le même exemple, avec un seul gestionnaire d'événement plutôt que trois.
 
@@ -2835,7 +2318,7 @@ input {
 
 Ici, `e.target.name` réfère à la propriété `name` dans l'élément `<input>` du DOM.
 
-</div>
+</Alert>
 
 ---
 
@@ -2866,7 +2349,7 @@ person.artwork.city = 'New Delhi';
 
 Mais en React, on doit approcher l'état de façon immuable.
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 3fr", columnGap:10}}>
+<TwoColumns top style={{ gridTemplateColumns:"1fr 3fr"}}>
 
 <div style={{ marginTop: 20 }}>
   On créé un nouvel objet `artwork` (copiant les données de l'état précédent)
@@ -2893,7 +2376,7 @@ setPerson({
 });
 ```
 
-</aside>
+</TwoColumns>
 
 ---
 
@@ -3004,9 +2487,9 @@ img {
 
 ## Les objets sont-il imbriqués?
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 2fr", columnGap:10, fontSize:"0.9em"}}>
+<TwoColumns top style={{ gridTemplateColumns:"1fr 2fr"}}>
 
-<div style={{marginTop:20}}>
+<div style={{marginTop:'1em'}}>
 
 Les objets suivants semblent "imbriqués" dans le code.
 
@@ -3023,9 +2506,9 @@ let obj = {
 };
 ```
 
-<div style={{ marginTop: 20 }}>
-  Mais cette notion d'imbrication est trompeuse. Quand le code exécute, il
-  n'existe pas de notion d'imbrication. En fait, ce sont deux objets distincts.
+<div style={{ marginTop: '1em' }}>
+  C'est trompeur. Quand le code exécute, la notion d'imbrication n'existe pas.
+  En fait, ce sont deux objets distincts.
 </div>
 
 ```js
@@ -3041,7 +2524,7 @@ let obj2 = {
 };
 ```
 
-</aside>
+</TwoColumns>
 
 ---
 
@@ -3049,7 +2532,7 @@ let obj2 = {
 
 L'objet `obj1` n'est pas vraiment stocké dans `obj2`. La preuve, `obj3` pourrait référer à `obj1` aussi:
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns top>
 
 ```js
 let obj1 = {
@@ -3077,17 +2560,17 @@ C'est que `obj3.artwork`, `obj2.artwork`, ainsi qu'`obj1` réfèrent tous au mê
 Ils ne sont donc pas "imbriqués". Il est préférable de les concevoir en tant qu'objets séparés, qui réfèrent ou pointent les uns les autres.
 
 </div>
-</aside>
+</TwoColumns>
 
 ---
 
 ## Réaliser des modifications complexes avec immer
 
-<div className="alert alert-warning px-5 py-4 text-body">
+<Alert type="warning">
 
 Quand l'état est complexe, avec plusieurs objets "imbriqués", on pourrait considérer le
 rendre plat (le rendre moins complexe). Mais si on préfère conserver la structure complexe, il existe
-un outil pour les changements complexes. [Immer](https://github.com/immerjs/use-immer) est
+un outil: [Immer](https://github.com/immerjs/use-immer) est
 une bibliothèque populaire qui permet d'utiliser une syntaxe de changements mutatifs,
 mais qui produit un résultat en copie d'objet. On pourrait croire que le code suivant brise
 la règle d'immuabilité du state. Mais avec Immer, ce n'est pas le cas.
@@ -3098,9 +2581,9 @@ updatePerson((draft) => {
 });
 ```
 
-Contrairement aux mutations régulières, immer n'écrase pas les états précédents.
+Contrairement aux mutations régulières, **immer** n'écrase pas les états précédents.
 
-</div>
+</Alert>
 
 ---
 
@@ -3111,10 +2594,10 @@ Pour utiliser Immer
 1. `npm install use-immer` pour ajouter Immer en tant que dépendance.
 2. Remplacez `import { useState } from 'react'` par `import { useImmer } from 'use-immer'`
 
-<div className="alert alert-warning px-5 py-4 text-body">
+<Alert type="warning">
 Le `draft` (brouillon) fourni par Immer est un objet spécial, nommé [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), qui enregistre toutes les mutations qui affectent l'objet. C'est pour cela qu'il est possible de muter l'objet autant qu'on le désire. Dans les coulisses, Immer détermine les modifications à `draft` et produit un nouvel objet avec toutes vos modifications.
 
-</div>
+</Alert>
 
 ---
 
@@ -3228,14 +2711,11 @@ Les gestionnaires d'événements ci-haut sont simples et concis.
 
 Il serait possible d'utiliser le `useState` et le `useImmer` dans le même composant.
 
-Immer est une façon de garder le code simple et concis, surtout avec des objets imbriqués,
-où la copie d'objet génère du code complexe.
+Immer est une façon de garder le code simple et concis, surtout avec des objets imbriqués, où la copie d'objet génère du code complexe.
 
 ---
 
 ## Pourquoi éviter la mutation d'état en React (1/2)
-
-<div className="alert alert-warning px-5 py-4 text-body">
 
 Voici les raisons:
 
@@ -3243,20 +2723,14 @@ Voici les raisons:
 - **Optimisations:** Plusieurs stratégies d'optimisation de React (memo) vont 'sauter' le rendu quand les props ou le state n'a pas été modifié. Quand on ne mute jamais l'état, c'est très simple de valider s'il y a des changements avec une simple comparaison `prevObj ===  obj`
 - **Nouvelles fonctionnalités:** L'équipe React prépare de nouvelles fonctionnalités qui se fient que l'état n'est jamais muté. Ces nouvelles fonctionnalités pourraient échouer si votre projet utilise de la mutation.
 
-</div>
-
 ---
 
 ## Pourquoi éviter la mutation d'état en React (2/2)
-
-<div className="alert alert-warning px-5 py-4 text-body">
 
 - **Ajout de besoins:** Certaines fonctionnalités, tel qu'implanter annuler/rétablir, afficher un historique de changements, permettre de réinitialiser un formulaire aux valeurs précédentes, sont des actions simples à réaliser quand rien n'est muté. C'est plus simple de garder des copies des états précédents, et de les ramener au besoin. C'est plus compliqué à implanter quand il y a des mutations.
 - **Simplicité:** Quand React ne fait aucune mutation, il n'y a alors rien de spécial à coder. Pas besoin de proxy, ni de propriétés capturées, ni d'objets réactifs à initialiser. C'est pourquoi React nous permet d'ajouter n'importe quel objet dans l'état, sans aucun impact sur la performance.
 
 Il est souvent possible de muter l'état en React sans ressentir d'impact négatif. Mais à mesure que des nouvelles fonctionnalités sont ajoutées à React, celles-ci s'attendent à ce que les objets soient immuables. Donc, pour que votre code soit compatible avec une future version de React, assurez-vous d'écrire du code avec un état immuable.
-
-</div>
 
 ---
 
@@ -3646,35 +3120,26 @@ Chaque fois qu'on veut modifier le tableau, il faut passer un nouveau tableau au
 
 Voici une table de référence des opérations de tableau communes. Evitez les méthodes de la colonne de gauche. Préférez les méthodes de la colonne de droite.
 
-|           | Évitez (Mute le tableau)             | Adoptez (Crée nouveau tableau)             |
-| --------- | ------------------------------------ | ------------------------------------------ |
-| Ajouter   | `push`, `unshift`                    | `concat`, `[...arr]` syntaxe décomposition |
-| Enlever   | `pop`, `shift`, `splice`             | `filter`, `slice`                          |
-| Remplacer | `splice`, `arr[i] = ...` assignation | `map`                                      |
-| Trier     | `reverse`, `sort`                    | Copier le tableau avant de trier           |
+<div style={{display: "flex", flexDirection: "column"}}>
 
-Alternativement, on peut utiliser Immer qui permet l'usage des deux colonnes.
-
----
-
-## Note
-
-<div className="alert alert-warning px-5 py-4 text-body">
-
-Notez que les méthodes [`slice`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) ont [`splice`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) ont des noms similaires, mais se comportent de façons différentes.
-
-- `slice` permet de copier un tableau, en partie ou totalité.
-- `splice` **mute** un tableau (en insérant ou enlevant des items).
-
-En React, on recommande d'utiliser `slice` (sans `p`!) pour éviter la mutation.
+|              | Mutation du tableau 🚫               | Nouveau Tableau ✅                           |
+| ------------ | ------------------------------------ | -------------------------------------------- |
+| Ajout        | `push()`, `unshift()`                | `concat()`, `[...arr]` syntaxe décomposition |
+| Suppression  | `pop()`, `shift()`, `splice()`       | `filter()`, `slice()`, `toSpliced()` 🆕      |
+| Remplacement | `splice()`, `arr[i] = x` assignation | `map()`, `.with()` 🆕                        |
+| Tri          | `sort()`, `reverse()`,               | `toSorted()` 🆕, `toReversed()` 🆕           |
 
 </div>
+<hr />
+<Alert>
+Alternativement, on peut utiliser Immer qui permet l'usage des mutations.
+</Alert>
 
 ---
 
-## Ajouter à un tableau avec push
+## Ajouter à un tableau avec push 🚫
 
-`push()` mute un tableau en ajoutant un item. (À éviter)
+`push()` mute un tableau en ajoutant un item. (À éviter) 🚫
 
 <Sandpack>
 
@@ -3839,13 +3304,13 @@ export default function List() {
 setArtists(artists.filter((a) => a.id !== artist.id));
 ```
 
-Le `filter` crée un nouveau tableau d'`artists` conservant les ID qui sont différents de `artist.id`. Chaque clic du bouton "enlever" va créer un nouveau tableau filtré, et provoquer un re-rendu. Notez que `filter` ne modifie pas le tableau original.
+`filter()` génère un nouveau tableau d'`artists`.
 
 ---
 
 ## Transformer un tableau avec `map`
 
-Si vous désirez modifier certains ou tous les items d'un tableau, utilisez `map()` pour créer un nouveau tableau. La fonction passée à `map` détermine quoi faire avec chaque item, basé sur son contenu ou son index (ou les deux).
+`map()` génère un nouveau tableau. La fonction passée à `map` détermine quoi faire avec chaque item, basé sur son contenu ou son index (ou les deux).
 
 Dans cet exemple, un tableau détient les coordonnées de deux cercles et un carré. Quand on clique le bouton, on déplace les cercles de 50 pixels vers le bas. `map()` va créer ce nouveau tableau.
 
@@ -3914,11 +3379,9 @@ body {
 
 ## Remplacer les items d'un tableau
 
-Il est fréquent de vouloir remplacer un ou plusieurs items d'un tableau.
+Les asignations du genre `arr[0] = x` mutent l'objet. On préfère utiliser `map` pour générer un nouveau tableau.
 
-Les asignations du genre `arr[0] = 'non'` mutent l'objet. On préfère utiliser `map`.
-
-Pour remplacer un item, créez un nouveau tableau avec `map`. Dans votre appel `map`, vous recevez l'index de l'item comme second argument. On peut utiliser cette position pour décider si on retourne l'item original, ou autre chose.
+`map`, reçoit l'item et l'index comme arguments. On peut utiliser l'index (la position) pour décider si on retourne l'item original, ou autre chose.
 
 <Sandpack>
 
@@ -3933,7 +3396,7 @@ export default function CounterList() {
   function handleIncrementClick(index) {
     const nextCounters = counters.map((c, i) => {
       if (i === index) {
-        // Incrémentez le compteur cliqué
+        // Incrémente le compteur cliqué
         return c + 1;
       } else {
         // Le reste demeure la même chose
@@ -3974,13 +3437,9 @@ button {
 
 ## Insérer au milieu d'un tableau
 
-Parfois, on veut insérer un item dans une position spécifique, qui n'est ni au début, ni à la fin.
-Pour cela, on peut utiliser la méthode `slice()` avec la syntaxe de décomposition de tableau `...`.
-`slice()` permet d'obtenir une "portion" du tableau.
-Pour insérer un item, il faut créer un tableau qui décompose la portion avant le point d'insértion,
-par la suite ajouter le nouvel item, et ensuite décomposer le reste du tableau.
+Pour insérer un item, il faut créer un tableau qui décompose la portion avant le point d'insértion, par la suite ajouter le nouvel item, et ensuite décomposer le reste du tableau.
 
-Dans cet exemple, le bouton "Insérer" va toujours insérer à l'index 1.
+Pour cela, on peut utiliser la méthode `slice()` avec la syntaxe de décomposition de tableau `...`. (Dans cet exemple, "Insérer" tente d'insérer à la position 1.)
 
 <Sandpack>
 
@@ -4039,11 +3498,11 @@ button {
 
 ## Faire des changements avancés
 
-On pourrait vouloir renverser un tableau, ou le trier. Mais les méthodes `reverse()` et `sort()` mutent le tableau orginal. Que faire?
+On pourrait vouloir renverser un tableau, ou le trier. Mais les méthodes `reverse()` et `sort()` mutent le tableau orginal. Que faire si nous sommes avant 2023?
 
 **Faites une copie du tableau d'abord, et faites des changements mutatifs ensuite**
 
-Par exemple:
+On utilise la syntaxe de décomposition `[...list]` pour créer une copie du tableau original.
 
 <Sandpack>
 
@@ -4083,29 +3542,35 @@ export default function List() {
 
 ---
 
-## Changements avancés
+## Tableau référant des objets
 
-On utilise la syntaxe de décomposition `[...list]` pour créer une copie du tableau original. Il est maintenant possible d'utiliser `nextList.reverse()` ou `nextList.sort()`, ou même asigner des items directement `nextList[0] = "something"`.
+Par contre, même si on copie un tableau, on ne peut muter les objets du tableau. La copie est superficielle (shallow), et ce nouveau tableau contient les mêmes objets que l'original. Si on modifie un objet dans le tableau copié, on mute l'état.
 
-Par contre, même si on copie un tableau, on ne peut muter les items du tableau. La copie est superficielle (shallow), et ce nouveau tableau contient les mêmes items que l'original. Si on modifie un objet dans le tableau copié, on mute l'état. Le code suivant est donc problématique:
+Le code suivant est problématique:
 
 ```js
 const nextList = [...list];
-nextList[0].seen = true; // Problème: mute list[0]
+nextList[0].seen = true; // Problème: mutation  🚫
 setList(nextList);
 ```
 
-Même si `nextList` et `list` sont deux tableaux distincts, **`nextList[0]` et `list[0]` pointent vers le même objet** En modifiant `nextList[0].seen`, on modifie aussi `list[0].seen`. C'est donc une mutation d'état, qu'il est préférable d'éviter. On résout ce problème de la même façon qu'avec les objets JS imbriqués -- En copiant des items individuels qu'on désire changer plutôt que de muter. Voici comment:
+Même si `nextList` et `list` sont deux tableaux distincts, **`nextList[0]` et `list[0]` pointent vers le même objet** En modifiant `nextList[0].seen`, on modifie aussi `list[0].seen`. C'est donc une mutation d'état. 🚫
+
+On résout ce problème de la même façon qu'avec les objets JS imbriqués: en clonant plutôt que de muter.
+
+<div style={{fontSize:"2rem"}}>
+```js
+nextList[0] = {...nextList[0], seen: true }; ✅
+```
+</div>
 
 ---
 
 ## Modifier des objets dans des tableaux
 
-Les objets ne sont pas réellement dans les tableaux. Même si on dirait qu'ils sont imbriqués, chaque objet est une valeur séparée, vers lequel le tableau pointe. On doit être prudent lorsqu'on change des champs imbriqués tel que `list[0]`, car on pourrait changer un item qui est référé par un autre tableau.
+Les objets ne sont pas réellement dans les tableaux. Même si on dirait qu'ils sont imbriqués, chaque objet est une valeur séparée, vers lequel le tableau pointe. **Lorsqu'on met à jour des états imbriqués, il faut créer des copies des objets à modifier, jusqu'au top niveau.**
 
-**Lorsqu'on met à jour des états imbriqués, il faut créer des copies des objets à modifier, jusqu'au top niveau.**
-
-Dans cet exemple, deux listes d'oeuvres d'art partagent le même état initial. Ils devraient être isolés, mais à cause d'une valeur mutée, leur état est accidentellement partagé, et cocher la boite d'une liste affecte l'autre liste.
+Dans cet exemple, deux listes d'oeuvres d'art partagent le même état initial. À cause d'une valeur mutée, leur état est accidentellement partagé. Cocher la boite d'une liste affecte l'autre liste.
 
 <Sandpack>
 
@@ -4181,21 +3646,21 @@ Le problème est ici:
 ```js
 const myNextList = [...myList];
 const artwork = myNextList.find((a) => a.id === artworkId);
-artwork.seen = nextSeen; // Problème: on mute un item existant
+artwork.seen = nextSeen; // Problème: on mute un item existant 🚫
 setMyList(myNextList);
 ```
 
-Même si le tableau `myNextList` est nouveau, les _items_ sont les mêmes que dans le tableau original `myList`. Changer `artwork.seen` change donc l'item _original_. Cet item se trouve aussi dans `yourArtworks`, causant le bogue. Ces bogue sont difficiles à cerner, mais disparaissent dès qu'on arrête de muter.
+Même si le tableau `myNextList` est nouveau, les _items_ sont les mêmes que dans le tableau original `myList`. Changer `artwork.seen` modifie donc l'objet _original_. Cet objet se trouve aussi dans `yourArtworks`, causant le bogue. Ce bogue est difficile à trouver, mais il disparait dès qu'on arrête de muter.
 
-**On peut utiliser map pour substituer un vieil item avec sa nouvelle version sans mutation**
+**On peut utiliser `map` pour substituer un vieil objet avec une nouvelle version, sans mutation**
 
 ```js
 setMyList(myList.map(artwork => {
   if (artwork.id === artworkId) {
-    // Créer un nouvel item avec changements
+    // Créer un nouvel objet, avec changements
     return { ...artwork, seen: nextSeen };
   } else {
-    // Pas de changements
+    // Pas de changements, on conserve l'objet
     return artwork;
   }
 });
@@ -4205,9 +3670,7 @@ setMyList(myList.map(artwork => {
 
 ## Décomposer les items des tableaux
 
-Ici, `...` est la syntaxe de décomposition pour créer la copie d'un objet.
-
-Avec cette approche, aucun des items d'état n'est muté, et le bogue est réglé.
+Ici, `...` est la syntaxe de décomposition pour créer la copie d'un objet. Aucun des items d'état n'est muté, et le bogue est réglé.
 
 <Sandpack>
 
@@ -4229,10 +3692,10 @@ export default function BucketList() {
     setMyList(
       myList.map((artwork) => {
         if (artwork.id === artworkId) {
-          // Créé un *nouvel* objet avec changements
+          // Créé un nouvel objet, avec changements
           return { ...artwork, seen: nextSeen };
         } else {
-          // Pas de changements.
+          // Pas de changements, on conserve l'objet
           return artwork;
         }
       })
@@ -4243,10 +3706,10 @@ export default function BucketList() {
     setYourList(
       yourList.map((artwork) => {
         if (artwork.id === artworkId) {
-          // Créé un *nouvel* objet avec changements
+          // Créé un nouvel objet, avec changements
           return { ...artwork, seen: nextSeen };
         } else {
-          // Pas de changements.
+          // Pas de changements, on conserve l'objet
           return artwork;
         }
       })
@@ -4288,23 +3751,21 @@ function ItemList({ artworks, onToggle }) {
 
 </Sandpack>
 
-En général, **le seul objet d'état que l'on peut muter, c'est celui qui vient tout juste d'être créé.** Si vous devez insérer une nouvelle oeuvre d'art, c'est correct de la muter. Si on gère quelque chose provenant de l'état, il faut faire une copie.
+En général, **le seul objet d'état que l'on peut muter, c'est celui qui vient tout juste d'être créé.** Si on insère une nouvelle oeuvre d'art, c'est correct de la muter. Mais si on modifie un objet provenant de l'état, il faut faire une copie.
 
 ---
 
-## Écrivez une logique concise avec Immer.
+## Écrire une logique concise avec Immer
 
-Modifier des tableaux imbriqués sans mutation est répétitif et complexe. Utilisez les mêmes stratégies qu'avec les objets:
+Modifier des tableaux imbriqués, sans mutation, est répétitif et complexe.
 
-- En général, on ne devrait pas modifier les données profondément imbriquées. Si c'est le cas, tentez de réécrire la structure pour avoir une structure moins profonde ou plate
-
-- Si on ne désire pas restructurer, on pourrait utiliser [Immer](https://github.com/immerjs/use-immer). On peut alors écrire une syntaxe de mutation, mais qui est converti en copies.
-
-Voici le même exemple réécrit en Immer
+- En général, on ne devrait pas modifier les données profondément imbriquées.
+- On pourrait réécrire la structure pour avoir une structure moins profonde (aplatir la structure)
+- Aleternative, on pourrait utiliser [Immer](https://github.com/immerjs/use-immer). On peut alors utiliser la mutation (car Immer fait une copie des mutations)
 
 <Sandpack>
 
-```js
+```js src/App.js
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
 
@@ -4388,7 +3849,7 @@ function ItemList({ artworks, onToggle }) {
 
 ---
 
-## oui
+## Utiliser Immer
 
 Avec Immer, **les mutations comme `artwork.seen = nextSeen` sont permises:**
 
@@ -4899,11 +4360,3 @@ On veut le bouton affiché 3 fois, avec des props correctement configurés.
 Bonne chance!
 
 ---
-
-```
-
-```
-
-```
-
-```

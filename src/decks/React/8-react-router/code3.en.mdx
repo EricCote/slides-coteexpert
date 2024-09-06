@@ -1,0 +1,159 @@
+## Hash Routing with useEffect
+
+<Sandpack options={{ showNavigator: true }} >
+
+```jsx src/App.js active
+import { useEffect, useState } from 'react';
+import Menu from './Menu';
+import Route from './Route';
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(window.location.hash);
+
+  function changePage(evt) {
+    setCurrentPage(window.location.hash);
+  }
+
+  //All renders must be pure, and only generate JSX.
+  //Renders must not modify the DOM. UseEffect will run
+  //AFTER the render, so it can affect the DOM.
+  useEffect(() => {
+    //Handle the "hashchange" event
+    window.addEventListener('hashchange', changePage);
+    return () => window.removeEventListener('hashchange', changePage);
+  }, []);
+
+  return (
+    <>
+      <Menu />
+      <Route page={currentPage} />
+    </>
+  );
+}
+```
+
+```jsx src/Route.jsx
+import Home from './Home';
+import News from './News';
+import Contact from './Contact';
+
+export default function Route({ page }) {
+  switch (page) {
+    case '#home':
+    case '#':
+    case '':
+      return <Home />;
+    case '#news':
+      return <News />;
+    case '#contact':
+      return <Contact />;
+    default:
+      return <div>404 error</div>;
+  }
+}
+```
+
+```jsx src/Menu.jsx
+export default function Menu() {
+  const hash = location.hash === '' ? '#' : location.hash;
+  return (
+    <ul className='menu'>
+      {menuList.map((menuItem) => (
+        <li key={menuItem.url}>
+          <a
+            className={menuItem.url === hash ? 'active' : ''}
+            href={menuItem.url}
+          >
+            {menuItem.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const menuList = [
+  {
+    name: 'Home',
+    url: '#',
+  },
+  {
+    name: 'News',
+    url: '#news',
+  },
+  {
+    name: 'Contact',
+    url: '#contact',
+  },
+  {
+    name: 'About',
+    url: '#about',
+  },
+];
+```
+
+```jsx src/Home.jsx
+export default function Home() {
+  return (
+    <>
+      <h1>Home page</h1>
+      <p>This is the Home page!</p>
+    </>
+  );
+}
+```
+
+```jsx src/News.jsx
+export default function News() {
+  return (
+    <>
+      <h1>News page</h1>
+      <p>This is the News page!</p>
+    </>
+  );
+}
+```
+
+```jsx src/Contact.jsx
+export default function Contact() {
+  return (
+    <>
+      <h1>Contact page</h1>
+      <p>This is the Contact page!</p>
+    </>
+  );
+}
+```
+
+```css
+ul.menu {
+  list-style-type: none;
+  margin: 0;
+  margin-bottom: 1em;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu li {
+  float: left;
+}
+
+.menu li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.menu .active {
+  background-color: royalblue;
+}
+```
+
+</Sandpack>
