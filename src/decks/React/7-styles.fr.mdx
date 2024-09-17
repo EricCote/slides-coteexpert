@@ -1,0 +1,639 @@
+---
+title: Styles et CSS
+description: Styles et CSS
+language: fr
+---
+
+# Styles et CSS
+
+### Éric Côté
+
+---
+
+## React et CSS
+
+- "React est une biblothèque JavaScript pour créer des interfaces usager"
+- Pourtant, la documentation ne possède pas beaucoup d'infos sur les styles et le CSS.
+- React se veut agnostique au niveau de la technologie de styles
+
+---
+
+## Styles à la volée (inline)
+
+- Il est possible d'utiliser les styles sans CSS
+- Il faut utiliser un objet avec la syntaxe du DOM.
+  - On remplace les tirets du CSS par du camel-casing -> camelCasing
+  - `margin-top` devient `marginTop`
+- Le style inline est acceptable en JSX (c'est problématique en HTML).
+  - En HTML, on ne peut pas utiliser de variable avec `style`
+  - En JSX, c'est facile de mettre des variables pour nos styles, ce qui permet de la réutilisation et la modularisation.
+
+---
+
+## Style inline
+
+<Sandpack>
+
+```js
+import { buttonStyle } from './styles.js';
+
+export default function App() {
+  return (
+    <>
+      <h1>My Title</h1>
+      <p>My text body</p>
+      <button style={buttonStyle}>Click me</button>
+      <hr />
+      <button>Click me</button>
+    </>
+  );
+}
+```
+
+```js src/styles.js
+const buttonStyle = {
+  backgroundColor: 'rgb(172, 172, 255)',
+  fontSize: '1rem',
+  border: 'none',
+  padding: '2rem',
+  borderRadius: '1rem',
+  boxShadow: 'inset -2px -2px 3px #666',
+};
+
+export { buttonStyle };
+```
+
+</Sandpack>
+
+---
+
+## CSS et React
+
+- Facile d'utiliser du CSS
+- La problématique, c'est d'avoir des composants réutilisables.
+  - C'est facile d'isoler le JSX des composants
+  - Mais le CSS est global au document HTML
+  - Deux composants pourraient redéfinir le même sélécteur CSS
+  - Cela créé une collision de noms
+
+---
+
+## Fichier CSS
+
+<Sandpack>
+
+```js
+import './style.css';
+
+export default function App() {
+  return (
+    <>
+      <h1>My Title</h1>
+      <p>My text body</p>
+      <button className='btn'>Click me</button>
+    </>
+  );
+}
+```
+
+```css src/style.css
+body {
+  background-color: bisque;
+}
+h1 {
+  font-size: 3rem;
+}
+p {
+  font-family: serif;
+  font-size: 1.4rem;
+}
+.btn {
+  background-color: rgb(172, 172, 255);
+  font-size: 1.4 rem;
+  border: none;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: inset -2px -2px 3px #666;
+}
+.btn:hover {
+  background-color: rgb(200, 200, 255);
+}
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: inset 2px 2px 3px #666;
+}
+```
+
+</Sandpack>
+
+---
+
+## Pourquoi utiliser BootStrap
+
+**Avantages**
+
+- Très populaire
+- Beaucoup d'exemples disponibles
+- Des thèmes personalisés sont téléchargeables
+- Supporte maintennat le dark mode
+- Adapté au petits appareils, responsive
+
+**Désavantages**
+
+- Le thème de base est très vanille
+- Ressemble à plein d'autres sites web
+
+---
+
+## Adding BootStrap
+
+<Sandpack>
+
+```js
+import 'bootstrap/dist/css/bootstrap.css';
+
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div className='container'>
+      <h1 className='display-1'>Custom Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form onSubmit={submit}>
+        <div className='form-floating mb-3'>
+          <input
+            type='email'
+            className='form-control'
+            name='email'
+            id='email'
+            placeholder='name@example.com'
+          />
+          <label htmlFor='email'>Email address</label>
+        </div>
+        <div className='form-floating'>
+          <input
+            type='password'
+            className='form-control'
+            name='password'
+            id='password'
+            placeholder='Password'
+          />
+          <label htmlFor='Password'>Password</label>
+        </div>
+        <div className='mt-3'>
+          <button className='btn btn-primary' type='submit'>
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "bootstrap": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
+```
+
+</Sandpack>
+
+---
+
+## Bootstrap et les thèmes
+
+- Il existe des milliers de themes pour bootstrap
+- Certains gratuits, d'autres payants
+- On peut aussi personnaliser la librairie bootrap avec notre propre CSS
+
+---
+
+## Personnaliser BootStrap avec CSS
+
+<Sandpack>
+
+```js
+import 'bootstrap/dist/css/bootstrap.css';
+import './custom.css';
+
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div className='container'>
+      <h1 className='display-1'>Custom Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form onSubmit={submit}>
+        <div className='form-floating mb-3'>
+          <input
+            type='email'
+            className='form-control'
+            name='email'
+            id='email'
+            placeholder='name@example.com'
+          />
+          <label htmlFor='email'>Email address</label>
+        </div>
+        <div className='form-floating'>
+          <input
+            type='password'
+            className='form-control'
+            name='password'
+            id='password'
+            placeholder='Password'
+          />
+          <label htmlFor='Password'>Password</label>
+        </div>
+        <div className='mt-3'>
+          <button className='btn btn-primary' type='submit'>
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+```css src/custom.css
+body {
+  background-color: bisque;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "bootstrap": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
+```
+
+</Sandpack>
+
+---
+
+## Bootstrap et Sass
+
+- Recommandé de personaliser le code de Bootstrap à la source, avec le langage Sass
+- Possible de générer un très petit fichier
+- On peut personaliser les données de `_variables.scss`
+
+---
+
+## Customize BootStrap using SASS
+
+<Sandpack>
+
+```js
+import './custom.scss';
+
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div className='container'>
+      <h1 className='display-1'>Custom Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form onSubmit={submit}>
+        <div className='form-floating mb-3'>
+          <input
+            type='email'
+            className='form-control'
+            name='email'
+            id='email'
+            placeholder='name@example.com'
+          />
+          <label htmlFor='email'>Email address</label>
+        </div>
+        <div className='form-floating'>
+          <input
+            type='password'
+            className='form-control'
+            name='password'
+            id='password'
+            placeholder='Password'
+          />
+          <label htmlFor='Password'>Password</label>
+        </div>
+        <div className='mt-3'>
+          <button className='btn btn-primary' type='submit'>
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+```scss src/custom.scss
+// Override default variables before the import
+$body-bg: pink;
+$input-bg: white;
+
+// Import Bootstrap and its default variables
+@import '~bootstrap/scss/bootstrap.scss';
+```
+
+```json package.json
+{
+  "dependencies": {
+    "sass": "latest",
+    "bootstrap": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
+```
+
+</Sandpack>
+
+---
+
+## React Bootstrap
+
+- React Bootstrap ajoute des composants pour simplifier l'usage de Bootstrap
+- `<div className="container">` devient `<Container>`
+- `<button className="btn btn-primary">` devient `<Button variant="primary">`
+- La taille du code est réduite de manière significative
+
+---
+
+## Using React Bootstrap to simplify
+
+<Sandpack>
+
+```js
+import 'bootstrap/dist/css/bootstrap.css';
+import './custom.css';
+import { Container, Form, FloatingLabel, Button } from 'react-bootstrap';
+
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <Container>
+      <h1 className='display-1'>Custom Form</h1>
+      <p>This is a short form to fill out.</p>
+      <Form onSubmit={submit}>
+        <FloatingLabel controlId='email' label='Email address' className='mb-3'>
+          <Form.Control
+            type='email'
+            name='email'
+            placeholder='name@example.com'
+          />
+        </FloatingLabel>
+
+        <FloatingLabel controlId='password' label='Password' className='mb-3'>
+          <Form.Control
+            type='password'
+            name='password'
+            placeholder='Password'
+          />
+        </FloatingLabel>
+
+        <Form.Group>
+          <Button type='submit' variant='primary'>
+            Submit
+          </Button>
+        </Form.Group>
+      </Form>
+    </Container>
+  );
+}
+```
+
+```css src/custom.css
+body {
+  background-color: lightblue;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "react-bootstrap": "latest",
+    "bootstrap": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
+```
+
+</Sandpack>
+
+---
+
+## TailwindCSS
+
+- Tailwind est un framework CSS orienté 'utilitaire'.
+- Bootstrap utilise des grandes classes pour générer les composants
+- Tailwind combine plusieurs petites classes pour générer les composants
+- `<button className="btn btn-primary">` devient <br /> `<button classname="h-10 px-6 font-semibold rounded-md bg-blue text-white">`
+- Tailwind permet de facilement personaliser nos composants
+- Inclut un compilateur PostCSS pour livrer le plus petit CSS possible
+- Tailwind est devenu TRÈS populaire
+
+---
+
+## Exemple Tailwind CSS
+
+<Sandpack tailwind>
+
+```js
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div className='h-[100vh] bg-slate-200'>
+      <h1 className='p-2 text-5xl font-extralight text-gray-900'>
+        Custom Form
+      </h1>
+      <p className='p-2'>This is a short form to fill out.</p>
+      <form className='p-2' onSubmit={submit}>
+        <div className='relative w-full mb-5  group'>
+          <input
+            type='email'
+            name='email'
+            id='email'
+            className='block bg-white rounded px-2 pb-1 pt-5 w-full text-base text-stone-500 bg-gray-50 border border-stone-300 appearance-none focus:outline-none ring-0 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 peer'
+            placeholder=' '
+            required
+          />
+          <label
+            htmlFor='email'
+            className='absolute text-base text-stone-500 focus:text-gray-900 duration-300 transform -translate-y-5 scale-90 text-sm top-6 z-10 origin-[0] start-2 peer-focus:text-sky-500 peer-focus:text-sm peer-placeholder-shown:scale-125 peer-placeholder-shown:-translate-y-2 peer-focus:scale-90 peer-focus:-translate-y-5'
+          >
+            Email address
+          </label>
+        </div>
+        <div className='relative w-full mb-5 group'>
+          <input
+            type='password'
+            name='password'
+            id='password'
+            className='block bg-white rounded px-2 pb-1 pt-5 w-full text-base text-stone-500 bg-gray-50 border border-stone-300 appearance-none focus:outline-none ring-0 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 peer'
+            placeholder=' '
+            required
+          />
+          <label
+            htmlFor='password'
+            className='absolute text-base text-stone-500 focus:text-gray-900 duration-300 transform -translate-y-5 scale-90 text-sm top-6 z-10 origin-[0] start-2 peer-focus:text-sky-500 peer-focus:text-sm peer-placeholder-shown:scale-125 peer-placeholder-shown:-translate-y-2 peer-focus:scale-90 peer-focus:-translate-y-5'
+          >
+            Password
+          </label>
+        </div>
+        <div className='mb-5 group'>
+          <button
+            className='rounded-md bg-blue-600 px-6 py-3.5 font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-60'
+            type='submit'
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Tailwind libs
+
+Liste partielle des bibliothèques Tailwind disponibles
+
+<TwoColumns top>
+<div>
+- [Tailwind UI](https://tailwindui.com/)
+- [Shadcn/UI](https://ui.shadcn.com/)
+- [Aceternity UI](https://ui.aceternity.com/)
+- [daisyUI](https://daisyui.com/)
+- [Magic UI](https://magicui.design/)
+- [HyperUI](https://www.hyperui.dev/)
+- [Meraki UI](https://merakiui.com/)
+- [Tailus UI](https://tailus.io/)
+
+</div>
+
+<div>
+- [TailMater UI Kit](https://github.com/aribudin/tailmater/) (Based on Material 3)
+- [Material Tailwind](https://www.material-tailwind.com/)
+- [Treact](https://treact.owaiskhan.me/)
+- [Float UI](https://floatui.com/)
+- [Flowbite](https://flowbite.com/)
+- [WindUI](https://wind-ui.com/)
+- [Preline UI](https://preline.co/)
+- [TailGrids](https://tailgrids.com/)
+
+</div>
+
+</TwoColumns>
+
+---
+
+## CSS-in-JS
+
+- Plutôt que d'utiliser des librairies CSS, on pourrait générer le CSS par le JavaScript (CSS-in-JS).
+  - On génère déjà le HTML par le JavaScript (JSX).
+  - Cela permet de styler dans les composants.
+- Il y a deux approches:
+  - Runtime CSS-in-JS
+  - Compile-Time CSS-in-JS
+
+---
+
+## Runtime CSS-in-JS
+
+- Le code est dynamiquement généré.
+- Page est un peu plus lourde et lente
+  - On génèere le CSS à chaque visite
+- Approche plus classique
+  - Styled Components (popular)
+  - Emotion
+
+---
+
+## Compile-time CSS-in-JS
+
+- Prend la forme d'un Module CSS
+  - Linaria
+  - Vanilla extract
+- Ou de classes atomiques
+  - StyleX
+  - Pre-Style
+
+---
+
+## StyleX
+
+- Bibliothèque de Meta
+- Encore en beta
+- Pas de playground (pour le moment)
+- Prometteur pour le futur
+
+[Demo de StyleX avec Next](https://stackblitz.com/edit/stylex-next)
+
+---

@@ -117,7 +117,7 @@ const [data, setData] = useState(0);
 
 <TwoColumns top>
 
-On modifie le state dans `handleClick`:
+On modifie le state dans `handleClick`.
 
 ```js
 function handleClick() {
@@ -126,7 +126,6 @@ function handleClick() {
 ```
 
 </TwoColumns>
-Voici le code réparé:
 
 <Sandpack    files={{
     "src/data.js": myFile
@@ -1057,7 +1056,7 @@ Quand React fait un re-rendu d'un composant:
 
 Contrairement aux variables locales qui disparaissent quand la fonction est complétée (quand le JSX est retourné), l'état est conservé entre les appels.
 
-L'état est conservé par React, à l'extérieur de la fonction. Quand React appelle votre composant, il vous donne accès au snapshot de l'état pour ce rendu particulier. Votre composant retourne un snapshot du UI avec de nouveaux props et gestionnaires d'événements, générées à partir des valeurs d'états de ce rendu.
+L'état est conservé par React, à l'extérieur de la fonction. Quand React appelle un composant, il offre un snapshot de l'état pour ce rendu particulier. Le composant retourne alors un snapshot du UI avec de nouveaux props et gestionnaires d'événements, générés à partir des valeurs d'états de ce rendu.
 
 ---
 

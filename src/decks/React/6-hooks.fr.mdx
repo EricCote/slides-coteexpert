@@ -1,0 +1,249 @@
+---
+title: hooks
+description: Décrits les règles des hooks
+---
+
+# Règles des Hooks
+
+---
+
+## Hooks
+
+- Les Hooks permettent d'appeler des fonctionnalités de React
+- Les Hooks peuvent être utilisés sous certaines conditions
+  - Ces conditions sont appelées les **règles des hooks** (Rules of Hooks)
+- On peut créer nos propres hooks personnalisés
+  - Les hooks doivent être des fonctions pures, sans effets de bord
+- Tous les hooks débutent avec le préfixe use (ex: useState, useRef)
+
+---
+
+## Les hooks sont purs
+
+- Les hooks sont appelés par des composants, pendant leurs rendus
+- Il faut respecter les règles de pureté
+  - Pas d'effet de bord, pas de modification de DOM, pas d'appel d'API
+- L'état et les props sont "read-only"
+  - Il est possible de muter des données locales ou des clones
+
+---
+
+## Hooks placés au top niveau
+
+- On appelle un hook au top niveau d'un composant
+- Ou encore au top niveau d'un hook personnalisé
+
+```js
+function Counter() {
+  // ✅ bien: top-niveau dans un composant fonctionnel
+  const [count, setCount] = useState(0);
+  // ...
+}
+
+function useWindowWidth() {
+  // ✅ bien: top niveau dans un hook personnalisé (custom hook)
+  const [width, setWidth] = useState(window.innerWidth);
+  // ...
+}
+```
+
+---
+
+## Top niveau seulement
+
+On ne tolère pas un appel de hook qui n'est pas top niveau
+
+- 🔴 Pas de Hooks dans des boucles ou conditions
+- 🔴 Pas de Hooks après un return conditionnel
+- 🔴 Pas de Hooks dans les gestionnaires d'événements
+- 🔴 Pas de Hooks dans composants classes
+- 🔴 Pas de Hooks dans les fonctions passées à `useMemo`, `useReducer`, ou `useEffect`
+- 🔴 Pas de Hooks dans des blocs `try`/`catch`/`finally`
+
+---
+
+## Pas de Hooks dans des boucles ou conditions
+
+```js
+function Bad({ cond }) {
+  if (cond) {
+    // 🔴 Mauvais: appel de Hook dans une condition
+    //(Il faut déplacer au top niveau)
+    const theme = useContext(ThemeContext);
+  }
+  // ...
+}
+```
+
+```js
+function Bad() {
+  for (let i = 0; i < 10; i++) {
+    // 🔴 Mauvais: appel de Hook dans une boucle
+    //(Il faut déplacer au top niveau)
+    const theme = useContext(ThemeContext);
+  }
+  // ...
+}
+```
+
+---
+
+## Pas de Hooks après un return conditionnel
+
+```js
+function Bad({ cond }) {
+  if (cond) {
+    return;
+  }
+  // 🔴 Mauvais: après un return conditional
+  //(Il faut déplacer au top niveau, avant le return)
+  const theme = useContext(ThemeContext);
+  // ...
+}
+```
+
+---
+
+## Pas de Hooks dans les gestionnaires d'événements
+
+```js
+function Bad() {
+  function handleClick() {
+    // 🔴 Mauvais: dans un gestionnaire d'événement
+    //(Il faut déplacer au top niveau)
+    const theme = useContext(ThemeContext);
+  }
+  // ...
+}
+```
+
+---
+
+## Pas de Hooks dans les fonctions flèches
+
+Pas de Hooks dans les fonctions passées à `useMemo`, `useReducer`, ou `useEffect`
+
+```js
+function Bad() {
+  const style = useMemo(() => {
+    // 🔴 Mauvais: dans useMemo
+    //(Il faut déplacer au top niveau)
+    const theme = useContext(ThemeContext);
+    return createStyle(theme);
+  });
+  // ...
+}
+```
+
+---
+
+## 🔴 Pas de Hooks dans composants classes
+
+```js
+class Bad extends React.Component {
+  render() {
+    // 🔴 Mauvais: dans un composant classe
+    //(Utiliser un composant fonctionnel plutôt qu'une classe)
+    useEffect(() => {});
+    // ...
+  }
+}
+```
+
+---
+
+## Pas de Hooks dans des blocs `try`/`catch`/`finally`
+
+```js
+function Bad() {
+  try {
+    // 🔴 Mauvais: dans un bloc  try/catch/finally
+    //(Il faut déplacer au top niveau)
+    const [x, setX] = useState(0);
+  } catch {
+    const [x, setX] = useState(1);
+  }
+}
+```
+
+---
+
+## Appeler seulement pendant le rendu
+
+Donc on peut appeler un hook, pendant le rendu:
+
+- Au top niveau d'un composant fonctionnel
+- Au top niveau d'un Hook personnalisé
+
+On ne peut pas appeler un hook:
+
+- À partir d'une fonction JavaScript quelconque
+
+```js
+function FriendList() {
+  const [onlineStatus, setOnlineStatus] = useOnlineStatus(); // ✅
+}
+
+// ❌ Pas un composant, ni un Hook personnalisé
+function setOnlineStatus() {
+  const [onlineStatus, setOnlineStatus] = useOnlineStatus();
+}
+```
+
+---
+
+## State hooks
+
+useState: Gère la persistance de valeurs et provoque un re-rendu quand la valeur change
+
+useReducer: Gère la persistance de valeurs pour des états complexes, en utilisant des fonctions dispatch et reducer. Provoque un re-rendu quand la valeur change
+
+useContext: Accède aux données du contexte et provoque un re-rendu quand le contexte change
+
+useRef: Gère la persistance d'une valeur mutative, ne provoque JAMAIS de re-rendu
+
+---
+
+## Hooks de perfomance
+
+(cours avancé)
+
+useCallback: Mémoïser des callbacks pour prévenir des re-rendus
+
+useMemo: Mémoïser des valeurs pour prévenir des re-calculs non-nécessaires
+
+## Hooks et les Effets
+
+useEffect: Permet l'appel d'Effets impurs après le rendu, tel que le chargement de données, les abonnements, les modifications du DOM
+
+useLayoutEffect: Similaire à useEffect, lancé après le rendu et les modifs du DOM, mais avant le 'paint' du navigateur. (Évite l'effet de clignotement)
+
+🆕 useInsertionEffect: (pour les bibliothèques qui génèrent du CSS-in-JS) Similaire à useLayoutEffect, mais lancé avant les autres layout effects. Évite des problèmes de positionnement dans les calculs de useLayoutEffect
+
+🆕 useSyncExternalStore: permet de gérer les abonnements extérieurs à React. Retourne une référence aux données, et gère la notification de modification, qui provoque un re-rendu
+
+---
+
+## Hooks et les autres scénarios
+
+useimperativeHandle: Personnalise l'instance d'une ref retournée au composant parent
+
+useDebugValue: Affichage d'infos dans React DevTools par notre Hook personnalisé
+
+🆕 useId: génère un nom unique mais persistant
+
+---
+
+Hooks et le concurrent rendering
+
+🆕 useDeferredValue: Génère un rendu avec le résultat précédent tant que le nouveau résultat n'a pas fini de suspendre
+
+🆕🆕 useOptimistic: Génère un rendu avec un résultat fourni (optimiste) tant que le nouveau résultat n'a pas fini de suspendre
+
+🆕 useTransition: Permet d'encapsuler des setState() (qui génèrent un re-rendu synchrone) de façon asynchrone, dans une transition. Cela permet de garder le reste de notre IU interactive. Un rendu de transition peut se faire interrompre sans problème. Permet aussi de gérer l'attente via une prop d'état de la transition, plutôt qu'un suspense.
+
+---
+
+🆕🆕 useActionState: génère une méthode d'action et un état qui contient le résultat retourné par cette méthode. On lie par la suite la prop `action` du `<form>`, ou la prop formAction d'un `<button>`
+
+🆕🆕 useFormStatus: Permet au composant enfant d'obtenir les infos du formulaire parent (pending, data, method, action)

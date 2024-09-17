@@ -1,9 +1,8 @@
-## History Routing with useEffect
+## React Naïve Routing with components
 
 <Sandpack options={{ showNavigator: true }} >
 
 ```jsx src/App.js active
-import { useEffect, useState } from 'react';
 import Menu from './Menu';
 import { Router, Route } from './Route';
 
@@ -11,45 +10,17 @@ import Home from './Home';
 import News from './News';
 import Contact from './Contact';
 
+//the problem here: when we click on the menu,
+//the browser loads our app again, instead of hiding/showing
+//the current page/component.
+//But there's no need to reload, since a SPA loads
+//all components at load time.
 export default function App() {
-  const [currentPage, setCurrentPage] = useState(window.location.pathname);
-
-  function backButtonHandler(evt) {
-    setCurrentPage(evt.state); //change state to re-render the right page
-  }
-
-  useEffect(() => {
-    //handle the Back button!
-    window.addEventListener('popstate', backButtonHandler);
-    //add the current page
-    window.history.replaceState(currentPage, '', currentPage);
-  }, []); //bind this event on the first render.
-
-  //click handler that uses the history API instead of navigating
-  function clickHandler(evt) {
-    //create a url object from the link text
-    const url = new URL(evt.target.href);
-    if (
-      //if hostname is the same, but with a different path,
-      //then handle the navigation
-      url.hostname === window.location.hostname &&
-      url.pathname !== window.location.pathname
-    ) {
-      evt.preventDefault(); //cancel the navigation
-      //Add destination in history API
-      window.history.pushState(url.pathname, '', url.pathname);
-      setCurrentPage(url.pathname); //set State to re-render the app.
-    } else if (
-      url.hostname === window.location.hostname &&
-      url.pathname === window.location.pathname
-    ) {
-      evt.preventDefault(); //cancel if we navigate to the same page twice
-    }
-  }
+  const currentPage = window.location.pathname;
 
   return (
     <>
-      <Menu onClick={clickHandler} />
+      <Menu />
       <Router page={currentPage}>
         <Route path='/' element={<Home />} />
         <Route path='/home' element={<Home />} />
@@ -79,7 +50,7 @@ export function Route({ path, element }) {
 ```
 
 ```jsx src/Menu.jsx
-export default function Menu({ onClick }) {
+export default function Menu() {
   return (
     <ul className='menu'>
       {menuList.map((menuItem) => (
@@ -87,7 +58,6 @@ export default function Menu({ onClick }) {
           <a
             className={menuItem.url === location.pathname ? 'active' : ''}
             href={menuItem.url}
-            onClick={onClick}
           >
             {menuItem.name}
           </a>
@@ -121,8 +91,8 @@ const menuList = [
 export default function Home() {
   return (
     <>
-      <h1>Home Page</h1>
-      <p>This is the home page!</p>
+      <h1>Home page</h1>
+      <p>This is the Home page!</p>
     </>
   );
 }

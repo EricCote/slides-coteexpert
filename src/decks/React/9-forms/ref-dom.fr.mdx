@@ -1,0 +1,1015 @@
+---
+title: 'Manipulating the DOM with Refs'
+---
+
+# Manipuler le DOM et les Refs
+
+---
+
+## Intro
+
+- React manipule le [DOM](https://developer.mozilla.org/docs/Web/API/Document_Object_Model/Introduction) pour le synchroniser avec le résultat du rendu.
+- Fréquemment, les composants n'ont aucun besoin de manipuler ce DOM
+- Parfois, il faut accéder au DOM
+  - Envoyer le focus sur un champ de saisie
+  - Défiler (scroller) vers une section du document
+  - Mesurer la taille ou la position d'un élément
+- Le DOM a accès à des éléments du navigateur que React ne gère pas, il faut donc utiliser une **ref** vers un noeud du DOM
+
+---
+
+## Obrenir la ref d'un node
+
+Pour accéder au node du DOM géré par React, on importe le hook `useRef`
+
+```js
+import { useRef } from 'react';
+```
+
+On déclare ensuite une ref dans notre composant:
+
+```js
+const myRef = useRef(null);
+```
+
+Enfin, on passe cette ref à l'attribut `ref` dans le JSX
+
+```js
+<div ref={myRef}>
+```
+
+---
+
+## Usage de ref avec DOM
+
+- Le Hook `useRef` retourne un simple objet avec une seule propriété `current`
+- `myRef.current` est initialement `null`
+- Quand React génère un node du DOM pour le `<div>`, React place alors une référence du node dans `myRef.current`.
+- On peut alors accéder ce node dans les gestionnaires d'événement, et utiliser les API du navigateur.
+
+```js
+// You can use any browser APIs, for example:
+myRef.current.scrollIntoView();
+```
+
+---
+
+### Example: Focus sur un champ de saisie
+
+Le button déplace le focus vers le `<input>`:
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function Form() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <input ref={inputRef} />
+      <button onClick={handleClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+1. Declarer `inputRef` avec le hook `useRef`
+2. Passer la ref avec `<input ref={inputRef}>`. React va donc **stocker la référence du node `<input>` dans `inputRef.current`.**
+3. Dans la fonction `handleClick`, on obtient le node `<input>` par `inputRef.current`, et on appelle `focus()` via `inputRef.current.focus()`.
+4. Il faut lier le gestionnaire d'événement `handleClick` au `<button>` avec l'attribut `onClick`.
+
+- La manipulation du DOM est le cas le plus fréquent pour les refs.
+- useRef peut aussi servir à stocker des données externes à React, comme un timerId
+- Ref persiste entre les rendus (comme pour l'état)
+- Ref ne provoque aucun re-rendu
+
+---
+
+## Example: Scroller vers un élément
+
+On peut avoir plus d'une ref dans un composant. Dans cet exemple, il y a un carousel de 3 images. Chaque boutton centre l'image en appelant `scrollIntoView()`
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function CatFriends() {
+  const firstCatRef = useRef(null);
+  const secondCatRef = useRef(null);
+  const thirdCatRef = useRef(null);
+
+  function handleScrollToFirstCat() {
+    firstCatRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }
+
+  function handleScrollToSecondCat() {
+    secondCatRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }
+
+  function handleScrollToThirdCat() {
+    thirdCatRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }
+
+  return (
+    <>
+      <nav>
+        <button onClick={handleScrollToFirstCat}>Tom</button>
+        <button onClick={handleScrollToSecondCat}>Maru</button>
+        <button onClick={handleScrollToThirdCat}>Jellylorum</button>
+      </nav>
+      <div>
+        <ul>
+          <li>
+            <img
+              src='https://placekitten.com/g/200/200'
+              alt='Tom'
+              ref={firstCatRef}
+            />
+          </li>
+          <li>
+            <img
+              src='https://placekitten.com/g/300/200'
+              alt='Maru'
+              ref={secondCatRef}
+            />
+          </li>
+          <li>
+            <img
+              src='https://placekitten.com/g/250/200'
+              alt='Jellylorum'
+              ref={thirdCatRef}
+            />
+          </li>
+        </ul>
+      </div>
+    </>
+  );
+}
+```
+
+```css
+div {
+  width: 100%;
+  overflow: hidden;
+}
+
+nav {
+  text-align: center;
+}
+
+button {
+  margin: 0.25rem;
+}
+
+ul,
+li {
+  list-style: none;
+  white-space: nowrap;
+}
+
+li {
+  display: inline;
+  padding: 0.5rem;
+}
+```
+
+</Sandpack>
+
+---
+
+## Gérer une liste de refs avec un callback
+
+Dans les exemples précédents, il y a un nombre spécifique de refs. Mais si on doit obtenir une ref pour chaque item d'une liste, que faire? Le code suivant ne fonctionne pas:
+
+```js
+<ul>
+  {items.map((item) => {
+    // Doesn't work!
+    const ref = useRef(null);
+    return <li ref={ref} />;
+  })}
+</ul>
+```
+
+Cela échoue car les hooks doivent être appelés au **top-niveau** du composant.
+On ne peut appeler `useRef` dans une boucle, une condition ou dans un appel `map()`.
+
+---
+
+## Solution Possible
+
+- Obtenir une ref à l'élément parent, et utiliser la manipulation du DOM pour trouver les nodes enfants (ex: querySelectorAll)
+
+- C'est une solution fragile, si on change la structure du DOM
+
+<hr />
+
+Une autre solution, c'est de passer une fonction à l'attribut ref. C'est aussi appelé un "`ref` callback". React appelle ce callback du ref avec le node du DOM quand il faut générer la ref, et avec `null` quand c'est le temps de la vider. On peut alors alors utiliser un Tableau ou une Map, et accéder la ref par son index ou son ID.
+
+Voici comment scroller dans une longue liste:
+
+<Sandpack>
+
+```js
+import { useRef, useState } from 'react';
+
+export default function CatFriends() {
+  const itemsRef = useRef(null);
+  const [catList, setCatList] = useState(setupCatList);
+
+  function scrollToCat(cat) {
+    const map = getMap();
+    const node = map.get(cat);
+    node.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }
+
+  function getMap() {
+    if (!itemsRef.current) {
+      // Initialize the Map on first usage.
+      itemsRef.current = new Map();
+    }
+    return itemsRef.current;
+  }
+
+  return (
+    <>
+      <nav>
+        <button onClick={() => scrollToCat(catList[0])}>Tom</button>
+        <button onClick={() => scrollToCat(catList[5])}>Maru</button>
+        <button onClick={() => scrollToCat(catList[9])}>Jellylorum</button>
+      </nav>
+      <div>
+        <ul>
+          {catList.map((cat) => (
+            <li
+              key={cat}
+              ref={(node) => {
+                const map = getMap();
+                if (node) {
+                  map.set(cat, node);
+                } else {
+                  map.delete(cat);
+                }
+              }}
+            >
+              <img src={cat} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function setupCatList() {
+  const catList = [];
+  for (let i = 0; i < 10; i++) {
+    catList.push('https://loremflickr.com/320/240/cat?lock=' + i);
+  }
+
+  return catList;
+}
+```
+
+```css
+div {
+  width: 100%;
+  overflow: hidden;
+}
+
+nav {
+  text-align: center;
+}
+
+button {
+  margin: 0.25rem;
+}
+
+ul,
+li {
+  list-style: none;
+  white-space: nowrap;
+}
+
+li {
+  display: inline;
+  padding: 0.5rem;
+}
+```
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "canary",
+    "react-dom": "canary",
+    "react-scripts": "^5.0.0"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Explications
+
+Dans cet exemple, `itemsRef` ne stocke pas un node du DOM. Il stocke plutôt une collection `Map`, qui stocke un node pour chaque clé itemID. Le "callback à Ref" met à jour la collection `Map`.
+
+```js
+<li
+  key={cat.id}
+  ref={node => {
+    const map = getMap();
+    if (node) {
+      // Add to the Map
+      map.set(cat, node);
+    } else {
+      // Remove from the Map
+      map.delete(cat);
+    }
+  }}
+>
+```
+
+On peut donc aller chercher des nodes via le `Map`
+
+## Une autre approche
+
+Voici une autre approche pour gérer le "`ref` callback" avec une fonction de cleanup.
+
+```js
+<li
+  key={cat.id}
+  ref={node => {
+    const map = getMap();
+    // Add to the Map
+    map.set(cat, node);
+
+    return () => {
+      // Remove from the Map
+      map.delete(cat);
+    };
+  }}
+>
+```
+
+---
+
+## Accéder au node d'un autre composant
+
+Quand on place une ref sur un composant génèrant un simple élément, tel que `<input>`, React place alors le node correspondant dans `ref.current`
+
+Mais si on place une ref sur un composant JSX, tel que `<MyInput />`, on obtient alors `null`. (Le bouton ne fonctionne pas ci-bas).
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+function MyInput(props) {
+  return <input {...props} />;
+}
+
+export default function MyForm() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <MyInput ref={inputRef} />
+      <button onClick={handleClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+## Explications
+
+React affiche même une erreur sur la console:
+
+<Alert type="error">
+
+Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+</Alert>
+
+Par défaut, React ne laisse pas un composant accéder au DOM d'un autre composant. (Même pas pour un composant enfant!)
+
+C'est voulu. Manipuler le node d'un composant le rend encore plus fragile.
+
+Si un composant veut exposer le DOM d'un enfant, il faut indiquer à React que c'est notre désir avec l'API `forwardRef`.
+
+---
+
+## FowardRef
+
+```js
+const MyInput = forwardRef((props, ref) => {
+  return <input {...props} ref={ref} />;
+});
+```
+
+1. `<MyInput ref={inputRef} />` indique à React de placer une référence du node dans `inputRef.current`. Par contre, le composant `MyInput` doit indiquer que c'est voulu.
+2. Le composant `MyInput` est déclaré avec un `forwardRef`. Il pourra recevoir `inputRef` et le placer dans l'argument `ref` (déclaré après les props).
+3. `MyInput` passe le `ref` dans le `<input>` interne.
+
+Maintenant, on peut placer le focus.
+
+---
+
+## ForwardRef
+
+<Sandpack>
+
+```js
+import { forwardRef, useRef } from 'react';
+
+const MyInput = forwardRef((props, ref) => {
+  return <input {...props} ref={ref} />;
+});
+
+export default function Form() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <MyInput ref={inputRef} />
+      <button onClick={handleClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+## ForwardRef
+
+Dans plusieurs sytèmes, c'est commun pour les composants de bas niveau (boutons, input, etc) de passer les refs aux nodes. Mais les composants plus haut niveau (formulaires, listes, sections de page) n'exposent pas leur Node pour éviter les dépendances accidentelles sur la structure du DOM.
+
+---
+
+## Exposer un sous-ensemble des API avec une référence impérative (imperative handle)
+
+Dans l'exemple précédent, `MyInput` expose l'élément `input` du DOM. Ça permet au parent d'appeler `focus()`. Mais ça expose aussi au parent tout le reste du DOM (ex: changer les styles CSS). Pour limiter la fonctionnalité exposée, on utilise `useImperativeHandle`:
+
+<Sandpack>
+
+```js
+import { forwardRef, useRef, useImperativeHandle } from 'react';
+
+const MyInput = forwardRef((props, ref) => {
+  const realInputRef = useRef(null);
+  useImperativeHandle(ref, () => ({
+    // Only expose focus and nothing else
+    focus() {
+      realInputRef.current.focus();
+    },
+  }));
+  return <input {...props} ref={realInputRef} />;
+});
+
+export default function Form() {
+  const inputRef = useRef(null);
+
+  function handleClick() {
+    inputRef.current.focus();
+  }
+
+  return (
+    <>
+      <MyInput ref={inputRef} />
+      <button onClick={handleClick}>Focus the input</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+Explications useImperativeHandle
+
+- `realInputRef` dans `MyInput` réfère au node du DOM.
+- `useImperativeHandle` indique à React de fournir un objet spécial et spécifique, comme valeur au composant parent.
+- `inputRef.current`, dans le composant parent `Form`, ne peut accéder que la méthode `focus`.
+- Dans ce cas, la "référence" (handle) du ref n'est pas le node, mais l'objet spécifié par `useImperativeHandle`.
+
+---
+
+## Quand React attache les refs
+
+Dans React, chaque mise à jour se déroule en 2 phases:
+
+- Pendant le **rendu,** React appelle les composants pour déterminer ce qu'il faut afficher.
+- Pendant le **commit,** React applique les modifications au DOM.
+
+<hr />
+
+- En général, on ne veut pas accéder aux refs pendant le rendu.
+- C'est aussi le cas pour les refs qui réfèrent au DOM.
+- Pour le premier rendu, les nodes n'ont pas encore été créés
+  - `ref.current` sera `null`.
+- Et pour les rendus suivants, les nodes ne sont pas encore mis à jour
+  - Il est trop tôt pour les lire
+- React inscrit `ref.current` pendant le commit.
+  - Avant de mettre à jour le DOM, réinitialise `ref.current` à `null`.
+  - Après la mise à jour du DOM, React inscrit dans `ref.current` le node généré
+
+## Accéder aux refs dans les événements
+
+- D'habitude, on accède aux refs à partir des **gestionnaires d'événements**
+- Si on désire travailler avec un ref, mais qu'il n'y a pas d'événement particulier, on a besoin d'un Effet.
+
+---
+
+## Dépiler les mises à jour d’état de façon synchrone avec flushSync
+
+Le code suivant ajoute un "todo" et défile l'écran au dernier élément de la liste. Mais il défile (scroll) au "todo" qui précède le dernier.
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+
+export default function TodoList() {
+  const listRef = useRef(null);
+  const [text, setText] = useState('');
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAdd() {
+    const newTodo = { id: nextId++, text: text };
+    setText('');
+    setTodos([...todos, newTodo]);
+    listRef.current.lastChild.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
+  }
+
+  return (
+    <>
+      <button onClick={handleAdd}>Add</button>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <ul ref={listRef}>
+        {todos.map((todo) => (
+          <li key={todo.id}>{todo.text}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+let nextId = 0;
+let initialTodos = [];
+for (let i = 0; i < 20; i++) {
+  initialTodos.push({
+    id: nextId++,
+    text: 'Todo #' + (i + 1),
+  });
+}
+```
+
+</Sandpack>
+
+## Problème
+
+Le problème est ici
+
+```js
+setTodos([...todos, newTodo]);
+listRef.current.lastChild.scrollIntoView();
+```
+
+- En React, les mise à jour de l'état sont cédulés dans une file. (Queue)
+- Souvent, c'est un comportement désirable.
+- Ici, c'est un problème: `setTodos` ne met pas immédiatement à jour le DOM.
+- Au moment où l'on tente de défiler au dernier élément, le nouveau "todo" n'est pas encore dans le DOM
+- Le défilement est donc toujours en retard d'une position
+- On peut forcer React à mettre à jour le DOM immédiatement de façon synchrone.
+
+---
+
+## FlushSync
+
+On peut utiliser le `flushSync` du `react-dom` et encapsuler la mise à jour de l'état dans un `flushSync`
+
+```js
+flushSync(() => {
+  setTodos([...todos, newTodo]);
+});
+listRef.current.lastChild.scrollIntoView();
+```
+
+- Ceci ordonne à React de mettre à jour le DOM de façon synchrone, immédiatement après l'exécution de du code de `flushSync`
+- Le dernier "todo" est dans le DOM au moment où l'on tente de faire un défilement.
+
+---
+
+## Exemple de flushSync
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+import { flushSync } from 'react-dom';
+
+export default function TodoList() {
+  const listRef = useRef(null);
+  const [text, setText] = useState('');
+  const [todos, setTodos] = useState(initialTodos);
+
+  function handleAdd() {
+    const newTodo = { id: nextId++, text: text };
+    flushSync(() => {
+      setText('');
+      setTodos([...todos, newTodo]);
+    });
+    listRef.current.lastChild.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
+  }
+
+  return (
+    <>
+      <button onClick={handleAdd}>Add</button>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <ul ref={listRef}>
+        {todos.map((todo) => (
+          <li key={todo.id}>{todo.text}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+let nextId = 0;
+let initialTodos = [];
+for (let i = 0; i < 20; i++) {
+  initialTodos.push({
+    id: nextId++,
+    text: 'Todo #' + (i + 1),
+  });
+}
+```
+
+</Sandpack>
+
+---
+
+## Bonnes pratiques pour la manipulation du DOM via refs
+
+- Refs sont des échppatoires.
+- On utilise seulement pour "sortir du modèle React".
+
+  - gérer le focus
+  - défiler la page à une position précise
+  - appeler des API du Navigateur
+
+- Si on utilise des actions non-destructives (comme le focus et le défilement) il n'y aura pas de problèmes.
+- Si on tente de modifier le DOM manuellement, il pourrait avoir un risque de conflit avec les modifications de React.
+
+---
+
+## Exemple de problème en modifiant le DOM
+
+Imaginons un message et deux boutons. Un bouton gère l'affichage avec React, en utilisant rendu conditionnel et l'état. L'autre gère l'affichage avec le DOM, et la méthode `remove()`. Basculez entre les 2 boutons.
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+
+export default function Counter() {
+  const [show, setShow] = useState(true);
+  const ref = useRef(null);
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setShow(!show);
+        }}
+      >
+        Toggle with setState
+      </button>
+      <button
+        onClick={() => {
+          ref.current.remove();
+        }}
+      >
+        Remove from the DOM
+      </button>
+      {show && <p ref={ref}>Hello world</p>}
+    </div>
+  );
+}
+```
+
+```css
+p,
+button {
+  display: block;
+  margin: 10px;
+}
+```
+
+</Sandpack>
+
+Tenter d'utiliser setState pour montrer un élément qui a été enlevé manuellement du DOM génère un crash. React ne sait pas comment gérer un DOM qui a été modifié à l'extérieur de React.
+
+---
+
+## Évitez de modifier le DOM géré par React
+
+- On fait attention quand on modifie le DOM géré par React
+  - modifier des enfants
+  - ajouter des enfants
+  - enlever des enfants
+- Cela pourrait générer un résultat visuel incohérent
+- Cela pourrait planter
+- On peut modifier le DOM, mais avec prudence
+- Par exemple, on peut modifier les parties du DOM que React n'a aucune raison de mettre à jour
+  - Imaginons un `<div>` qui est toujours vide dans le JSX, React n'a aucune raison de toucher son contenu
+  - On peut modifier ce div sans problème
+
+---
+
+## Résumé
+
+- Les refs dont un concept générique, mais on les utilise fréquemment pour gérer les éléments du DOM
+- On indique à React de placer dans `myRef.current`, une référence à un node du DOM, en spécifiant `<div ref={myRef}>`.
+- Souvent, on utilise les refs pour des actions non-destructives comme le focus, le défilement, ou la mesure des éléments du DOM
+- Les composants n'exposent pas le DOM par défaut. Il faut utiliser `forwardRef`.
+- Évitez de modifier le DOM géré par React
+- S'il faut modifier le DOM géré par React, modifiez les parties que React n'ai aucune raison de mettre à jour.
+
+---
+
+## Jouer et stopper la vidéo
+
+Le bouton doit appeler `play()` et `pause()` sur le DOM de la `<video>`. Il faut utiliser une ref pour que le bouton fonctionne.
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+
+export default function VideoPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  function handleClick() {
+    const nextIsPlaying = !isPlaying;
+    setIsPlaying(nextIsPlaying);
+  }
+
+  return (
+    <>
+      <button onClick={handleClick}>{isPlaying ? 'Pause' : 'Play'}</button>
+      <video width='250'>
+        <source
+          src='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
+          type='video/mp4'
+        />
+      </video>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 20px;
+}
+```
+
+</Sandpack>
+
+Pour un défi supplémentaire, il faudrait que le bouton "Play" se synchronise quand le visiteur utilise le clic-droit pour démarrer la vidéo, ou utilise les raccourcis clavier. Les événements `onPlay` et `onPause` sont précieux.
+
+---
+
+## Focus sur le champ de saisie
+
+Fair un clic sur "Search" Devrait mettre le focus sur le champ de saisie
+
+<Sandpack>
+
+```js
+export default function Page() {
+  return (
+    <>
+      <nav>
+        <button>Search</button>
+      </nav>
+      <input placeholder='Looking for something?' />
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défiler dans un carrousel
+
+Le carrousel a un bouton "Next" pour changer l'image active. Il faut défiler vers le bon élément avec `scrollIntoView()` sur le node de l'image active:
+
+```js
+node.scrollIntoView({
+  behavior: 'smooth',
+  block: 'nearest',
+  inline: 'center',
+});
+```
+
+<Hint>
+
+Pas besin de refs sur toutes les images. Une seule ref vers l'image active, ou sur la liste elle-même, peut suffire. Utilisez `flushSync` pour s'assurer que le DOM est à jour avant le défilement.
+
+</Hint>
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function CatFriends() {
+  const [index, setIndex] = useState(0);
+  return (
+    <>
+      <nav>
+        <button
+          onClick={() => {
+            if (index < catList.length - 1) {
+              setIndex(index + 1);
+            } else {
+              setIndex(0);
+            }
+          }}
+        >
+          Next
+        </button>
+      </nav>
+      <div>
+        <ul>
+          {catList.map((cat, i) => (
+            <li key={cat.id}>
+              <img
+                className={index === i ? 'active' : ''}
+                src={cat.imageUrl}
+                alt={'Cat #' + cat.id}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+const catList = [];
+for (let i = 0; i < 10; i++) {
+  catList.push({
+    id: i,
+    imageUrl: 'https://placekitten.com/250/200?image=' + i,
+  });
+}
+```
+
+```css
+div {
+  width: 100%;
+  overflow: hidden;
+}
+
+nav {
+  text-align: center;
+}
+
+button {
+  margin: 0.25rem;
+}
+
+ul,
+li {
+  list-style: none;
+  white-space: nowrap;
+}
+
+li {
+  display: inline;
+  padding: 0.5rem;
+}
+
+img {
+  padding: 10px;
+  margin: -10px;
+  transition: background 0.2s linear;
+}
+
+.active {
+  background: rgba(0, 100, 150, 0.4);
+}
+```
+
+</Sandpack>
+
+---
+
+## Focus le champ de saisie avec différents composants
+
+Cliquer le bouton search devrait placer focus sur le champ de saisie. En conservant les fichiers séparés, comment connecter les refs à travers les différents composants?
+
+<Hint>
+
+Il faudra utiliser `forwardRef`
+
+</Hint>
+
+<Sandpack>
+
+```js src/App.js
+import SearchButton from './SearchButton.js';
+import SearchInput from './SearchInput.js';
+
+export default function Page() {
+  return (
+    <>
+      <nav>
+        <SearchButton />
+      </nav>
+      <SearchInput />
+    </>
+  );
+}
+```
+
+```js src/SearchButton.js
+export default function SearchButton() {
+  return <button>Search</button>;
+}
+```
+
+```js src/SearchInput.js
+export default function SearchInput() {
+  return <input placeholder='Looking for something?' />;
+}
+```
+
+```css
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+```
+
+</Sandpack>

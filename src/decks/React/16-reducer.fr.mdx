@@ -1,0 +1,3342 @@
+---
+Title: Combiner Réducteurs et Contexte
+---
+
+# Reducer
+
+---
+
+## Extraire la logique d'état dans un réducteur
+
+Les composants avec des mises à jour éparpillées à travers de multiples gestionnaires d'événements, ça devient complexe. Dans ces cas, on peut consoloider toute la logique de mise à jour à l'extérieur du composant, dans une seule fonction appelée le **réducteur**.
+
+---
+
+## Concepts
+
+- Qu'est-ce qu'une fonction de réducteur
+- Comment refactoriser `useState` vers `useReducer`
+- Quand utiliser un réducteur
+- Comment écrire un bon réducteur
+
+---
+
+## La logique d'état peut devenir complexe
+
+Dans l'exemple suivant, le composant `TaskApp` contient, dans son état, un tableau de `tasks`. Il y a 3 gestionnaires d'événements pour ajouter, enlever et modifier les `tasks`:
+
+<Sandpack>
+
+```js src/App.js
+import { useState } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+
+export default function TaskApp() {
+  const [tasks, setTasks] = useState(initialTasks);
+
+  function handleAddTask(text) {
+    setTasks([
+      ...tasks,
+      {
+        id: nextId++,
+        text: text,
+        done: false,
+      },
+    ]);
+  }
+
+  function handleChangeTask(task) {
+    setTasks(
+      tasks.map((t) => {
+        if (t.id === task.id) {
+          return task;
+        } else {
+          return t;
+        }
+      })
+    );
+  }
+
+  function handleDeleteTask(taskId) {
+    setTasks(tasks.filter((t) => t.id !== taskId));
+  }
+
+  return (
+    <>
+      <h1>Prague itinerary</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false },
+];
+```
+
+```js src/AddTask.js hidden
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js hidden
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+Chacun des gestionnaires d'événements appelle `setTasks` dans le but de mettre à jour l'état. À mesure que le composant évolue, la complexité de la logique d'état se complexifie aussi.
+
+---
+
+## Consolider la logique d'état avec un réducteur
+
+Pour réduire la complexité et conserver toute la logique dans un seul endroit facile à maintenir, on doit déplacer toute cette logique dans une seule fonction à l'extérieur du composant. Ça se nomme un **réducteur**.
+
+Les réducteurs sont une façon différente de gérer l'état. On peut migrer de useState à useReducer en 3 étapes:
+
+1. **Passer** de l'écriture d'état au dispatch d'actions
+2. **Écrire** la fonction du réducteur
+3. **Utiliser** le reducteur du composant
+
+---
+
+## Étape 1: Passer de l'écriture d'état au dispatch d'actions
+
+Les gestionnaires d'événements spécifient comment modifier l'état:
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10, fontSize:"0.8em"}}>
+```js
+function handleAddTask(text) {
+  setTasks([
+    ...tasks,
+    {
+      id: nextId++,
+      text: text,
+      done: false,
+    },
+  ]);
+}
+
+````
+
+```js
+function handleChangeTask(task) {
+  setTasks(
+    tasks.map((t) => {
+      if (t.id === task.id) {
+        return task;
+      } else {
+        return t;
+      }
+    })
+  );
+}
+````
+
+</aside>
+
+```js
+function handleDeleteTask(taskId) {
+  setTasks(tasks.filter((t) => t.id !== taskId));
+}
+```
+
+---
+
+## Description des gestionnaires d'événements
+
+- `handleAddTask(text)` est appelée quand on clique "Add".
+- `handleChangeTask(task)` est appelée quand on tape la case à cocher, ou le bouton "Save".
+- `handleDeleteTask(taskId)` est appelée quant on clique "Delete".
+
+Gérer l'état avec un réducteur est légèrement différent de le gérer en modifiant l'état. Plutôt que de dire comment modifier l'état, on décrit "ce que l'utilisateur désire" en faisant un _dispatch_ d'action dans le gestionnaire d'événement. pltôt que de modifier les `tasks`dans le gestionnaire d'événement, on _dispatch_ une action "ajouter/changer/enlever une tâche". L'intention est plus claire.
+
+---
+
+## Code
+
+L'objet passé à `dispatch` est une "action".
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+
+```js
+function handleAddTask(text) {
+  dispatch({
+    type: 'added',
+    id: nextId++,
+    text: text,
+  });
+}
+```
+
+```js
+function handleChangeTask(task) {
+  dispatch({
+    type: 'changed',
+    task: task,
+  });
+}
+
+function handleDeleteTask(taskId) {
+  dispatch({
+    type: 'deleted',
+    id: taskId,
+  });
+}
+```
+
+</aside>
+
+---
+
+## Action
+
+Une action est un objet JavaScript. La structure de l'action n'est pas spécifique, elledécrit l'information miminale de ce qui change.
+
+**note:** L'objet action n'a pas de forme précise.
+
+Par convention, on lui donne un `type` qui décrit le type de modification, et les autres champs décrivent les détails de la modification.
+
+```js
+dispatch({
+  // specific to component
+  type: 'what_happened',
+  // other fields go here
+});
+```
+
+---
+
+### Étape 2: Écrire la fonction réducteur
+
+C'est dans la fonction reducteur que l'on place la logique d'état. Il y a deux arguments: l'état courant et l'objet action. Cela retourne l'état suivant.
+
+```js
+function yourReducer(state, action) {
+  // return next state for React to set
+}
+```
+
+React conserve l'état de ce qui est retourné du réducteur
+
+Dans notre exemple:
+
+1. Déclarer l'état courant (`tasks`) comme premier argument
+2. Déclarer l'objet `action` comme second argment
+3. Retourner le prochain état du réducteur (que React conserve)
+
+---
+
+## Fonction réducteur
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10, fontSize:'0.8em'}}>
+
+```js
+function tasksReducer(tasks, action) {
+  if (action.type === 'added') {
+    return [
+      ...tasks,
+      {
+        id: action.id,
+        text: action.text,
+        done: false,
+      },
+    ];
+  } else if (action.type === 'deleted') {
+    return tasks.filter((t) => t.id !== action.id);
+  }
+
+```
+
+```js
+  //...
+  else if (action.type === 'changed') {
+    return tasks.map((t) => {
+      if (t.id === action.task.id) {
+        return action.task;
+      } else {
+        return t;
+      }
+    });
+  } else {
+    throw Error('Unknown action: ' + action.type);
+  }
+}
+```
+
+</aside>
+
+Parce que le réducteur prend l'état en argument, on peut le déclarer à l'extérieur du composant. C'est plus facile à lire et maintenir
+
+---
+
+## Convention du switch
+
+Le code précédent utilise `if/else`, mais la convention, c'est d'utiliser le `switch`.
+
+<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10, fontSize:"0.8em"}}>
+
+```js
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+```
+
+```js
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+</aside>
+
+On recommande d'englober chaque block case entre des accolades `{` et `}` pour que les variables des blocs soient isolées les unes des autres. De plus, chaque `case` se termine par `return` (ou `break`). Si on oublie le `return`, le code continue au prochain `case`, ce qui est une erreur.
+
+---
+
+## Pourquoi on appelle cela un réducteur?
+
+C'est à cause de l'opération `reduce()` des tableaux JS.
+
+L'opération `reduce()` permet de prendre un tableau et d'"accumuler" une valeur unique à partir de l'ensemble.
+
+```js
+const arr = [1, 2, 3, 4, 5];
+const sum = arr.reduce((result, number) => result + number); // 1 + 2 + 3 + 4 + 5
+```
+
+La fonction passée à `reduce` est le "réducteur". Cela prend deux arguments: le _résultat accumulé_ jusqu'à maintenant, et _l'item courant_. On retourne retourne le nouveau résultat accumulé.
+
+Le réducteur React est similaire: on prend deux aguments _l'état précédent_, et _l'action_. On retourne le nouvel _état suivant_.
+
+---
+
+## Exemple avec reduce (sans React)
+
+On appelle `reduce()` avec un `initialState` et un tableau d'`actions` pour calculer l'état final, en passant la fonction du réducteur.
+
+<Sandpack>
+
+```js src/index.js active
+import tasksReducer from './tasksReducer.js';
+
+let initialState = [];
+let actions = [
+  { type: 'added', id: 1, text: 'Visit Kafka Museum' },
+  { type: 'added', id: 2, text: 'Watch a puppet show' },
+  { type: 'deleted', id: 1 },
+  { type: 'added', id: 3, text: 'Lennon Wall pic' },
+];
+
+let finalState = actions.reduce(tasksReducer, initialState);
+
+const output = document.getElementById('output');
+output.textContent = JSON.stringify(finalState, null, 2);
+```
+
+```js src/tasksReducer.js
+export default function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```html public/index.html
+<pre id="output"></pre>
+```
+
+</Sandpack>
+
+Pas besoin de React pour utiliser un réducteur.
+
+---
+
+## Étape 3: Utiliser le réducteur de votre composant
+
+Importez le hook `useReducer` de React:
+
+```js
+import { useReducer } from 'react';
+```
+
+On doit remplacer `useState`:
+
+```js
+const [tasks, setTasks] = useState(initialTasks);
+```
+
+par `useReducer`:
+
+```js
+const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+```
+
+---
+
+## Détails de useReducer
+
+Le Hook `useReducer` est similaire à `useState`.
+
+On passe une valeur initiale, on reçoit la valeur de l'état, et une fonction pour modifier l'état (ici une fonction dispatch).
+
+Le hook `useReducer` prend 2 arguments
+
+1. une fonction de réducteur
+2. l'état initial
+
+et cela retourne:
+
+1. La valeur de l'état
+2. la fonction dispatch (pour "dispatcher" les actions au réducteur)
+
+---
+
+## Exemple complété (Version 1)
+
+C'est complété! Ici, le réducteur est en bas du fichier.
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <>
+      <h1>Prague itinerary</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false },
+];
+```
+
+```js src/AddTask.js hidden
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js hidden
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+---
+
+## Exemple complété (Version 2)
+
+Le même exemple, avec le réducteur dans son propre fichier séparé.
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+import tasksReducer from './tasksReducer.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <>
+      <h1>Prague itinerary</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false },
+];
+```
+
+```js src/tasksReducer.js
+export default function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```js src/AddTask.js hidden
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js hidden
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+C'est plus facile à lire quand le code est séparé. Les gestionnaires d'événements appellent dispatch avec une action qui _décrit la modification_. Le réducteur détermine comment _mettre à jour l'état_.
+
+---
+
+## Comparer `useState` et `useReducer`
+
+Réducteurs sont différents des états.
+
+- **Taille du code:** il y a moins de code avec `useState`. Tandis qu'avec `useReducer`, on doit fournir une fonction réducteur, ainsi qu'appeler dispatch avec des actions. `useReducer` aide si plusieurs gestionnaires d'événements modifient les données de façon similaire.
+- **Lisibilité:**
+- **Lisibilité:** `useState` est facile à lire pour les scénarios simples. `useReducer` simplifie les scénarios plus complexes, en séparant le _quoi_ du _comment_.
+- **Débogage:** les bogues avec `useState` sont difficiles à trouver. Avec `useReducer`, il est facile d'ajouter un `console.log` dans un réducteur et de décortiquer l'action, l'état précédent et l'état suivant.
+
+---
+
+## Suite des différences
+
+- **Testing:** Un réducteur est fonction pure, sans dépendance sur aucune composante. C'est facile à tester de façon séparée et isolée. Pour un scénario comlexe, c'est facile de tester un résultat à partir d'un état initial et d'une action.
+- **Préférence Personnelle:** Certains préfèrent les réducteurs, d'autres pas. c'est correcty. c'est une question de goût. On peut convertir entre `useState` et `useReducer` dans les deux sens: ils sont équivalents
+
+On recommande d'utiliser un réducteur quand il y a beaucoup de bogues suite à des modifications d'états, ou quand on veut du code plus structuré.
+
+Pas besoin d'utiliser des réducteurs partout. On peut mélanger les deux approches dans une solution.
+
+---
+
+## Bonnes pratiques pour écrire un réducteur
+
+- **Les réducteurs sont purs.** Les réducteurs roulent pendant le render. Les réducteurs doivent être purs. Les actions sont mis en file jusqu'au prochain rendu. Les mêmes entrées génèrent la même sortie. Un réducteur ne doit pas envoyer de requêtes, ni gérer de timeout, ne générer d'effets de bord. Ils doivent mettre à jour les objets et tableaux sans mutations.
+- **Chaque action décrit une interaction, même si cela entraîne de multiples changements.**
+  Par exemple, si un utilisateur clique "Reset" sur un formulaire de 5 champs, il vaut mieux faire un dispatch de l'action `reset_form` que 5 dispatch d'actions `set_field`. Si on on journalise chaque action d'un réducteur, le journal devrait permettre de reconstituer les interactions et réponses dans le bon ordre.
+
+---
+
+## Écrire des réducteurs concis avec Immer
+
+Tout comme la mise à jour des objects dans l'état régulier, on peut utiliser la librairie Immer pour que les reducteurs soient plus concis.
+
+`useImmerReducer` permet de muter l'état avec `push` ou `arr[i] =`
+
+<Sandpack>
+
+```js src/App.js
+import { useImmerReducer } from 'use-immer';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+
+function tasksReducer(draft, action) {
+  switch (action.type) {
+    case 'added': {
+      draft.push({
+        id: action.id,
+        text: action.text,
+        done: false,
+      });
+      break;
+    }
+    case 'changed': {
+      const index = draft.findIndex((t) => t.id === action.task.id);
+      draft[index] = action.task;
+      break;
+    }
+    case 'deleted': {
+      return draft.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useImmerReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <>
+      <h1>Prague itinerary</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Visit Kafka Museum', done: true },
+  { id: 1, text: 'Watch a puppet show', done: false },
+  { id: 2, text: 'Lennon Wall pic', done: false },
+];
+```
+
+```js src/AddTask.js hidden
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js hidden
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "immer": "1.7.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "use-immer": "0.5.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+Les réducteurs doivent être purs, et ne devraient pas muter l'état. Immer peut fournir un objet brouillon nommé `draft` qui permet des mutations sécuritaires.
+
+Immer va créer un copie de l'état avec les changements effectués sur l'objet `draft`. Les réducteurs gérés par `useImmerReducer` peuvent muter leur premier argument et n'ont pas besoin de retourner d'état.
+
+---
+
+## Résumé
+
+- Pour convertir de `useState` vers `useReducer`:
+  1. Appelez dispatch avec une actions dans les gestionnaires d'événements.
+  2. Écrvez une fonction réducteur qui retourne le prochain état pour un état et une action donnée
+  3. Remplacez `useState` par `useReducer`.
+- Il ya plus de code à écrire dans un réducteur. Ça aide au moment des déboguer et de tester.
+- Reducteurs doivent être purs
+- Chaque action décrit une seule interaction utilisateur.
+- Immer permet d'écrire des réducteurs dans un style mutatif.
+
+---
+
+## Défi: Dispatcher les actions à partir des gestionnaires d'événements
+
+Présentment, les gestionnaires d'événements de `ContactList.js` et `Chat.js` ont des commentaires `// TODO`. Taper dans le champ de saisie ne fonctionne pas, et cliquer sur les boutons ne change pas la selection.
+
+Remplacez les 2 `// TODO`s avec des `dispatch` et les actions correspondantes. Pour comprendre le format des actions, il faut consulter le code du réducteur dans `messengerReducer.js`. Le réducteur est bien écrit, nul besoin de le modifier. Il suffit d'appeler le dispatch avec la bonne action dans `ContactList.js` et `Chat.js`.
+
+---
+
+## Défi Suite
+
+<Hint>
+
+La fonction `dispatch` est disponible dans les composants, car ça été passé dans les props. Il suffit d'appeler `dispatch` avec la bonne action.
+
+C'est dans le réducteur qu'on voit la structure l'objet `action`. Dans le cas de `changed_selection`, voici le réducteur:
+
+```js
+case 'changed_selection': {
+  return {
+    ...state,
+    selectedId: action.contactId
+  };
+}
+```
+
+L'action devrait avoir une propriété `type: 'changed_selection'`, ainsi qu'une propriété`contactId`
+
+</Hint>
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import Chat from './Chat.js';
+import ContactList from './ContactList.js';
+import { initialState, messengerReducer } from './messengerReducer';
+
+export default function Messenger() {
+  const [state, dispatch] = useReducer(messengerReducer, initialState);
+  const message = state.message;
+  const contact = contacts.find((c) => c.id === state.selectedId);
+  return (
+    <div>
+      <ContactList
+        contacts={contacts}
+        selectedId={state.selectedId}
+        dispatch={dispatch}
+      />
+      <Chat
+        key={contact.id}
+        message={message}
+        contact={contact}
+        dispatch={dispatch}
+      />
+    </div>
+  );
+}
+
+const contacts = [
+  { id: 0, name: 'Taylor', email: 'taylor@mail.com' },
+  { id: 1, name: 'Alice', email: 'alice@mail.com' },
+  { id: 2, name: 'Bob', email: 'bob@mail.com' },
+];
+```
+
+```js src/messengerReducer.js
+export const initialState = {
+  selectedId: 0,
+  message: 'Hello',
+};
+
+export function messengerReducer(state, action) {
+  switch (action.type) {
+    case 'changed_selection': {
+      return {
+        ...state,
+        selectedId: action.contactId,
+        message: '',
+      };
+    }
+    case 'edited_message': {
+      return {
+        ...state,
+        message: action.message,
+      };
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```js src/ContactList.js
+export default function ContactList({ contacts, selectedId, dispatch }) {
+  return (
+    <section className='contact-list'>
+      <ul>
+        {contacts.map((contact) => (
+          <li key={contact.id}>
+            <button
+              onClick={() => {
+                // TODO: dispatch changed_selection
+              }}
+            >
+              {selectedId === contact.id ? <b>{contact.name}</b> : contact.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+```js src/Chat.js
+import { useState } from 'react';
+
+export default function Chat({ contact, message, dispatch }) {
+  return (
+    <section className='chat'>
+      <textarea
+        value={message}
+        placeholder={'Chat to ' + contact.name}
+        onChange={(e) => {
+          // TODO: dispatch edited_message
+          // (Read the input value from e.target.value)
+        }}
+      />
+      <br />
+      <button>Send to {contact.email}</button>
+    </section>
+  );
+}
+```
+
+```css
+.chat,
+.contact-list {
+  float: left;
+  margin-bottom: 20px;
+}
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li button {
+  width: 100px;
+  padding: 10px;
+  margin-right: 10px;
+}
+textarea {
+  height: 150px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi : Effacer le champ quand un message est envoyé
+
+Currently, pressing "Send" doesn't do anything. Add an event handler to the "Send" button that will:
+
+1. Show an `alert` with the recipient's email and the message.
+2. Clear the message input.
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import Chat from './Chat.js';
+import ContactList from './ContactList.js';
+import { initialState, messengerReducer } from './messengerReducer';
+
+export default function Messenger() {
+  const [state, dispatch] = useReducer(messengerReducer, initialState);
+  const message = state.message;
+  const contact = contacts.find((c) => c.id === state.selectedId);
+  return (
+    <div>
+      <ContactList
+        contacts={contacts}
+        selectedId={state.selectedId}
+        dispatch={dispatch}
+      />
+      <Chat
+        key={contact.id}
+        message={message}
+        contact={contact}
+        dispatch={dispatch}
+      />
+    </div>
+  );
+}
+
+const contacts = [
+  { id: 0, name: 'Taylor', email: 'taylor@mail.com' },
+  { id: 1, name: 'Alice', email: 'alice@mail.com' },
+  { id: 2, name: 'Bob', email: 'bob@mail.com' },
+];
+```
+
+```js src/messengerReducer.js
+export const initialState = {
+  selectedId: 0,
+  message: 'Hello',
+};
+
+export function messengerReducer(state, action) {
+  switch (action.type) {
+    case 'changed_selection': {
+      return {
+        ...state,
+        selectedId: action.contactId,
+        message: '',
+      };
+    }
+    case 'edited_message': {
+      return {
+        ...state,
+        message: action.message,
+      };
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```js src/ContactList.js
+export default function ContactList({ contacts, selectedId, dispatch }) {
+  return (
+    <section className='contact-list'>
+      <ul>
+        {contacts.map((contact) => (
+          <li key={contact.id}>
+            <button
+              onClick={() => {
+                dispatch({
+                  type: 'changed_selection',
+                  contactId: contact.id,
+                });
+              }}
+            >
+              {selectedId === contact.id ? <b>{contact.name}</b> : contact.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+```js src/Chat.js active
+import { useState } from 'react';
+
+export default function Chat({ contact, message, dispatch }) {
+  return (
+    <section className='chat'>
+      <textarea
+        value={message}
+        placeholder={'Chat to ' + contact.name}
+        onChange={(e) => {
+          dispatch({
+            type: 'edited_message',
+            message: e.target.value,
+          });
+        }}
+      />
+      <br />
+      <button>Send to {contact.email}</button>
+    </section>
+  );
+}
+```
+
+```css
+.chat,
+.contact-list {
+  float: left;
+  margin-bottom: 20px;
+}
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li button {
+  width: 100px;
+  padding: 10px;
+  margin-right: 10px;
+}
+textarea {
+  height: 150px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi: Restaurer les champs quand on navigue entre les tabulations
+
+In this example, switching between different recipients always clears the text input:
+
+```js
+case 'changed_selection': {
+  return {
+    ...state,
+    selectedId: action.contactId,
+    message: '' // Clears the input
+  };
+}
+```
+
+This is because you don't want to share a single message draft between several recipients. But it would be better if your app "remembered" a draft for each contact separately, restoring them when you switch contacts.
+
+Your task is to change the way the state is structured so that you remember a separate message draft _per contact_. You would need to make a few changes to the reducer, the initial state, and the components.
+
+---
+
+## Défi suite
+
+<Hint>
+
+You can structure your state like this:
+
+```js
+export const initialState = {
+  selectedId: 0,
+  messages: {
+    0: 'Hello, Taylor', // Draft for contactId = 0
+    1: 'Hello, Alice', // Draft for contactId = 1
+  },
+};
+```
+
+The `[key]: value` [computed property](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#computed_property_names) syntax can help you update the `messages` object:
+
+```js
+{
+  ...state.messages,
+  [id]: message
+}
+```
+
+</Hint>
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import Chat from './Chat.js';
+import ContactList from './ContactList.js';
+import { initialState, messengerReducer } from './messengerReducer';
+
+export default function Messenger() {
+  const [state, dispatch] = useReducer(messengerReducer, initialState);
+  const message = state.message;
+  const contact = contacts.find((c) => c.id === state.selectedId);
+  return (
+    <div>
+      <ContactList
+        contacts={contacts}
+        selectedId={state.selectedId}
+        dispatch={dispatch}
+      />
+      <Chat
+        key={contact.id}
+        message={message}
+        contact={contact}
+        dispatch={dispatch}
+      />
+    </div>
+  );
+}
+
+const contacts = [
+  { id: 0, name: 'Taylor', email: 'taylor@mail.com' },
+  { id: 1, name: 'Alice', email: 'alice@mail.com' },
+  { id: 2, name: 'Bob', email: 'bob@mail.com' },
+];
+```
+
+```js src/messengerReducer.js
+export const initialState = {
+  selectedId: 0,
+  message: 'Hello',
+};
+
+export function messengerReducer(state, action) {
+  switch (action.type) {
+    case 'changed_selection': {
+      return {
+        ...state,
+        selectedId: action.contactId,
+        message: '',
+      };
+    }
+    case 'edited_message': {
+      return {
+        ...state,
+        message: action.message,
+      };
+    }
+    case 'sent_message': {
+      return {
+        ...state,
+        message: '',
+      };
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```js src/ContactList.js
+export default function ContactList({ contacts, selectedId, dispatch }) {
+  return (
+    <section className='contact-list'>
+      <ul>
+        {contacts.map((contact) => (
+          <li key={contact.id}>
+            <button
+              onClick={() => {
+                dispatch({
+                  type: 'changed_selection',
+                  contactId: contact.id,
+                });
+              }}
+            >
+              {selectedId === contact.id ? <b>{contact.name}</b> : contact.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+```js src/Chat.js
+import { useState } from 'react';
+
+export default function Chat({ contact, message, dispatch }) {
+  return (
+    <section className='chat'>
+      <textarea
+        value={message}
+        placeholder={'Chat to ' + contact.name}
+        onChange={(e) => {
+          dispatch({
+            type: 'edited_message',
+            message: e.target.value,
+          });
+        }}
+      />
+      <br />
+      <button
+        onClick={() => {
+          alert(`Sending "${message}" to ${contact.email}`);
+          dispatch({
+            type: 'sent_message',
+          });
+        }}
+      >
+        Send to {contact.email}
+      </button>
+    </section>
+  );
+}
+```
+
+```css
+.chat,
+.contact-list {
+  float: left;
+  margin-bottom: 20px;
+}
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li button {
+  width: 100px;
+  padding: 10px;
+  margin-right: 10px;
+}
+textarea {
+  height: 150px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi: Implementer `useReducer` du debut
+
+In the earlier examples, you imported the `useReducer` Hook from React. This time, you will implement _the `useReducer` Hook itself!_ Here is a stub to get you started. It shouldn't take more than 10 lines of code.
+
+To test your changes, try typing into the input or select a contact.
+
+---
+
+## Défi
+
+<Hint>
+
+Here is a more detailed sketch of the implementation:
+
+```js
+export function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState);
+
+  function dispatch(action) {
+    // ???
+  }
+
+  return [state, dispatch];
+}
+```
+
+Recall that a reducer function takes two arguments--the current state and the action object--and it returns the next state. What should your `dispatch` implementation do with it?
+
+</Hint>
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from './MyReact.js';
+import Chat from './Chat.js';
+import ContactList from './ContactList.js';
+import { initialState, messengerReducer } from './messengerReducer';
+
+export default function Messenger() {
+  const [state, dispatch] = useReducer(messengerReducer, initialState);
+  const message = state.messages[state.selectedId];
+  const contact = contacts.find((c) => c.id === state.selectedId);
+  return (
+    <div>
+      <ContactList
+        contacts={contacts}
+        selectedId={state.selectedId}
+        dispatch={dispatch}
+      />
+      <Chat
+        key={contact.id}
+        message={message}
+        contact={contact}
+        dispatch={dispatch}
+      />
+    </div>
+  );
+}
+
+const contacts = [
+  { id: 0, name: 'Taylor', email: 'taylor@mail.com' },
+  { id: 1, name: 'Alice', email: 'alice@mail.com' },
+  { id: 2, name: 'Bob', email: 'bob@mail.com' },
+];
+```
+
+```js src/messengerReducer.js
+export const initialState = {
+  selectedId: 0,
+  messages: {
+    0: 'Hello, Taylor',
+    1: 'Hello, Alice',
+    2: 'Hello, Bob',
+  },
+};
+
+export function messengerReducer(state, action) {
+  switch (action.type) {
+    case 'changed_selection': {
+      return {
+        ...state,
+        selectedId: action.contactId,
+      };
+    }
+    case 'edited_message': {
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          [state.selectedId]: action.message,
+        },
+      };
+    }
+    case 'sent_message': {
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          [state.selectedId]: '',
+        },
+      };
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+```
+
+```js src/MyReact.js active
+import { useState } from 'react';
+
+export function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState);
+
+  // ???
+
+  return [state, dispatch];
+}
+```
+
+```js src/ContactList.js hidden
+export default function ContactList({ contacts, selectedId, dispatch }) {
+  return (
+    <section className='contact-list'>
+      <ul>
+        {contacts.map((contact) => (
+          <li key={contact.id}>
+            <button
+              onClick={() => {
+                dispatch({
+                  type: 'changed_selection',
+                  contactId: contact.id,
+                });
+              }}
+            >
+              {selectedId === contact.id ? <b>{contact.name}</b> : contact.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+```js src/Chat.js hidden
+import { useState } from 'react';
+
+export default function Chat({ contact, message, dispatch }) {
+  return (
+    <section className='chat'>
+      <textarea
+        value={message}
+        placeholder={'Chat to ' + contact.name}
+        onChange={(e) => {
+          dispatch({
+            type: 'edited_message',
+            message: e.target.value,
+          });
+        }}
+      />
+      <br />
+      <button
+        onClick={() => {
+          alert(`Sending "${message}" to ${contact.email}`);
+          dispatch({
+            type: 'sent_message',
+          });
+        }}
+      >
+        Send to {contact.email}
+      </button>
+    </section>
+  );
+}
+```
+
+```css
+.chat,
+.contact-list {
+  float: left;
+  margin-bottom: 20px;
+}
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li button {
+  width: 100px;
+  padding: 10px;
+  margin-right: 10px;
+}
+textarea {
+  height: 150px;
+}
+```
+
+</Sandpack>
+
+---
+
+# Combiner Réducteurs et Contexte {/* test */}
+
+---
+
+## Intro
+
+Le réducteur permet de consolider la logique de modification d'état. Le contexte permet de passer des infos vers d'autres composants de l'arborescence. On peut combiner les 2 approches.
+
+---
+
+## Plan
+
+- Comment combiner un réducteur avec un contexte
+- Comment éviter de passer l'état et les dispatch dans nos props
+- Comment isoler le contexte et la logique d'état dans des fichiers séparés
+
+---
+
+## Réducteur (sans contexte)
+
+Dans cet exemple provenant de la section des réducteurs, l'état est géré par un réducteur. La fonction réducteur contient toute la logique pour modifier l'état, tout en bas du fichier.
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <>
+      <h1>Day off in Kyoto</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/AddTask.js
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+---
+
+## Il faut passer des props
+
+Un réducteur garde les gestionnaires d'événements courts et concis. Mais, à mesure que l'application grandit, des lourdeurs surgissent. **Présentement, l'état `tasks` et la fonction `dispatch` ne sont disponibles que dans le composant `TaskApp`.** Pour que les autres composants puissent lier ou modifier l'état, il faut passer des props avec l'état et les gestionnaires d'événements.
+
+<TwoColumns style={{columnGap:"4%"}}>
+<div>
+
+`TaskApp` passe la liste de tâches et les gestionnaires d'événements à `TaskList`:
+
+```jsx
+<TaskList
+  tasks={tasks}
+  onChangeTask={handleChangeTask}
+  onDeleteTask={handleDeleteTask}
+/>
+```
+
+</div>
+<div>
+Et `TaskList` passe la tâche et les gestionnaires d'événements à `Task`:
+
+{/* prettier-ignore */}
+```jsx
+<Task 
+  task={task} 
+  onChange={onChangeTask} 
+  onDelete={onDeleteTask} 
+/>
+```
+
+</div>
+</TwoColumns>
+
+---
+
+## Une autre approche avec le contexte
+
+Dans un petit exemple, l'approche avec props fonctionne. Mais avec des dizaines ou des centaines de composantes, ça devient lourd.
+
+Une alternative aux props est le contexte. On pourrait passer l'état `tasks`et la fonction `dispatch` dans un contexte. **N'importe quel composant sous `TaskApp` pourrait lire les tâches et lancer des dispatchs sans souffrir du "prop drilling" partout.**
+
+Voici comment combiner un réducteurs au contexte
+
+1. **Créer** le contexte.
+2. **Ajouter** l'état et le dispatch dans le contexte
+3. **Utliser** le contexte de n'importe où
+
+---
+
+## Étape 1: Créer le contexte {/* step-1-create-the-context */}
+
+Le hook `useReducer` retourne l'état `tasks` et la fonction `dispatch` pour la mise à jour.
+
+```js
+const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+```
+
+Pour les passer dans l'arborescence, il faut créer deux contextes séparés:
+
+- `TasksContext` pour la liste de tâches.
+- `TasksDispatchContext` pour la fonction de dispatch.
+
+On recommande d'exporter d'un fichier séparé pour que ce soit simple de les importer plus tard
+
+---
+
+## Code pour créer le contexte
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <>
+      <h1>Day off in Kyoto</h1>
+      <AddTask onAddTask={handleAddTask} />
+      <TaskList
+        tasks={tasks}
+        onChangeTask={handleChangeTask}
+        onDeleteTask={handleDeleteTask}
+      />
+    </>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/TasksContext.js active
+import { createContext } from 'react';
+
+export const TasksContext = createContext(null);
+export const TasksDispatchContext = createContext(null);
+```
+
+```js src/AddTask.js
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+On passe `null` comme valeur par défaut. Les valeurs seront fournies par le composant `TaskApp`
+
+---
+
+## Étape 2: Placer l'état et le dispatch dans le contexte {/* step-2-put-state-and-dispatch-into-context */}
+
+On peut impoerter les deux contextes dans le composant `TaskApp`. Il faut fournir les `tasks` et le `dispatch` à toute l'arborescence via un contexte.
+
+```js {4,7-8}
+import { TasksContext, TasksDispatchContext } from './TasksContext.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+  // ...
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        ...
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+```
+
+---
+
+## Code avec le "context provider"
+
+Dans cet exemple, l'information est diffusée par les props ainsi que le contexte. C'est un peu redondant.
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+import { TasksContext, TasksDispatchContext } from './TasksContext.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  function handleAddTask(text) {
+    dispatch({
+      type: 'added',
+      id: nextId++,
+      text: text,
+    });
+  }
+
+  function handleChangeTask(task) {
+    dispatch({
+      type: 'changed',
+      task: task,
+    });
+  }
+
+  function handleDeleteTask(taskId) {
+    dispatch({
+      type: 'deleted',
+      id: taskId,
+    });
+  }
+
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        <h1>Day off in Kyoto</h1>
+        <AddTask onAddTask={handleAddTask} />
+        <TaskList
+          tasks={tasks}
+          onChangeTask={handleChangeTask}
+          onDeleteTask={handleDeleteTask}
+        />
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+let nextId = 3;
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/TasksContext.js
+import { createContext } from 'react';
+
+export const TasksContext = createContext(null);
+export const TasksDispatchContext = createContext(null);
+```
+
+```js src/AddTask.js
+import { useState } from 'react';
+
+export default function AddTask({ onAddTask }) {
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          onAddTask(text);
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+```
+
+```js src/TaskList.js
+import { useState } from 'react';
+
+export default function TaskList({ tasks, onChangeTask, onDeleteTask }) {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} onChange={onChangeTask} onDelete={onDeleteTask} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task, onChange, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            onChange({
+              ...task,
+              text: e.target.value,
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          onChange({
+            ...task,
+            done: e.target.checked,
+          });
+        }}
+      />
+      {taskContent}
+      <button onClick={() => onDelete(task.id)}>Delete</button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+Il faut enlever les props dans la prochaine étape.
+
+---
+
+## Étape 3: Utiliser le contexte de n'importe où {/* step-3-use-context-anywhere-in-the-tree */}
+
+Plus besoin de passer les données dans les props.
+
+```js {4-5}
+<TasksContext.Provider value={tasks}>
+  <TasksDispatchContext.Provider value={dispatch}>
+    <h1>Day off in Kyoto</h1>
+    <AddTask />
+    <TaskList />
+  </TasksDispatchContext.Provider>
+</TasksContext.Provider>
+```
+
+Si un composant enfant doit obtenir la liste de tâches, il reçoit l'info via le contexte.
+
+```js {2}
+export default function TaskList() {
+  const tasks = useContext(TasksContext);
+  // ...
+```
+
+---
+
+## Mettre à jour en appelant le dispatch
+
+Pour modifier la liste de tâches, un composant peut obtenir la fonction `dispatch` du contexte, et ensuite l'appeler.
+
+```js {3,9-13}
+export default function AddTask() {
+  const [text, setText] = useState('');
+  const dispatch = useContext(TasksDispatchContext);
+  // ...
+  return (
+    // ...
+    <button onClick={() => {
+      setText('');
+      dispatch({
+        type: 'added',
+        id: nextId++,
+        text: text,
+      });
+    }}>Add</button>
+    // ...
+```
+
+---
+
+## Code
+
+**Le composant `TaskApp` ne passe aucun gestionnaire d'événement à `TaskList`, et le `TaskList` n'en passe aucun à `Task`.** Chaque composant obtient les données et dispatch du contexte:
+
+<Sandpack>
+
+```js src/App.js
+import { useReducer } from 'react';
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+import { TasksContext, TasksDispatchContext } from './TasksContext.js';
+
+export default function TaskApp() {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        <h1>Day off in Kyoto</h1>
+        <AddTask />
+        <TaskList />
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/TasksContext.js
+import { createContext } from 'react';
+
+export const TasksContext = createContext(null);
+export const TasksDispatchContext = createContext(null);
+```
+
+```js src/AddTask.js
+import { useState, useContext } from 'react';
+import { TasksDispatchContext } from './TasksContext.js';
+
+export default function AddTask() {
+  const [text, setText] = useState('');
+  const dispatch = useContext(TasksDispatchContext);
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          dispatch({
+            type: 'added',
+            id: nextId++,
+            text: text,
+          });
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+
+let nextId = 3;
+```
+
+```js src/TaskList.js active
+import { useState, useContext } from 'react';
+import { TasksContext, TasksDispatchContext } from './TasksContext.js';
+
+export default function TaskList() {
+  const tasks = useContext(TasksContext);
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useContext(TasksDispatchContext);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            dispatch({
+              type: 'changed',
+              task: {
+                ...task,
+                text: e.target.value,
+              },
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          dispatch({
+            type: 'changed',
+            task: {
+              ...task,
+              done: e.target.checked,
+            },
+          });
+        }}
+      />
+      {taskContent}
+      <button
+        onClick={() => {
+          dispatch({
+            type: 'deleted',
+            id: task.id,
+          });
+        }}
+      >
+        Delete
+      </button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+**Chaque state vit dans le composant `TaskApp`, au top-niveau, géré avec `useReducer`.** Mais les `tasks` and `dispatch` sont disponbles à chaque composant en dessous grâce au contexte.
+
+---
+
+## Déplacer cette stratégie dans un seul fichier {/* moving-all-wiring-into-a-single-file */}
+
+On pourrait alléger les composants ent déplaçant le reducer et le contexte dans un seul fichier. Présentement, `TasksContext.js` contient ces déclarations de contexte.
+
+```js
+import { createContext } from 'react';
+
+export const TasksContext = createContext(null);
+export const TasksDispatchContext = createContext(null);
+```
+
+Ajoutons à ce fichier: déplaçons le réducteur dans ce fichier. Déclarons aussi un nouveau composant `TasksProvider` qui connecte tous les morceaux.
+
+1. Ceci gère l'état avec un réducteur.
+2. Ceci fournit les deux contextes.
+3. Ceci va prendre `children` en tant que prop, pour qu'on puisse lui passer du JSX.
+
+---
+
+## Nouveau composant TaskProvider
+
+```js
+export function TasksProvider({ children }) {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        {children}
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+```
+
+**Ceci enlève la complexité et les détails du composant `TaskApp`**
+
+---
+
+## Mettre le réducteur et le contexte dans un fichier séparé
+
+<Sandpack  >
+
+```js src/App.js
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+import { TasksProvider } from './TasksContext.js';
+
+export default function TaskApp() {
+  return (
+    <TasksProvider>
+      <h1>Day off in Kyoto</h1>
+      <AddTask />
+      <TaskList />
+    </TasksProvider>
+  );
+}
+```
+
+```js src/TasksContext.js
+import { createContext, useReducer } from 'react';
+
+export const TasksContext = createContext(null);
+export const TasksDispatchContext = createContext(null);
+
+export function TasksProvider({ children }) {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        {children}
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/AddTask.js
+import { useState, useContext } from 'react';
+import { TasksDispatchContext } from './TasksContext.js';
+
+export default function AddTask() {
+  const [text, setText] = useState('');
+  const dispatch = useContext(TasksDispatchContext);
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          dispatch({
+            type: 'added',
+            id: nextId++,
+            text: text,
+          });
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+
+let nextId = 3;
+```
+
+```js src/TaskList.js
+import { useState, useContext } from 'react';
+import { TasksContext, TasksDispatchContext } from './TasksContext.js';
+
+export default function TaskList() {
+  const tasks = useContext(TasksContext);
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useContext(TasksDispatchContext);
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            dispatch({
+              type: 'changed',
+              task: {
+                ...task,
+                text: e.target.value,
+              },
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          dispatch({
+            type: 'changed',
+            task: {
+              ...task,
+              done: e.target.checked,
+            },
+          });
+        }}
+      />
+      {taskContent}
+      <button
+        onClick={() => {
+          dispatch({
+            type: 'deleted',
+            id: task.id,
+          });
+        }}
+      >
+        Delete
+      </button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+---
+
+## Créer des hooks spécialisés
+
+On recommande d'exporter des fonctions qui exposent le contexte de `TasksContext.js`.
+
+```js
+export function useTasks() {
+  return useContext(TasksContext);
+}
+
+export function useTasksDispatch() {
+  return useContext(TasksDispatchContext);
+}
+```
+
+C'est plus simple de lire le contexte.
+
+```js
+const tasks = useTasks();
+const dispatch = useTasksDispatch();
+```
+
+---
+
+## Un seul fichier pour tout gérer
+
+Tout centraliser ne change pas le comportement. Mais cela permet de découpler les contextes et d'ajouter des fonctionalités. Tout le contexte et le réducteur se trouve dans `TasksContext.js`. Ça garde les autres composants propres et élégants. Certains composants cherchent à gérer les données, et d'autres ne veulent qu'afficher.
+
+<Sandpack>
+
+```js src/App.js
+import AddTask from './AddTask.js';
+import TaskList from './TaskList.js';
+import { TasksProvider } from './TasksContext.js';
+
+export default function TaskApp() {
+  return (
+    <TasksProvider>
+      <h1>Day off in Kyoto</h1>
+      <AddTask />
+      <TaskList />
+    </TasksProvider>
+  );
+}
+```
+
+```js src/TasksContext.js
+import { createContext, useContext, useReducer } from 'react';
+
+const TasksContext = createContext(null);
+
+const TasksDispatchContext = createContext(null);
+
+export function TasksProvider({ children }) {
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTasks);
+
+  return (
+    <TasksContext.Provider value={tasks}>
+      <TasksDispatchContext.Provider value={dispatch}>
+        {children}
+      </TasksDispatchContext.Provider>
+    </TasksContext.Provider>
+  );
+}
+
+export function useTasks() {
+  return useContext(TasksContext);
+}
+
+export function useTasksDispatch() {
+  return useContext(TasksDispatchContext);
+}
+
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case 'added': {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case 'changed': {
+      return tasks.map((t) => {
+        if (t.id === action.task.id) {
+          return action.task;
+        } else {
+          return t;
+        }
+      });
+    }
+    case 'deleted': {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
+
+const initialTasks = [
+  { id: 0, text: 'Philosopher’s Path', done: true },
+  { id: 1, text: 'Visit the temple', done: false },
+  { id: 2, text: 'Drink matcha', done: false },
+];
+```
+
+```js src/AddTask.js
+import { useState } from 'react';
+import { useTasksDispatch } from './TasksContext.js';
+
+export default function AddTask() {
+  const [text, setText] = useState('');
+  const dispatch = useTasksDispatch();
+  return (
+    <>
+      <input
+        placeholder='Add task'
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          setText('');
+          dispatch({
+            type: 'added',
+            id: nextId++,
+            text: text,
+          });
+        }}
+      >
+        Add
+      </button>
+    </>
+  );
+}
+
+let nextId = 3;
+```
+
+```js src/TaskList.js active
+import { useState } from 'react';
+import { useTasks, useTasksDispatch } from './TasksContext.js';
+
+export default function TaskList() {
+  const tasks = useTasks();
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <Task task={task} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Task({ task }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useTasksDispatch();
+  let taskContent;
+  if (isEditing) {
+    taskContent = (
+      <>
+        <input
+          value={task.text}
+          onChange={(e) => {
+            dispatch({
+              type: 'changed',
+              task: {
+                ...task,
+                text: e.target.value,
+              },
+            });
+          }}
+        />
+        <button onClick={() => setIsEditing(false)}>Save</button>
+      </>
+    );
+  } else {
+    taskContent = (
+      <>
+        {task.text}
+        <button onClick={() => setIsEditing(true)}>Edit</button>
+      </>
+    );
+  }
+  return (
+    <label>
+      <input
+        type='checkbox'
+        checked={task.done}
+        onChange={(e) => {
+          dispatch({
+            type: 'changed',
+            task: {
+              ...task,
+              done: e.target.checked,
+            },
+          });
+        }}
+      />
+      {taskContent}
+      <button
+        onClick={() => {
+          dispatch({
+            type: 'deleted',
+            id: task.id,
+          });
+        }}
+      >
+        Delete
+      </button>
+    </label>
+  );
+}
+```
+
+```css
+button {
+  margin: 5px;
+}
+li {
+  list-style-type: none;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+```
+
+</Sandpack>
+
+- `TasksProvider` fournit les structures pour diffuser les tâches dans l'arborescence
+- `useTasks` permet de lire les tâches
+- `useTasksDispatch` permet la mise à jour des tâches
+
+---
+
+## Note
+
+`useTasks` et `useTasksDispatch` sont des _[Custom Hooks (Hooks personalisés).]_
+
+Une fonction est un hook personalisé quand son nom commence débute par `use`.
+
+Un hook personalisé permet d'appeler d'autres hooks, tel que useContext.
+
+---
+
+À mesure que notre app évolue, elle développera différentes paires de contexte-réducteur. C'est une façon puissante de remonter l'état et de dffuser le contexte à tous les autres composants.
+
+---
+
+## Révision
+
+- On peut combiner réducteur et contexte. Cela permet aux composants enfants de lire et modifier un état qui se trouve plus haut dans l'arborescence.
+- On fournit un état et un dispatch que l'on partage aux composants enfants
+  1. on créé 2 contextes (un pour l'état, l'autre pour le dispatch)
+  2. On fournit ces contextes au composant qui utilise le réducteur
+  3. On utilise ce contexte dans les composants enfants
+- On peut réduire la taille des composants en déplaçant du code dans d'autres composants.
+  - On créé un composant `TaskProvider` qui fournit le contexte
+  - On créé un Hook personalisé `useTasks` et `useTasksDispatch` pour lire ce contexte
+- Il peut avoir plusieurs paires de contexte-réducteur dans une application.

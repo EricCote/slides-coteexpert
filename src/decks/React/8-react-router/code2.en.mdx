@@ -4,9 +4,9 @@
 
 ```jsx src/App.js active
 import Menu from './Menu';
-import Route, { AllRoutes } from './Route';
+import Router, { AllRoutes } from './Route';
 
-//todo: in the returned data, replace the "AllRoutes" with a single "Route"
+//todo: in the returned data, replace the "AllRoutes" with the filtering "Router"
 
 //the problem here: when we click on the menu,
 //the browser loads our app again, instead of hiding/showing
@@ -30,9 +30,8 @@ import Home from './Home';
 import News from './News';
 import Contact from './Contact';
 
-export default function Route({ page }) {
-  // Routes are managed here.
-  // Note that /about will do a 404.
+export default function Router({ page }) {
+  // Only one single page will show
   switch (page) {
     case '/home':
     case '/':

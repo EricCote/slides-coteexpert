@@ -4,8 +4,12 @@
 
 ```jsx src/App.js active
 import { useEffect, useState } from 'react';
+import { Router, Route } from './Route';
 import Menu from './Menu';
-import Route from './Route';
+
+import Home from './Home';
+import News from './News';
+import Contact from './Contact';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(window.location.pathname);
@@ -33,30 +37,31 @@ export default function App() {
   return (
     <>
       <Menu active={currentPage} />
-      <Route page={currentPage} />
+      <Router page={currentPage}>
+        <Route path='/' element={<Home />} />
+        <Route path='/home' element={<Home />} />
+        <Route path='/news' element={<News />} />
+        <Route path='/contact' element={<Contact />} />
+        <Route path='*' element={<div>Not found! 404 error</div>} />
+      </Router>
     </>
   );
 }
 ```
 
 ```jsx src/Route.jsx
-import Home from './Home';
-import News from './News';
-import Contact from './Contact';
+//Filter the first child route according to path
+//all other children are hidden
+export function Router({ page, children }) {
+  const [display] = children.filter(
+    (r) => r.props.path === page || r.props.path === '*'
+  );
+  return display;
+}
 
-export default function Route({ page }) {
-  switch (page) {
-    case '/home':
-    case '/':
-    case '':
-      return <Home />;
-    case '/news':
-      return <News />;
-    case '/contact':
-      return <Contact />;
-    default:
-      return <div>404 error</div>;
-  }
+//If we need to show the Route, we display the element
+export function Route({ path, element }) {
+  return element;
 }
 ```
 

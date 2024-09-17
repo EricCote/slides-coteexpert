@@ -23,6 +23,8 @@ type SandpackProps = {
   options?: SandpackOptions;
   files?: object;
   s?: number;
+  tailwind?: boolean;
+  bootstrap?: boolean;
 };
 
 const sandboxStyle = `
@@ -82,6 +84,8 @@ function SandpackRoot(props: SandpackProps) {
     options: myOptions,
     files: additionalFiles,
     s,
+    tailwind = false,
+    bootstrap = false,
     ...rest
   } = props;
   myOptions = myOptions ?? {};
@@ -89,6 +93,20 @@ function SandpackRoot(props: SandpackProps) {
 
   if (s) {
     myOptions = { editorWidthPercentage: s, ...myOptions };
+  }
+  if (tailwind) {
+    myOptions = {
+      externalResources: ['https://cdn.tailwindcss.com'],
+      ...myOptions,
+    };
+  }
+  if (bootstrap) {
+    myOptions = {
+      externalResources: [
+        'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css',
+      ],
+      ...myOptions,
+    };
   }
   myOptions! = {
     // codeEditor: { extensions: [lintExtensions] },

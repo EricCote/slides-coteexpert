@@ -3,3 +3,585 @@ title: Formulaires en React
 description: Gérer des fomulaires en React
 language: fr
 ---
+
+# Forms
+
+#### Par Éric Côté
+
+---
+
+## Formulaire avec React
+
+Ici, les `<input>` sont **non-controllés** par les props passés
+
+<Sandpack >
+
+```js
+export default function App() {
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input type='text' name='fname' placeholder='' required />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Composants controllés (sans modifs)
+
+Ici chaque composant `<input>` est controllé par la `value` passée par prop. La console retourne un message d'erreur car on ne tente pas de changer la prop `value` quand on tape sur le clavier.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [firstName, setFirstName] = useState('Bob');
+  let [email, setEmail] = useState('bob@meta.com');
+
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder=''
+              value={firstName}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              value={email}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Valeur par défaut
+
+On utilise `defaultValue` pour générer la valeur initiale. Ce sont des composants non-controlés.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [firstName, setFirstName] = useState('Bob');
+  let [email, setEmail] = useState('bob@meta.com');
+
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder=''
+              defaultValue={firstName}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              defaultValue={email}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Read-only
+
+On utilise `readOnly` pour indiquer que c'est normal qu'un composant controllé (par ses props) ne gère pas les changements.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [firstName, setFirstName] = useState('Bob');
+  let [email, setEmail] = useState('bob@meta.com');
+
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder=''
+              value={firstName}
+              readOnly
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              value={email}
+              readOnly
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Gestion du onChange
+
+On utilise le gestionnaire d'événement `onChange` pour mettre à jour l'état, ce qui génère un re-rendu et qui affiche enfin les changements.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [firstName, setFirstName] = useState('');
+  let [email, setEmail] = useState('');
+
+  function nameChange(e) {
+    setFirstName(e.target.value);
+  }
+
+  function emailChange(e) {
+    setEmail(e.target.value);
+  }
+
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder='name'
+              value={firstName}
+              onChange={nameChange}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              value={email}
+              onChange={emailChange}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Gestion du onChange par fonctions inline
+
+Si le formulaire possède beaucoup de `<input>`, on pourrait utiliser des fonctions à la volée (inline) pour réduire la taille du code.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [firstName, setFirstName] = useState('');
+  let [email, setEmail] = useState('');
+
+  function submit(evt) {
+    evt.preventDefault();
+    const formData = new FormData(evt.currentTarget);
+    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder='name'
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Un seul state
+
+Si le formulaire possède beaucoup de `<input>`, on pourrait rassembler ces champs dans un seul état.
+
+<Sandpack >
+
+```js
+import { useState } from 'react';
+
+export default function App() {
+  const [myForm, setMyForm] = useState({ fname: '', email: '' });
+
+  function formChangeHandler(e) {
+    setMyForm({ ...myForm, [e.target.name]: e.target.value });
+  }
+
+  function submit(evt) {
+    evt.preventDefault();
+    alert(`Sending : ${JSON.stringify(myForm)}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder='name'
+              value={myForm.fname}
+              onChange={formChangeHandler}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              value={myForm.email}
+              onChange={formChangeHandler}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+import Refs from './9-forms/ref-values.fr.mdx';
+
+<Refs components={props.components} />
+
+---
+
+import Refs2 from './9-forms/ref-dom.fr.mdx';
+
+<Refs2 components={props.components} />
+
+---
+
+## Lire la valeur d'un composant non-controllé.
+
+Il est possible de lire la valeur d'un composant non-controllé via une ref.
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function App() {
+  const fnameRef = useRef();
+  const emailRef = useRef();
+
+  function submit(evt) {
+    evt.preventDefault();
+    const data = {
+      fname: nameRef.current.value,
+      email: emailRef.current.value,
+    };
+    alert(`Sending : ${JSON.stringify(data)}`);
+  }
+
+  return (
+    <div>
+      <h1>Form</h1>
+      <p>This is a short form to fill out.</p>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+        }}
+      >
+        <div>
+          <label htmlFor='fname'>
+            First Name: <br />
+            <input
+              type='text'
+              name='fname'
+              placeholder='name'
+              ref={fnameRef}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label htmlFor='email'>
+            Email address: <br />
+            <input
+              type='email'
+              name='email'
+              placeholder='email@example.com'
+              ref={emailRef}
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <button type='submit'>Submit</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Valider les données d'un formulaire
+
+- Il est possible de valider par notre propre code, sur l'événement du `onSubmit`, ou sur les événements `onChange`
+- Alternative: utiliser une bibliothèque pour les validations
+- Simplifie le code à générer
+  - React Hook Form
+  - tanStack Form
+  - Formik
+  - zod
+  - yup
+
+---

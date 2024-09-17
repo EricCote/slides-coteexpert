@@ -40,6 +40,10 @@ const router = createBrowserRouter([
         path: 'contact',
         lazy: () => import('./Contact.jsx'),
       },
+      {
+        path: '*',
+        element: <div>Not Found! Error 404</div>,
+      },
     ],
   },
 ]);
@@ -61,13 +65,14 @@ export function ErrorBoundary() {
 ```jsx src/Layout.jsx
 import Menu from './Menu.jsx';
 import { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigation } from 'react-router-dom';
 
 export default function Layout() {
+  const nav = useNavigation();
   return (
     <>
       <Menu />
-      <Outlet />
+      {nav.state == 'loading' ? 'loading' : <Outlet />}
     </>
   );
 }

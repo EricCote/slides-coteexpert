@@ -1,0 +1,469 @@
+---
+title: 'Referencing Values with Refs'
+---
+
+# Refs
+
+---
+
+## C'est quoi une ref
+
+Si on veut persister une information, sans déclancher de nouveaux rendus au changement, on doit utiliser une **ref**
+
+---
+
+## Ajouter ref aux composants
+
+Importer `useRef`:
+
+```js
+import { useRef } from 'react';
+```
+
+`useRef` prend une valeur initiale comme argument:
+
+```js
+const ref = useRef(0);
+```
+
+`useRef` retourne un objet:
+
+```js
+{
+  current: 0; // la valeur passée à useRef
+}
+```
+
+On peut muter `ref.current` comme on veut.
+
+---
+
+## Exemple d'un incrémenteur
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function Counter() {
+  let ref = useRef(0);
+
+  function handleClick() {
+    ref.current = ref.current + 1;
+    alert('You clicked ' + ref.current + ' times!');
+  }
+
+  return <button onClick={handleClick}>Click me!</button>;
+}
+```
+
+</Sandpack>
+
+---
+
+## Ref est flexible
+
+- ref stocke n'importe quoi: nombre, string, objet, ou même une fonction.
+- On peut modifier ou muter n'importe quel objet dans `ref.current`. (Différent de l'état)
+- Ref ne provoque **aucun re-rendu**. (Différent de l'état)
+- On peut utiliser ref et état dans le même composant.
+
+---
+
+## Exemple du chrono
+
+On calcule le temps ici via un `setInterval`. Pour que ça affiche les changements à chaque 10 ms, l'état stocke les secondes dans `now, setNow`.
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Stopwatch() {
+  const [startTime, setStartTime] = useState(null);
+  const [now, setNow] = useState(null);
+
+  function handleStart() {
+    // Start counting.
+    setStartTime(Date.now());
+    setNow(Date.now());
+
+    setInterval(() => {
+      // Update the current time every 10ms.
+      setNow(Date.now());
+    }, 10);
+  }
+
+  let secondsPassed = 0;
+  if (startTime != null && now != null) {
+    secondsPassed = (now - startTime) / 1000;
+  }
+
+  return (
+    <>
+      <h1>Time passed: {secondsPassed.toFixed(3)}</h1>
+      <button onClick={handleStart}>Start</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Gérer le "Stop"
+
+Pour annuler le `setInterval`, il faut un `clearInterval` avec le paramètre intervalID. Puisque cette donnée n'est pas utilisée dans le rendu, on la conserve dans une **ref**.
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+
+export default function Stopwatch() {
+  const [startTime, setStartTime] = useState(null);
+  const [now, setNow] = useState(null);
+  const intervalRef = useRef(null);
+
+  function handleStart() {
+    setStartTime(Date.now());
+    setNow(Date.now());
+
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setNow(Date.now());
+    }, 10);
+  }
+
+  function handleStop() {
+    clearInterval(intervalRef.current);
+  }
+
+  let secondsPassed = 0;
+  if (startTime != null && now != null) {
+    secondsPassed = (now - startTime) / 1000;
+  }
+
+  return (
+    <>
+      <h1>Time passed: {secondsPassed.toFixed(3)}</h1>
+      <button onClick={handleStart}>Start</button>
+      <button onClick={handleStop}>Stop</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Différences entre refs et l'état
+
+Ref est plus permissif que l'utilisation d'états. On peut muter ref comme on veut. Mais l'état est plus utile et plus fréquent.
+
+| refs                                                                | state                                                                                    |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `useRef(initialValue)` retourne <br /> `{ current: initialValue }`  | `useState(initialValue)` retourne <br /> `[value, setValue]`                             |
+| Ne provoque pas de re-rendu                                         | Provoque un re-rendu à la modification                                                   |
+| On peut modifier et muter la valeur de `current` comme on le veut.  | "Immuable", il faut utiliser la fonction `setState` pour modifier et céduler un re-rendu |
+| Pas besoin de lire (ou écrire) la valeur `current` pendant le rendu | On peut lire l'état. Chaque rendu est un snapshot de l'état qui ne change pas.           |
+
+---
+
+## Comparaison: État
+
+Compteur utilisant l'état
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+  }
+
+  return <button onClick={handleClick}>You clicked {count} times</button>;
+}
+```
+
+</Sandpack>
+
+setCount provoque un re-rendu, ce qui permet d'afficher la nouvelle valeur de l'état `count`.
+
+---
+
+## Comparaison: Ref
+
+Pas de re-rendu au changement
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function Counter() {
+  let countRef = useRef(0);
+
+  function handleClick() {
+    // This doesn't re-render the component!
+    countRef.current = countRef.current + 1;
+  }
+
+  return (
+    <button onClick={handleClick}>You clicked {countRef.current} times</button>
+  );
+}
+```
+
+</Sandpack>
+
+Lire `ref.current` pendant le rendu n'est pas très fiable. L'état est plus fiable.
+
+---
+
+## Comment useRef fonctionne
+
+`useRef` est stocké de façon similaire à `useState`. Ça pourrait ressembler à ceci:
+
+```js
+// Inside of React
+function useRef(initialValue) {
+  const [ref, unused] = useState({ current: initialValue });
+  return ref;
+}
+```
+
+Au premier rendu, `useRef` retourne `{ current: initialValue }`. Cet objet est stocké par React. Au prochain rendu, le même objet est retourné. Pas besoin de `setRef` car c'est **toujours le même objet retourné** pour chaque rendu.
+
+React n'utilise pas rééllement d'état dans le code de `useRef`, mais le modèle n'est pas mauvais: c'est comme un state sans `setState`.
+
+---
+
+## Quand utiliser les refs
+
+On utilise un ref quand il faut iteragir avec des système externes à React: des API du navigateur, des bibliothèques de calcul, des éléments qui n'affectent pas l'affichage d'un composant.
+
+Exemples:
+
+- Stocker un timeoutID de `setTimeout`
+- Stocker et manipuler un élément du DOM
+- Stocker des données qui ne sont pas utilisées pour la génération du JSX
+
+---
+
+## Bonnes pratiques
+
+- **Traiter les ref comme une échappatoire** C'est utile pour travailler avec les systèmes externes ou les API du navigateur. Mais si on se fie trop sur les refs, il faut repenser à notre approche utilisée.
+- **Ne pas lire ou écrire `ref.current` pendant le rendu** Si on doit afficher une info, l'état est préférable. React ne peut détecter quand `ref.current` est modifié, l'utiliser dans un rendu signifie que les changements ne seront pas affichés. (Il y a des exceptions, tel que `if (!ref.current) ref.current = new Thing()` qui initialise le ref au premier rendu.)
+
+Les refs n'ont pas les mêmes restrictions que l'état. Par exemple, l'état considère que chaque rendu est un snapshot d'information (pas de mutation), et que les mises à jour sont cédulées.
+
+Sur un ref, les modification et mutations sont immédiates
+
+```js
+ref.current = 5;
+console.log(ref.current); // 5
+```
+
+**Une ref est un simple objet JavaScript** et il se comporte comme tel. Pas besoin d'éviter les mutations.
+
+Si un objet n'est pas utilisé dans un rendu, React se fiche des modifications ou mutations de celui-ci
+
+---
+
+## Ref et le DOM
+
+Une ref peut contenir n'importe quoi. Un scénario fréquent, c'est d'utiliser la ref pour accéder à un élément du DOM. Par exemple, indiquer au navigateur où mettre le curseur d'insertion (focus). En utilisant l'attribut ref en JSX, `<div ref={myRef}>`, react va exposer l'élément DOM via `myRef.current`. Quand l'élément est éliminé du DOM, `myRef.current` est alors modifié à `null`
+
+---
+
+## Résumé
+
+- Les refs sont un échappatoire pour contenir des valeur qui ne sont pas utilisées dans le rendu.
+- On utilise plus l'état que les refs
+- In ref est un simple objet JavaScript object avec une seule propriété nommée current, que l'on peut lire ou écrire
+  -React génère une ref grâce au Hook `useRef`
+- ref persiste des informations du composant entre les re-rendus (similaire à l'état).
+- Modifier la valeur `current` d'un ref ne déclanche pas de re-rendu. (différent de l'état)
+- Ne pas utiliser `ref.current` pendant le rendu. React ne génère pas son re-rendu
+
+---
+
+## Défi: réparer le clavardage
+
+Quand on tape un message et "Send", il y a un délai de 3 secondes, pendant lequel on peut cliquer "Undo". Undo annule le message grâce à un ClearTimeout. Mais ca ne fonctionne pas car "Sent" apparait après "Undo"
+
+<Hint>
+  Les variables telles que `let timeoutID` ne survivent pas entre les re-rendus.
+  Il faut un mécanisme pour que le timeoutID persiste.
+</Hint>
+
+<Sandpack>
+
+```js
+import { useState } from 'react';
+
+export default function Chat() {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  let timeoutID = null;
+
+  function handleSend() {
+    setIsSending(true);
+    timeoutID = setTimeout(() => {
+      alert('Sent!');
+      setIsSending(false);
+    }, 3000);
+  }
+
+  function handleUndo() {
+    setIsSending(false);
+    clearTimeout(timeoutID);
+  }
+
+  return (
+    <>
+      <input
+        disabled={isSending}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <button disabled={isSending} onClick={handleSend}>
+        {isSending ? 'Sending...' : 'Send'}
+      </button>
+      {isSending && <button onClick={handleUndo}>Undo</button>}
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi: Le composant ne fait pas de re-rendu
+
+Ce bouton doit basculer entre "on" et "off". Mais il montre toujours "Off". Quel est le problème?
+
+<Sandpack>
+
+```js
+import { useRef } from 'react';
+
+export default function Toggle() {
+  const isOnRef = useRef(false);
+
+  return (
+    <button
+      onClick={() => {
+        isOnRef.current = !isOnRef.current;
+      }}
+    >
+      {isOnRef.current ? 'On' : 'Off'}
+    </button>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi: Réparer l'antirebond
+
+Dens cet exmple, tous les gestionnaires d'événements ont un filtre antirebond (debouncing). Un message n'apparait qu'après une seconde sans autre clic. À chaque clic, on réinitialise le délai.
+
+Ici, si on clique le premier suivi du second bouton, on ne voit que le message du second bouton. On perd le premier message. Il faut éliminer l'interférence.
+
+<Hint>
+
+Le timeoutID est partagé dans `DebouncedButton`. Il faut isoler le timeoutID pour chaque bouton.
+
+</Hint>
+
+<Sandpack>
+
+```js
+let timeoutID;
+
+function DebouncedButton({ onClick, children }) {
+  return (
+    <button
+      onClick={() => {
+        clearTimeout(timeoutID);
+        timeoutID = setTimeout(() => {
+          onClick();
+        }, 1000);
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <>
+      <DebouncedButton onClick={() => alert('Spaceship launched!')}>
+        Launch the spaceship
+      </DebouncedButton>
+      <DebouncedButton onClick={() => alert('Soup boiled!')}>
+        Boil the soup
+      </DebouncedButton>
+      <DebouncedButton onClick={() => alert('Lullaby sung!')}>
+        Sing a lullaby
+      </DebouncedButton>
+    </>
+  );
+}
+```
+
+```css
+button {
+  display: block;
+  margin: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Défi: Lire le dernier état
+
+Il y a un délai après avoir cliqué "Send". Si on tape "bonjour", suivi de "send" et on modifie ensuite le message, l'alerte affiche l'ancienne valeur, celle du moment où on a cliqué "Send".
+
+C'est un comportement souhaitable pour la plupart des Apps. Mais si on préfère que l'App affiche la dernière version du message, que faire?
+
+<Sandpack>
+
+```js
+import { useState, useRef } from 'react';
+
+export default function Chat() {
+  const [text, setText] = useState('');
+
+  function handleSend() {
+    setTimeout(() => {
+      alert('Sending: ' + text);
+    }, 3000);
+  }
+
+  return (
+    <>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={handleSend}>Send</button>
+    </>
+  );
+}
+```
+
+</Sandpack>
+
+---

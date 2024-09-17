@@ -38,7 +38,7 @@ DiagramProps) {
     <figure className='flex flex-col px-0 p-0 sm:p-10 first:mt-0 mt-10 sm:mt-0 justify-center items-center'>
       <div className='dark-image'>
         <img
-          src={`/images/docs/diagrams/${name}.dark.png`}
+          src={`/img/docs/diagrams/${name}.dark.png`}
           alt={alt}
           height={height}
           width={width}
@@ -46,7 +46,7 @@ DiagramProps) {
       </div>
       <div className='light-image'>
         <img
-          src={`/images/docs/diagrams/${name}.png`}
+          src={`/img/docs/diagrams/${name}.png`}
           alt={alt}
           height={height}
           width={width}
