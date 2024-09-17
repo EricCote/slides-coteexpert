@@ -6,14 +6,14 @@
     "route": "aspnetwebapi",
     "title": "ASP.NET Web API",
     "description": "Formation ASP.NET Web API",
-    "language": "fr",
+    "language": "es",
     "filename": "aspnetwebapi.fr.mdx"
   },
   {
     "route": "blazor",
     "title": "Blazor",
     "description": "Formation Blazor 2024",
-    "language": "fr",
+    "language": "es",
     "filename": "blazor.fr.mdx"
   },
   {
