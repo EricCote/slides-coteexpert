@@ -173,23 +173,35 @@ pre [data-line] {
   padding: 0 0.5rem;
 }
 
-pre [data-line]:hover {
-  background-color: rgb(191, 208, 163);
+code[data-theme*=' '],
+code[data-theme*=' '] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }
 
-pre [data-line]:hover span {
-  background-color: rgb(191, 208, 163);
+[data-bs-theme='dark'] code[data-theme*=' '],
+[data-bs-theme='dark'] code[data-theme*=' '] span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }
 
-[data-bs-theme='dark'] pre [data-line]:hover {
-  background-color: rgb(50, 62, 31);
+span[data-line]:hover,
+span[data-line]:hover > span {
+  background-color: rgb(191, 208, 163) !important;
 }
 
-[data-bs-theme='dark'] pre [data-line]:hover span {
-  background-color: rgb(50, 62, 31);
+[data-bs-theme='dark'] span[data-line]:hover,
+[data-bs-theme='dark'] span[data-line]:hover > span {
+  background-color: rgb(50, 62, 31) !important;
 }
 
-pre [data-highlighted-line] {
+code span[data-highlighted-line],
+code span[data-highlighted-line] span {
+  background-color: #e3e3e3;
+}
+
+[data-bs-theme='dark'] code span[data-highlighted-line],
+[data-bs-theme='dark'] code span[data-highlighted-line] span {
   background-color: darkslategray;
 }
 
@@ -215,18 +227,6 @@ code[data-line-numbers-max-digits='2'] > [data-line]::before {
 
 code[data-line-numbers-max-digits='3'] > [data-line]::before {
   width: 3rem;
-}
-
-code[data-theme*=' '],
-code[data-theme*=' '] span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
-}
-
-[data-bs-theme='dark'] code[data-theme*=' '],
-[data-bs-theme='dark'] code[data-theme*=' '] span {
-  color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
 }
 
 /* pre > code {

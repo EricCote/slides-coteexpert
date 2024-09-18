@@ -1474,6 +1474,114 @@ des éléments. Ceci permet à React de mieux comprendre ce qui a été modifié
 
 ---
 
+## Performance sans clés (modification optimale)
+
+Imaginons un ajout dans une liste JSX, à la toute fin:
+
+<TwoColumns top> 
+<div>
+#### Avant
+```js
+<ul>
+  <li>Bob</li>
+  <li>Amy<li>
+  <li>Joe</li>
+  <li>Mary</li>
+</ul>
+```
+</div>
+<div>
+#### Après
+```js {6}
+<ul>
+  <li>Bob</li>
+  <li>Amy<li>
+  <li>Joe</li>
+  <li>Mary</li>
+  <li>Bill</li>
+</ul>
+```
+</div>
+</TwoColumns>
+
+Dans la phase commit, on compare par position. Toutes les positions sont identiques sauf la dernière. Il suffit simplement d'ajouter le `<li>` avec Bill. La réconciliation est optimale, car on ne touche pas beaucoup au DOM.
+
+---
+
+## Perfomance sans clés (modification difficile)
+
+Maintenant, imaginons un ajout dans une liste JSX, mais **au tout début**:
+
+<TwoColumns top> 
+<div>
+#### Avant
+```js
+<ul>
+  <li>Bob</li>
+  <li>Amy<li>
+  <li>Joe</li>
+  <li>Mary</li>
+  <li>Bill</li>
+</ul>
+```
+</div>
+<div>
+#### Après
+```js {2-7}
+<ul>
+  <li>Luke</li>
+  <li>Bob</li>
+  <li>Amy<li>
+  <li>Joe</li>
+  <li>Mary</li>
+  <li>Bill</li>
+</ul>
+```
+</div>
+</TwoColumns>
+
+Dans la phase commit, on compare par position. Il faut modifier tous les `<li>`, et ensuite ajouter un élément à la fin. C'est pas optimal, et tous les éléments sont regénérés dans le DOM.
+
+---
+
+## Perfomance avec clés
+
+Même scénario, un ajout au début, mais **avec des clés**:
+
+<TwoColumns top> 
+<div>
+#### Avant
+```js
+<ul>
+  <li key={7} >Bob</li>
+  <li key={4} >Amy<li>
+  <li key={5} >Joe</li>
+  <li key={1} >Mary</li>
+  <li key={3} >Bill</li>
+</ul>
+```
+</div>
+<div>
+#### Après
+```js {2}
+<ul>
+  <li key={9} >Luke</li>
+  <li key={7} >Bob</li>
+  <li key={4} >Amy<li>
+  <li key={5} >Joe</li>
+  <li key={1} >Mary</li>
+  <li key={3} >Bill</li>
+</ul>
+```
+</div>
+</TwoColumns>
+
+Dans la phase commit, on compare par clé. Il suffit d'ajouter l'élément identifié par la clé `{9}`, toutes les autres clés demeurent identiques.
+
+Ce gain de performance avec clés est clair quand on ajoute, quand on enlève, quand on trie, quand on filtre, etc.
+
+---
+
 ## D'où proviennent les clés
 
 1. Prendre la clé de la base de données quand les données proviennent d'une BD
