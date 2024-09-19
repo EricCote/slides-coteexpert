@@ -1,28 +1,48 @@
-## Gérer l'état du chargement dans la prochaine version de React
+## use Hook with caching (v19)
 
 <Sandpack >
+```jsx src/fetchData.js
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+const response = await fetch(url);
+return await response.json();
+}
+
+export function removeFromCache(url) {
+  if (cache.has(url)) {
+    cache.delete(url);
+  }
+}
+```
 
 ```jsx src/App.js active
 import { use, Suspense } from 'react';
 import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
+import { fetchData, removeFromCache } from './fetchData';
+//FetchData is a fetch that uses simple caching.
+//simple but it works
 
-async function getMovies() {
-  const response = await fetch('https://mcuapi.herokuapp.com/api/v1/movies');
-  return response.json();
-}
+const url = 'https://mcuapi.herokuapp.com/api/v1/movies';
 
 export default function App() {
-  //Because there is no caching in this version,
-  //any rerender will trigger a new network call
-  //This is bad
-  const moviePromise = getMovies();
+  const moviePromise = fetchData(url);
   const rerender = useRerender();
 
   return (
     <>
       <h1>MCU Movies</h1>
       <button onClick={rerender}>Force Rerender</button>
+      <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
 
       <Suspense fallback={<div>Loading...</div>}>
         <Movies moviePromise={moviePromise} />
