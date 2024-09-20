@@ -124,12 +124,107 @@ export default function EditData({ firstName, lastName, color, onChange }) {
 
 ---
 
+## Containment
+
+<Sandpack>
+
+```jsx src/App.js
+import { useState } from 'react';
+import GreyBox from './L2Right-GreyBox';
+import BlueBox from './L2Left-BlueBox';
+
+export default function SimpleContainment() {
+  const [person, setPerson] = useState({ firstName: 'John', color: 'blue' });
+  const { firstName, lastName, color } = person;
+
+  function handleChange(evt) {
+    const { name, value } = evt.target;
+    setPerson({ ...person, [name]: value });
+  }
+
+  const displayData = <h1 style={{ color: color }}>The name is {firstName}</h1>;
+
+  const modifyData = (
+    <>
+      <input
+        value={firstName}
+        name='firstName'
+        placeholder='First Name'
+        onChange={handleChange}
+      />
+      {lastName !== undefined && (
+        <input
+          value={lastName}
+          name='lastName'
+          placeholder='Last Name'
+          onChange={handleChange}
+        />
+      )}
+      <input
+        value={color}
+        name='color'
+        placeholder='Color'
+        onChange={handleChange}
+      />
+    </>
+  );
+
+  return (
+    <section style={{ display: 'flex', alignItems: 'stretch', gap: 10 }}>
+      <div>
+        <BlueBox>{displayData}</BlueBox>
+      </div>
+      <div>
+        <GreyBox>{modifyData}</GreyBox>
+      </div>
+    </section>
+  );
+}
+```
+
+```jsx src/L2Left-BlueBox.js
+export default function BlueBox({ children }) {
+  return (
+    <div
+      style={{
+        backgroundColor: 'lightblue',
+        height: '200px',
+        borderRadius: '5px',
+        padding: '5px 20px',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+```jsx src/L2Right-GreyBox.js
+export default function GreyBox({ children }) {
+  return (
+    <div
+      style={{
+        backgroundColor: 'grey',
+        borderRadius: '5px',
+        padding: '5px 20px 20px',
+      }}
+    >
+      <h1>Containment</h1>
+      {children}
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
 ## Contexte
 
 <Sandpack>
 
 ```jsx src/App.js
-/* eslint-disable @typescript-eslint/no-unused-vars  */
 import { useState, memo, useMemo } from 'react';
 import BlueBox from './L2Left-BlueBox';
 import GreyBox from './L2Right-GreyBox';
@@ -140,7 +235,6 @@ export default function SimpleContext() {
     firstName: 'John',
     color: 'red',
   });
-  //const MemoContentHook = useMemo(Content, []);
 
   function handleChange(evt) {
     const { name, value } = evt.target;
@@ -156,7 +250,7 @@ export default function SimpleContext() {
 
 //The following would prevent the content from re-rendering
 //when the props are the same (hint: here they are always the same)
-const MemoContent = memo(Content);
+//const MemoContent = memo(Content);
 
 function Content() {
   //console.log('Rendering Content');
@@ -174,7 +268,6 @@ function Content() {
 ```
 
 ```jsx src/PersonContext.jsx
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createContext } from 'react';
 
 const PersonContext = createContext({
@@ -286,7 +379,6 @@ export default function EditData() {
 <Sandpack>
 
 ```jsx src/App.js
-/* eslint-disable @typescript-eslint/no-unused-vars  */
 import { useState } from 'react';
 import BlueBox from './L2Left-BlueBox';
 import GreyBox from './L2Right-GreyBox';
@@ -320,7 +412,6 @@ function Content() {
 ```
 
 ```jsx src/PersonContext.jsx
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createContext, useState, useContext } from 'react';
 
 const PersonContext = createContext({
