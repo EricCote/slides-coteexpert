@@ -11,7 +11,31 @@ import cat from './15-patterns/cat.jsx';
 
 import display from './15-patterns/displayMouse.jsx';
 
+## Approches architecturales de React
+
+Voici une liste des différentes approches de faire collaborer les composants:
+
+- Composant monolithique (anti-patron)
+- Séparation Top-Down
+
+_Approches classiques_
+
+- Containement (2014)
+- Containement avec array (2014)
+- Composant d'ordre supérieur (2015)
+- Child as function (2015)
+- Render Props (2016)
+
+_Approches Modernes_
+
+- Hooks Personnalisés (2020)
+- Provider avec contexte (2021)
+
+---
+
 ## Composant Monolithique
+
+Ceci est un anti-patron, avec un seul composant qui fait tout: gérer la position de souris, et gérer l'affichage.
 
 <Sandpack  files={{
     "src/Cat.js": cat
@@ -56,6 +80,8 @@ function DisplayMouse() {
 ---
 
 ## Composants top-down
+
+On sépare en deux composants, le composant `<MouseProvider>` pour gérer la position de souris, et le composant `<DisplayMouse>` pour afficher la position.
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -109,6 +135,8 @@ function MouseProvider() {
 
 ## Containment
 
+On passe le composant en tant que children.
+
 <Sandpack  files={{
     "src/Cat.js": cat,
     "src/DisplayMouse.js": display
@@ -159,7 +187,9 @@ function MouseProvider({ children }) {
 
 ---
 
-## Containment avec collection
+On passe plusieurs composants dans `children`, cela génère un tableau `Array`
+
+## Containment avec Array
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -272,6 +302,8 @@ export function addWithAlert(...params) {
 
 ## Higher Order Function (fonction d'ordre supérieur)
 
+Fonction qui prend un paramètre `fn`, et qui retourne une nouvelle fonction enveloppant `fn`.
+
 <Sandpack>
 
 ```js
@@ -324,6 +356,8 @@ export { addWithAlert };
 ---
 
 ## Higher Order Component (Composant d'ordre supérieur)
+
+Fonction qui prend un Composant en paramètre, qui retourne un nouveau Composant qui inclut le composant passé en tant qu'enfant.
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -390,6 +424,8 @@ function withMouse(Component) {
 
 ## Render Props (Function as children)
 
+"Function as Children" est la technique originale pour le render props (2015)
+
 <Sandpack  files={{
     "src/Cat.js": cat,
     "src/DisplayMouse.js": display
@@ -440,6 +476,8 @@ function MouseProvider({ children }) {
 
 ## Render Props (Function as render)
 
+Cette technique est plus récente et plus populaire
+
 <Sandpack  files={{
     "src/Cat.js": cat,
     "src/DisplayMouse.js": display
@@ -479,6 +517,8 @@ function MouseProvider({ render }) {
 ---
 
 ## Custom hook
+
+Cette approche moderne date de 2020.
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -524,6 +564,8 @@ function useMouse() {
 
 ## Custom hook with div
 
+Variation avec un div. Recommandé.
+
 <Sandpack  files={{
     "src/Cat.js": cat,
     "src/DisplayMouse.js": display
@@ -563,6 +605,8 @@ function useMouse() {
 ---
 
 ## Custom Provider Pattern with Context
+
+Approche moderne popularisée en 2022. Recommandée.
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -630,3 +674,5 @@ export { MouseContext, MouseProvider, useMouse };
 ```
 
 </Sandpack>
+
+---
