@@ -24,6 +24,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
+LanguageContext.displayName = 'LanguageContext';
 
 export default function LanguageProvider({
   initialLanguage,

@@ -1,4 +1,5 @@
 //This theme provider adds dark mode to react-bootstrap.
+/* global __DEV__ */
 
 import {
   useState,
@@ -46,6 +47,7 @@ let defaultThemes: ThemeItem[] = [
 ];
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
+ThemeContext.displayName = 'ThemeContext';
 
 //Modifies the html root element
 function modifyDOM(theme: string) {

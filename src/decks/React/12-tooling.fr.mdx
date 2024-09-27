@@ -6,3 +6,229 @@ date: '2024-09-17'
 # Outillage React
 
 ---
+
+## Outil React Dev Tools
+
+- **React Developer Tools** existe depuis 2015
+- Permet de naviguer l'arborescence du DOM Virtuel avec l'explorateur "Component"
+- Permet de mesurer la performance des composants avec le "Profiler"
+- Permet de visualiser les composants re-rendus avec les "Settings" (paramètres)
+
+  <hr />
+
+- D'autres outils existent:
+- React Context DevTool
+- Redux DevTool
+
+---
+
+## Installation
+
+On peut installer les devtools par une extensions de navigateur
+
+- Disponible sur Chrome (Edge, Brave, Opera, etc)
+- Disponible sur Firefox
+- PAS disponible sur Safari
+
+- Il existe une version des devTools que l'on peut ajouter au projet
+- Permet d'ajouter les outils devTools sur le rendu
+
+---
+
+## Icons
+
+<TwoColumns style={{gridTemplateColumns: '0.8fr 6fr'}}>
+  <img
+    src='https://raw.githubusercontent.com/facebook/react/refs/heads/main/packages/react-devtools-extensions/icons/restricted.svg'
+    alt='restricted'
+    style={{marginBottom:'1em'}}
+  />
+
+**Disabled:** React not found, or restricted browser page (ex: new tab or extension page)
+
+<img
+  src='https://raw.githubusercontent.com/facebook/react/refs/heads/main/packages/react-devtools-extensions/icons/production.svg'
+  alt='Production'
+  style={{ marginBottom: '1em' }}
+/>
+
+**Production:** React in prodution mode (Components Tab available)
+
+<img
+  src='https://raw.githubusercontent.com/facebook/react/refs/heads/main/packages/react-devtools-extensions/icons/development.svg'
+  alt='Development'
+  style={{ marginBottom: '1em' }}
+/>
+
+**Development:** React in development mode (Components and Profiler Tabs available)
+
+<img
+  src='https://raw.githubusercontent.com/facebook/react/refs/heads/main/packages/react-devtools-extensions/icons/outdated.svg'
+  alt='Outdated'
+  style={{ marginBottom: '1em' }}
+/>
+
+**Outdated** React version on page is outdated
+
+</TwoColumns>
+
+---
+
+## Tabs
+
+import ButtonIcon from './12-tooling/ButtonIcon.jsx';
+import { AllButtons } from './12-tooling/ButtonIcon.jsx';
+
+import Icon from './12-tooling/Icon.jsx';
+import { AllIcons } from './12-tooling/Icon.jsx';
+
+- React Dev Tools are available in the Browser devTools
+- Two Tabs are added: Components and Profiler
+- Move tabs around by dragging them
+
+<hr />
+
+<AllButtons />
+<hr />
+<AllIcons />
+
+---
+
+## Component tab
+
+#### Visualize the virtual DOM
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='collapsed' />
+  <div>**Collapsed:** child components are hidden</div>
+  <ButtonIcon type='expanded' />
+  <div>**Expanded:** child components are shown</div>
+  <div style={{ height: '3em' }}>&nbsp;</div>
+  <div>**Double-click:** filter search to sub-tree</div>
+</TwoColumns>
+
+#### Search Components
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='search' />
+  <div>**find:** Select an element in the page to find it</div>
+  <Icon type='search' />
+  <div>**search:** Search component with text or /regex/ </div>
+  <ButtonIcon type='down' />
+  <div>**Down:** Scroll to next search result (Enter)</div>
+  <ButtonIcon type='up' />
+  <div>**Up:** Scroll to previous search result (Shift-Enter)</div>
+  <ButtonIcon type='cancel' />
+  <div>**Cancel:** Reset search</div>
+</TwoColumns>
+
+---
+
+## View Component (1/2)
+
+#### Edit Props, State and Hooks
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='copy' />
+  <div>**Copy:** Copy to clipboard the items</div>
+  <div style={{ height: '3em' }}>&nbsp;</div>
+  <div>**Double-click:** Edit Prop, State or Hook</div>
+  <ButtonIcon type='delete' />
+  <div>**Delete:** Delete entry (from array)</div>
+  <Icon type='store-as-global-variable' />
+  <div>**Store as global variable:** using right click</div>
+  <ButtonIcon type='parse-hook-names' />
+  <div>**Parse hook names:** resolve from source code (May be slow)</div>
+
+</TwoColumns>
+
+---
+
+## View components (2/2)
+
+#### Rendered by
+
+Component Call stack (Click to Navigate)
+
+#### Source
+
+Source code filename and line number for the Component
+
+#### Status
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <Icon type='strict-mode-non-compliant' />
+  <div>**Strict Mode Non-Compliant:** This component is not running in StrictMode.</div>
+
+</TwoColumns>
+
+---
+
+## View Component
+
+#### Action Icons
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='editor' />
+  <div>**Editor:** Open in Editor (define editor in settings)</div>
+  <ButtonIcon type='error' />
+  <div>**Error:** Force the selected component into an errored state</div>
+  <ButtonIcon type='suspend' />
+  <div>**Suspend:** Suspend the selected component</div>
+  <ButtonIcon type='view-dom' />
+  <div>**View DOM:** Inspect the matching DOM element</div>
+  <ButtonIcon type='log-data' />
+  <div>**Log data:** Log this component data to the console</div>
+  <ButtonIcon type='view-source' />
+  <div>**View souce:** View source for this element</div>
+</TwoColumns>
+
+---
+
+## Settings
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='settings' />
+  <div>**Settings** there are 4 pages of settings:</div>
+
+</TwoColumns>
+
+<hr />
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <Icon type='settings' />
+  <div>**General settings**</div>
+  <Icon type='bug' />
+  <div>**Debugging**</div>
+  <Icon type='components' />
+  <div>**Components**</div>
+  <Icon type='profiler' />
+  <div>**Profiler** </div>
+</TwoColumns>
+
+---
+
+## <Icon type='settings' size='1em' /> General settings
+
+- Theme (dark, light, auto)
+- Density (compact or comfortable)
+- Dev Tools version (5.3.1)
+- Highlight updates when components render
+  - Very useful, but also invasive
+  - Creates boxes around rendered comopnents
+  - Blue means a render
+  - Yellow means multiple renders per second
+
+---
+
+## <Icon type='bug' size='1em' /> Debugging
+
+- Append component stacks to console warnings and errors
+  - Useful to get where a React message was generated
+- Show inline warnings and errors
+  - Useful to show errors and warnings right in the component view
+- Break on warnings
+  - Will do a js break on errors and warnings.
+  - Need to navigate the call stack to properly use
+- Hide logs during additional invocations in Strict Mode
+  - Do we show the console.log once or twice during first render?
+  - The second render, if shown, will be greyed out...

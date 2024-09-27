@@ -187,9 +187,9 @@ function MouseProvider({ children }) {
 
 ---
 
-On passe plusieurs composants dans `children`, cela génère un tableau `Array`
-
 ## Containment avec Array
+
+On passe plusieurs composants dans `children`, cela génère un tableau `Array`
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -245,9 +245,9 @@ function MouseProvider({ children }) {
 
 - Avant, de parler des **HOC** (Higher Order Components ou _composants d'ordre supérieur_), il faut parler des **HOF** (Higher Order Functions ou _Fonctions d'ordre supérieur_).
 
-- Un HOF, c'est une fonction qui prend un fonction en entrée, et qui retourne retourne une nouvelle fonction
+- Un HOF, c'est une fonction qui prend un fonction en entrée, et qui retourne une nouvelle fonction
 
-- Cette fonction retournée enveloppe ("wrap") la fonctionalité de la fonction d'entrée via composition fonctionnelle
+- Cette fonction retournée enveloppe ("wrap") la fonction d'entrée avec des comportements additionnels
 
 ---
 
@@ -290,7 +290,7 @@ export function addWithAlert(...params) {
   return add(...params);
 }
 
-//The syntax '...params' at the top is called the 'Rest parameters'.
+//The syntax '...params' at the top is called the 'Rest Parameters'.
 //It creates an array from the rest of the parameters
 //The Syntax '...params' at the bottom is called the 'Spread Operator'.
 //It creates separate calling parameters from an array
@@ -476,7 +476,7 @@ function MouseProvider({ children }) {
 
 ## Render Props (Function as render)
 
-Cette technique est plus récente et plus populaire
+Cette technique est plus récente et plus populaire (2016)
 
 <Sandpack  files={{
     "src/Cat.js": cat,
@@ -527,16 +527,23 @@ Cette approche moderne date de 2020.
 >
 
 ```js
-import { useState, useEffect } from 'react';
 import DisplayMouse from './DisplayMouse';
+import useMouse1 from './useMouse1';
+import useMouse2 from './useMouse2';
 //import Cat from './Cat';
 
 export default function ParentRoot() {
-  const mouse = useMouse();
+  const mouse = useMouse1();
   return <DisplayMouse mouse={mouse} />;
 }
+```
 
-function useMouse() {
+```js src/useMouse1.js
+import { useState, useEffect } from 'react';
+
+//This hook uses an Effect to subscribe to a DOM event.
+
+export default function useMouse1() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   function handleMouseMove(evt) {
@@ -552,6 +559,32 @@ function useMouse() {
 
   return mousePos;
 }
+```
+
+```js src/useMouse2.js
+import { useSyncExternalStore } from 'react';
+
+//here, we create a "store" called "moduleMousePos" to be able
+//call useSyncExternalStore
+
+let moduleMousePos = { x: 0, y: 0 };
+
+function subscribe(listener) {
+  function WrapMouseEvent(evt) {
+    moduleMousePos = { x: evt.clientX, y: evt.clientY };
+    listener(evt);
+  }
+
+  window.addEventListener('mousemove', WrapMouseEvent);
+  return () => {
+    window.removeEventListener('mousemove', WrapMouseEvent);
+  };
+}
+
+export default function useMouse2() {
+  const mousePos = useSyncExternalStore(subscribe, () => moduleMousePos);
+  return mousePos;
+}
 
 //Note:
 //1. A custom Hook must start with "use"
@@ -564,7 +597,7 @@ function useMouse() {
 
 ## Custom hook with div
 
-Variation avec un div. Recommandé.
+Variation du hook précédent, qui génère un "moveHandler" pour qu'on puisse l'attacher à un div.
 
 <Sandpack  files={{
     "src/Cat.js": cat,
