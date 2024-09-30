@@ -1,0 +1,53 @@
+---
+Title: Suspense et Erreurs
+---
+
+# Suspense et Erreurs
+
+---
+
+## Gestion des erreurs et des attentes
+
+- Quand il y a une _erreur_ ou une _attente_ (promise), il n'est pas possible d'afficher le résultat du rendu.
+- C'est une mauvaise expérience UX d'avoir un composant qui n'affiche rien
+- On recommande d'ajouter un affichage pour indiquer qu'il y a une erreur ou une attente.
+- Un composant qui ne peut compléter son rendu va aussi interrompre le rendu de son parent.
+- L'interruption remonte jusqu'à ce qu'on rencontre un parent qui intercepte l'erreur ou l'attente
+- Cette interception se fait avec un composant `<ErrorBoundery>` ou `<Suspense>`
+- Plusieurs Frameworks incluent un `<ErrorBoundary>` global
+
+---
+
+## Gérer les attentes via Suspense
+
+- Quand il y a une attente via une _Promise_, React met le rendu en suspend.
+- Cette suspension remonte jusqu'au premier `<Suspense>` trouvé.
+- Si on spécifie une prop `fallback`, on l'affiche tant que la suspension dure
+- Dès que la suspension termine, on génère un nouveau rendu.
+
+---
+
+## wow
+
+<Sandpack  >
+
+```js
+import { useState, useRef, useEffect, memo, useCallback, use } from 'react';
+
+export default function App() {
+  const data = use('wow');
+  return <div>test</div>;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc",
+    "react-scripts": "^5.0.0"
+  }
+}
+```
+
+</Sandpack>

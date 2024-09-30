@@ -94,7 +94,7 @@ import { AllIcons } from './12-tooling/Icon.jsx';
 
 ---
 
-## Component tab
+## Component tab <Icon type='components' size='1em' />
 
 #### Visualize the virtual DOM
 
@@ -107,7 +107,7 @@ import { AllIcons } from './12-tooling/Icon.jsx';
   <div>**Double-click:** filter search to sub-tree</div>
 </TwoColumns>
 
-#### Search Components
+#### Search Components <Icon type='search' size='1em'/>
 
 <TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
   <ButtonIcon type='search' />
@@ -230,5 +230,69 @@ Source code filename and line number for the Component
   - Will do a js break on errors and warnings.
   - Need to navigate the call stack to properly use
 - Hide logs during additional invocations in Strict Mode
-  - Do we show the console.log once or twice during first render?
-  - The second render, if shown, will be greyed out...
+  - Do we show the console.log once, or twice during the first two renders?
+  - If there is a second render, the React Tools will grey out the second `console.log()`
+
+---
+
+## <Icon type='components' size='1em' /> Components
+
+- Expand component tree by default
+  - Shows all components expanded, instead of collapsed
+- Always parse hook names from source (may be slow)
+  - Not necessary to click <ButtonIcon type='parse-hook-names' size='1.5em' /> anymore
+- Open in editor URL
+  - You can specify an url, or VS Code.
+- Hide components when...
+  - Filters can be:
+    - type
+    - name
+    - hoc
+
+---
+
+## <Icon type='profiler' size='1em' /> Profiler settings
+
+- Record why each component rendered while profiling
+  - Shows "Why did this render?" on each component
+  - Usually a change that schedules a re-render: state, reducer, context, syncExternalStore
+  - Has a perf impact (small, but measurable)
+- Hide commits below X ms
+  - Useful when lots of render events and you want to filter the insignificant ones
+
+---
+
+## Profiler Tab <Icon type='profiler' size='1em' />
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <ButtonIcon type='record' />
+  <div>**Record:** Start/Stop Profiling</div>
+  <ButtonIcon type='reload' />
+  <div>**Reload:** Reload and start profiling</div>
+  <ButtonIcon type='clear' />
+  <div>**Clear:** Clear profiling data</div>
+  <ButtonIcon type='import' />
+  <div>**Import:** Load profile</div>
+  <ButtonIcon type='export' />
+  <div>**Export:** Save profile</div>
+</TwoColumns>
+<hr />
+
+<TwoColumns style={{ gridTemplateColumns: '0.4fr 6fr' }}>
+  <Icon type='flame-chart' />
+  <div>**Flamegraph:** Flamegraph Chart</div>
+  <Icon type='ranked-chart' />
+  <div>**Ranked:** Ranked Chart</div>
+  <Icon type='timeline' />
+  <div>**Timeline:** Timeline of the actions</div>
+</TwoColumns>
+
+---
+
+## Chart
+
+- Click to "zoom" in the component
+- Blue areas are slow because of children components
+- Yellow areas are slow because of the component itself
+- Grey areas are not rendered
+- You can compare the render time of each commit event

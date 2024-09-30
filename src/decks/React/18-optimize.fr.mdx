@@ -1,0 +1,347 @@
+---
+Title: Optimisation
+---
+
+import nameGen from './18-optimize/nameGen.js';
+
+# Optimisation et performance
+
+---
+
+## Optimisation
+
+Il y a plusieurs approches pour optimiser la performace des applications React.
+
+- Utiliser le mode "production" plutôt que "développement"
+- Utiliser les bonnes pratiques du web
+- Réduire le nombre de rendus nécessaires
+
+---
+
+## Mode Prduction
+
+- Le mode Production est plus performant
+- On minifie le code
+- On élimine le code non-nécessaire (tree-shaking)
+- React réduit le nombre de 'warnings' envoyés à la console
+- React désactive le `StrictMode`
+  - Le `StrictMode`génère deux rendus la première fois qu'un composant apparait
+    <hr />
+
+---
+
+## Bonnes pratiques du web
+
+- Réduire la taille du téléchargement
+  - Utiliser le bon type d'image (jpeg, png, web, svg)
+  - Uiliser la bonne taille d'image
+  - Ne conserver que les classes CSS nécessaires
+  - Activer la compression GZIP sur http
+
+---
+
+## Bonne pratiques REACT
+
+- Permettre de pré-générer le html sur le serveur
+- Permet d'éviter le phénomème de la page blanche
+
+- Client-Side Rendering (CSR) génère le html sur le navigateur
+- Static-Side Generation (SSG) pré-génère le html au moment du build
+- Server-Side Rendering (SSR) génère le html sur le serveur au moment de la requête
+- Modèles hybrides, certaines pages sont SSG et d'autres sont SSR
+
+---
+
+## Réduire le nombre de composants rendus
+
+- Utiliser des formulaires avec des composants "non-controllés"
+  - Les composants "controllés" sont gérés par des props et state
+  - Il faut céduler un rendu pour qu'un composant controllé puisse afficher sa modification
+  - Le composant non-controllé n'a pas besoin de React pour réagir
+- Optimiser le rendu des listes
+  - Ne pas oublier d'utiliser `key`
+- Virtualiser les longues listes
+  - Permet d'afficher qu'un petit fragment d'une longue liste
+  - Ex: React-Window et React-Virtualized
+- **Memoization**: Sauter le rendu des composants quand les propriétés ne changent pas
+  - On conserve le résultat d'un rendu pour un ensemble de props
+  - Quand on rappelle le même rendu à nouveau
+    - On recycle le _Virtual DOM_ précédent
+    - Sinon, on regénère des nouveau éléments dans le _Virtual DOM_
+
+---
+
+## Composants controllés
+
+<Sandpack>
+
+```js
+import { useState, useRef, useEffect } from 'react';
+
+export default function App() {
+  const [name, setName] = useState('Controlled');
+  const myRef = useRef();
+
+  useEffect(() => {
+    document.body.style.backgroundColor = rndColor();
+  }); //runs after every render
+
+  return (
+    <div>
+      <label>
+        Controlled input:{' '}
+        <input value={name} onChange={(e) => setName(e.target.value)} />
+      </label>
+
+      <label>
+        Uncontrolled input: <input ref={myRef} defaultValue='Uncontrolled' />
+      </label>
+
+      <button
+        onClick={() =>
+          alert(`
+    controlled: ${name}
+    uncontrolled: ${myRef.current.value}
+    `)
+        }
+      >
+        Display
+      </button>
+    </div>
+  );
+}
+
+function rndColor() {
+  return `rgb(${rndNb()}, ${rndNb()}, ${rndNb()})`;
+}
+
+function rndNb() {
+  return Math.floor(Math.random() * 128 + 128);
+}
+```
+
+```css
+div {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+
+button {
+  margin-right: auto;
+}
+```
+
+</Sandpack>
+
+---
+
+## Liste avec "memoization"
+
+<Sandpack  files={{'src/nameGen.js': nameGen}}>
+
+```js
+import { useState, useRef, useEffect, memo } from 'react';
+import { getRandomName } from './nameGen';
+
+const initialList = ['Bob', 'Mary', 'Joe'];
+
+export default function App() {
+  const [authors, setAuthors] = useState(initialList);
+  const insertNameRef = useRef();
+
+  return (
+    <div>
+      <label>
+        Name: <input ref={insertNameRef} defaultValue={getRandomName()} />
+      </label>
+      <button
+        onClick={() => {
+          setAuthors([insertNameRef.current.value, ...authors]);
+          insertNameRef.current.value = getRandomName();
+        }}
+      >
+        Insert at beginning
+      </button>
+      <button
+        onClick={() => {
+          setAuthors([...authors, insertNameRef.current.value]);
+          insertNameRef.current.value = getRandomName();
+        }}
+      >
+        Insert at end
+      </button>
+      <table>
+        <tbody>
+          {authors.map((a) => (
+            <Author name={a} key={a} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+//Memoize Person
+//When we call Author with the same props (name),
+//then no need to render,
+//just return the previous output
+//----------------------------------
+//if different props, then render Person
+//and memoize it for the next time
+const Author = memo(Person);
+
+function Person({ name }) {
+  //slow down rendering for dev tools
+  //with console.log
+  console.log(name);
+  return (
+    <tr>
+      <td>{name}</td>
+    </tr>
+  );
+}
+```
+
+```css
+div {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+
+button {
+  margin-right: auto;
+}
+```
+
+</Sandpack>
+
+<br />À tester avec Dev tools:
+
+- Avec et sans `Memoization`
+- Avec et sans `key`
+
+---
+
+## Liste avec useCallback
+
+<Sandpack  files={{'src/nameGen.js': nameGen}}>
+
+```js
+import { useState, useRef, useEffect, memo, useCallback } from 'react';
+import { getRandomName } from './nameGen';
+
+const initialList = ['Bob', 'Mary', 'Joe'];
+
+export default function App() {
+  const [authors, setAuthors] = useState(initialList);
+  const insertNameRef = useRef();
+  const deleteHandler = useCallback(deleteHandle, []);
+
+  function deleteHandle(name) {
+    setAuthors((authors) => authors.filter((n) => n !== name));
+  }
+
+  return (
+    <div>
+      <label>
+        Name: <input ref={insertNameRef} defaultValue={getRandomName()} />
+      </label>
+      <button
+        onClick={() => {
+          setAuthors([insertNameRef.current.value, ...authors]);
+          insertNameRef.current.value = getRandomName();
+        }}
+      >
+        Insert at beginning
+      </button>
+      <button
+        onClick={() => {
+          setAuthors([...authors, insertNameRef.current.value]);
+          insertNameRef.current.value = getRandomName();
+        }}
+      >
+        Insert at end
+      </button>
+      <table>
+        <tbody>
+          {authors.map((a) => (
+            <Author name={a} key={a} onDelete={deleteHandler} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+//Memoize Person
+//When we call Author with the same props (name),
+//then no need to render,
+//just return the previous output
+//----------------------------------
+//if different props, then render Person
+//and memoize it for the next time
+const Author = memo(Person);
+
+function Person({ name, onDelete }) {
+  //slow down rendering for dev tools
+  //with console.log
+  console.log(name);
+  return (
+    <tr>
+      <td>{name}</td>
+      <td>
+        <button onClick={(e) => onDelete(name)}>🗑️</button>
+      </td>
+    </tr>
+  );
+}
+```
+
+```css
+div {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+
+button {
+  margin-right: auto;
+}
+```
+
+</Sandpack>
+<br/>
+Avec Dev Tools
+
+- tester avec et sans `useCallBack`
+
+---
+
+## Pourquoi useCallback
+
+- Une fonction au top-niveau est persistante
+  - Sa portée est au niveau du module
+- Une fonction imbriquée (dans une autre fonction) est regénérée à chaque appel
+  - Sa portée est limitée à l'appel de la fonction englobante (ou closure)
+- `useCallback` permet de conserver une référence à une fonction imbriquée
+  - Sa portée est au niveau du composant (Hook) et du tableau de dépendances
+
+---
+
+## Difficultés de useCallback
+
+- Si c'est pour modifier un state, il faut réécrire le setState avec une fonction _setter_.
+- Il faut mettre les bonnes dépendances dans le tableau de dépendances.
+- C'est complexe à gérer partout.
+
+---
+
+## Fonctionalité Future
+
+**React-Compiler** va automatiquement générer de la _mémoization_ ainsi que les `useCallbacks`.
+
+- Prévu en 2025
+- Possède aussi des optimisations additionnelles pour le code
+- Une fois adopté, on recommande de ne plus appeler `Memo`, `useMemo` et `useCallback` dans notre code.
