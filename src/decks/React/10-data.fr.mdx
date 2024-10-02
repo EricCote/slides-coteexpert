@@ -56,31 +56,33 @@ useEffect(fn_Setup, dependencyArray?)
 
 Paramètre fn_Setup:
 
-- La fonction setup interagit et se connecte avec le monde externe
-- Retourne une fonction flèche pour se déconnecter
+- La fonction setup interagit et se "connecte" avec le monde externe
+- Peut retourner une fonction flèche (surnommée `cleanup`) pour se "déconnecter"
 
-Le tableau de dépendances détermine s'il faut exécuter
+Le tableau de dépendances détermine quand il faut exécuter
 
+- aucun changement dans les dépendances: pas d'exécution d'Effet
 - un ou plusieurs changements: exécute l'Effet après le rendu
-- aucun changement: pas d'exécution d'Effet
-- Si le tableau est un tableau vide: l'Effet exécute au permier rendu seulement
 - Si le tableau est `null` ou `undefined`: l'Effet exécute après chaque rendu
+- Si le tableau est un tableau vide: l'Effet n'exécute qu'après le premier rendu seulement
 
 ---
 
 ## useEffects n'est pas facile
 
 - Rendu et useEffect exécutent deux fois en Dev (`<StrictMode/>`)
-- Cela créé des rendu indésirables si on ne fait pas attention
-- useEffect devrait affecter qu'un élément externe seulement, c'est plus complexe quand on affecte plusieurs choses.
+- Cela créé des rendus additionnels
+  - C'est pour aider à trouver les effets de bord indésirables
+- useEffect devrait n'affecter qu'un élément externe seulement
+  - C'est plus complexe quand on affecte plusieurs choses.
 
 <hr />
 
-- Dependencies arrays are hard with strings, numbers and booleans
-  - But they are even harder with objects or arrays
-  - Comparison is done with referential equality (`Object.is()`)
-  - You cannot detect when content has changed
-  - Object and arrays need to be considered immutable
+- Tableaux de dépendences sont complexes avec strings, nombres et booléens
+  - Encore plus difficiles avec objets ou tableaux
+  - La comapraison utilise l'égalité référentielle (`Object.is()`)
+  - On ne peut détecter le contenu modifié d'une référence
+  - Objets et tableaux doivent être considérés immuables
 
 ---
 
@@ -92,494 +94,12 @@ Le tableau de dépendances détermine s'il faut exécuter
 
 ---
 
-## Hash Routing
-
-<Sandpack options={{ showNavigator: true }} >
-
-```jsx src/App.js active
-import { useEffect, useState } from 'react';
-import Menu from './Menu';
-import Route from './Route';
-
-export default function App() {
-  const [currentPage, setCurrentPage] = useState(window.location.hash);
-
-  function changePage(evt) {
-    setCurrentPage(window.location.hash);
-  }
-
-  useEffect(() => {
-    //Handle the "hashchange" event
-    window.addEventListener('hashchange', changePage);
-    return () => window.removeEventListener('hashchange', changePage);
-  }, []);
-
-  return (
-    <>
-      <Menu />
-      <Route page={currentPage} />
-    </>
-  );
-}
-```
-
-```jsx src/Route.jsx
-import Home from './Home';
-import News from './News';
-import Contact from './Contact';
-
-export default function Route({ page }) {
-  switch (page) {
-    case '#home':
-    case '#':
-    case '':
-      return <Home />;
-    case '#news':
-      return <News />;
-    case '#contact':
-      return <Contact />;
-    default:
-      return <div>404 error</div>;
-  }
-}
-```
-
-```jsx src/Menu.jsx
-export default function Menu() {
-  return (
-    <ul className='menu'>
-      {menuList.map((menuItem) => (
-        <li key={menuItem.url}>
-          <a
-            className={menuItem.url === location.hash ? 'active' : ''}
-            href={menuItem.url}
-          >
-            {menuItem.name}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-const menuList = [
-  {
-    name: 'Home',
-    url: '#',
-  },
-  {
-    name: 'News',
-    url: '#news',
-  },
-  {
-    name: 'Contact',
-    url: '#contact',
-  },
-  {
-    name: 'About',
-    url: '#about',
-  },
-];
-```
-
-```jsx src/Home.jsx
-export default function Home() {
-  return (
-    <>
-      <h1>Home page</h1>
-      <p>This is the Home page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/News.jsx
-export default function News() {
-  return (
-    <>
-      <h1>News page</h1>
-      <p>This is the News page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/Contact.jsx
-export default function Contact() {
-  return (
-    <>
-      <h1>Contact page</h1>
-      <p>This is the contact page!</p>
-    </>
-  );
-}
-```
-
-```css
-ul.menu {
-  list-style-type: none;
-  margin: 0;
-  margin-bottom: 1em;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-.menu li {
-  float: left;
-}
-
-.menu li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-.menu li a:hover:not(.active) {
-  background-color: #111;
-}
-
-.menu .active {
-  background-color: royalblue;
-}
-```
-
-</Sandpack>
-
----
-
-## Hash Routing with useSyncExternalStore
-
-<Sandpack options={{ showNavigator: true }} >
-
-```jsx src/App.js active
-import { useSyncExternalStore } from 'react';
-import Menu from './Menu';
-import Route from './Route';
-
-// Function subscribing to external changes
-// Similar to an effect subscription
-function subscribeHashChange(onHashChange) {
-  window.addEventListener('hashchange', onHashChange);
-  return () => window.removeEventListener('hashchange', onHashChange);
-}
-
-export default function App() {
-  const currentPage = useSyncExternalStore(
-    subscribeHashChange, // subscribe to changes
-    () => window.location.hash, // read the value (client)
-    () => window?.location.hash // read the value (server)
-  );
-
-  return (
-    <>
-      <Menu />
-      <Route page={currentPage} />
-    </>
-  );
-}
-```
-
-```jsx src/Route.jsx
-import Home from './Home';
-import News from './News';
-import Contact from './Contact';
-
-export default function Route({ page }) {
-  switch (page) {
-    case '#home':
-    case '#':
-    case '':
-      return <Home />;
-    case '#news':
-      return <News />;
-    case '#contact':
-      return <Contact />;
-    default:
-      return <div>404 error</div>;
-  }
-}
-```
-
-```jsx src/Menu.jsx
-export default function Menu() {
-  return (
-    <ul className='menu'>
-      {menuList.map((menuItem) => (
-        <li key={menuItem.url}>
-          <a
-            className={menuItem.url === location.hash ? 'active' : ''}
-            href={menuItem.url}
-          >
-            {menuItem.name}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-const menuList = [
-  {
-    name: 'Home',
-    url: '#',
-  },
-  {
-    name: 'News',
-    url: '#news',
-  },
-  {
-    name: 'Contact',
-    url: '#contact',
-  },
-  {
-    name: 'About',
-    url: '#about',
-  },
-];
-```
-
-```jsx src/Home.jsx
-export default function Home() {
-  return (
-    <>
-      <h1>Home page</h1>
-      <p>This is the Home page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/News.jsx
-export default function News() {
-  return (
-    <>
-      <h1>News page</h1>
-      <p>This is the News page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/Contact.jsx
-export default function Contact() {
-  return (
-    <>
-      <h1>Contact page</h1>
-      <p>This is the contact page!</p>
-    </>
-  );
-}
-```
-
-```css
-ul.menu {
-  list-style-type: none;
-  margin: 0;
-  margin-bottom: 1em;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-.menu li {
-  float: left;
-}
-
-.menu li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-.menu li a:hover:not(.active) {
-  background-color: #111;
-}
-
-.menu .active {
-  background-color: royalblue;
-}
-```
-
-</Sandpack>
-
----
-
-## Hash Routing with a custom hook to wrap
-
-<Sandpack options={{ showNavigator: true }} >
-
-```jsx src/App.js active
-import useHashChange from './useHashChange';
-import Menu from './Menu';
-import Route from './Route';
-
-export default function App() {
-  const currentPage = useHashChange();
-
-  return (
-    <>
-      <Menu />
-      <Route page={currentPage} />
-    </>
-  );
-}
-```
-
-```jsx src/Route.jsx
-import Home from './Home';
-import News from './News';
-import Contact from './Contact';
-
-export default function Route({ page }) {
-  switch (page) {
-    case '#home':
-    case '#':
-    case '':
-      return <Home />;
-    case '#news':
-      return <News />;
-    case '#contact':
-      return <Contact />;
-    default:
-      return <div>404 error</div>;
-  }
-}
-```
-
-```jsx src/useHashChange.jsx
-import { useSyncExternalStore } from 'react';
-
-function subscribeHashChange(onHashChange) {
-  window.addEventListener('hashchange', onHashChange);
-  return () => window.removeEventListener('hashchange', onHashChange);
-}
-
-export default function useHashChange() {
-  return useSyncExternalStore(
-    subscribeHashChange, // React won't resubscribe for as long as you pass the same function
-    () => window.location.hash, // read value on client
-    () => window?.location.hash // read value on the server
-  );
-}
-```
-
-```jsx src/Menu.jsx
-export default function Menu() {
-  return (
-    <ul className='menu'>
-      {menuList.map((menuItem) => (
-        <li key={menuItem.url}>
-          <a
-            className={menuItem.url === location.hash ? 'active' : ''}
-            href={menuItem.url}
-          >
-            {menuItem.name}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-const menuList = [
-  {
-    name: 'Home',
-    url: '#',
-  },
-  {
-    name: 'News',
-    url: '#news',
-  },
-  {
-    name: 'Contact',
-    url: '#contact',
-  },
-  {
-    name: 'About',
-    url: '#about',
-  },
-];
-```
-
-```jsx src/Home.jsx
-export default function Home() {
-  return (
-    <>
-      <h1>Home page</h1>
-      <p>This is the Home page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/News.jsx
-export default function News() {
-  return (
-    <>
-      <h1>News page</h1>
-      <p>This is the News page!</p>
-    </>
-  );
-}
-```
-
-```jsx src/Contact.jsx
-export default function Contact() {
-  return (
-    <>
-      <h1>Contact page</h1>
-      <p>This is the contact page!</p>
-    </>
-  );
-}
-```
-
-```css
-ul.menu {
-  list-style-type: none;
-  margin: 0;
-  margin-bottom: 1em;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-.menu li {
-  float: left;
-}
-
-.menu li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-.menu li a:hover:not(.active) {
-  background-color: #111;
-}
-
-.menu .active {
-  background-color: royalblue;
-}
-```
-
-</Sandpack>
-
----
-
-## Near future
-
-- The `use()` Hook can be used with any promise, to fetch data
-- **Special:** does not need to be top Level like the other hooks.
-- Can be used in loops, conditionals and inner functions
-- Available in React 19
+## Bientôt
+
+- Le hook `use()` peut être utilisé avec n'importe quel `promise`, pour obtenir des données
+- **Spécial:** n'a pas besoin d'être défini au top niveau
+  - peut être utilisé dans des boucles, des conditions
+- Disponible en React 19+
 
 ---
 
@@ -596,8 +116,14 @@ export default function App() {
   const [isLoading, setLoading] = useState(false);
 
   async function getMovies() {
-    //get the data
     setLoading(true);
+
+    //Artificial delay of 1 second
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    //get the data
     const response = await fetch('https://mcuapi.herokuapp.com/api/v1/movies');
     const data = await response.json();
 
@@ -628,7 +154,7 @@ export default function App() {
 ```jsx src/DisplayMovies.jsx
 export default function DisplayMovies({ movies, isLoading }) {
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className='spinner' role='status'></div>;
   }
   return movies.length > 0 ? (
     <div className='movieCards'>
@@ -697,6 +223,202 @@ button:focus-visible {
   margin-right: 15px;
   width: 200px;
 }
+
+.spinner {
+  display: block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Fetching using Custom hooks
+
+<Sandpack >
+
+```jsx src/App.js active
+import { useState, useEffect } from 'react';
+import useApi from './useApi';
+import DisplayMovies from './DisplayMovies';
+
+export default function App() {
+  const { data, error, loading, reload } = useApi(
+    'https://mcuapi.herokuapp.com/api/v1/movies',
+    { delay: 1000 }
+  );
+
+  if (error) return <Error error={error} />;
+
+  const unsortedMovies = data?.data ?? [];
+  //sort movies by release date
+  const sortedMovies = unsortedMovies.toSorted(
+    (a, b) =>
+      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+  );
+
+  return (
+    <>
+      <h1>MCU Movies</h1>
+      <button onClick={reload}>Refresh Movies</button>
+      <DisplayMovies movies={sortedMovies} isLoading={loading} />
+    </>
+  );
+}
+```
+
+```jsx src/Error.jsx
+export default function Error({ error }) {
+  return (
+    <>
+      <div>There is an error:</div>
+      <div style={{ color: 'red', fontFamily: 'monospace' }}>
+        {error.message}
+      </div>
+    </>
+  );
+}
+```
+
+```js src/useApi.js
+import { useState, useEffect } from 'react';
+
+export default function useApi(endpoint, options) {
+  const [data, setData] = useState();
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+
+  const { delay, ...rest } = options ?? {};
+
+  async function load() {
+    setLoading(true);
+
+    //Artificial delay
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
+
+    try {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      setData(data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, [endpoint, delay]);
+
+  return { data, error, loading, reload: load };
+}
+```
+
+```jsx src/DisplayMovies.jsx
+export default function DisplayMovies({ movies, isLoading }) {
+  if (isLoading) {
+    return <div className='spinner' role='status'></div>;
+  }
+  return movies.length > 0 ? (
+    <div className='movieCards'>
+      {movies.map((movie) => (
+        <div key={movie.id}>
+          <h3>{movie.title}</h3>
+          <img src={movie.cover_url} />
+          <p>
+            <b>Release date: </b>
+            {new Date(movie.release_date).toLocaleDateString()}
+          </p>
+          <p>{movie.overview}</p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div>No movies yet</div>
+  );
+}
+```
+
+```css
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #d9d9d9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  margin: 10px;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.movieCards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  row-gap: 20px;
+  column-gap: 20px;
+  justify-content: space-between;
+}
+
+.movieCards > div {
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 20px;
+  padding: 10px;
+  width: 300px;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.movieCards img {
+  float: left;
+  margin-right: 15px;
+  width: 200px;
+}
+
+.spinner {
+  display: block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
 ```
 
 </Sandpack>
@@ -711,21 +433,19 @@ button:focus-visible {
 import { use, Suspense } from 'react';
 import DisplayMovies from './DisplayMovies';
 import useRefresh from './useRefresh';
+import { fetchData } from './fetchData';
 
-async function getMovies() {
-  const response = await fetch('https://mcuapi.herokuapp.com/api/v1/movies');
-  return response.json();
-}
+const url = 'https://mcuapi.herokuapp.com/api/v1/movies';
 
 export default function App() {
-  const refresh = useRefresh();
+  const forceRefresh = useRefresh();
 
   return (
     <>
       <h1>MCU Movies</h1>
-      <button onClick={refresh}>Refresh Movies</button>
+      <button onClick={forceRefresh}>Refresh Movies</button>
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className='spinner' role='status'></div>}>
         <Movies />
       </Suspense>
     </>
@@ -733,13 +453,51 @@ export default function App() {
 }
 
 function Movies() {
-  const rawData = use(getMovies());
+  const rawData = use(
+    fetchData('https://mcuapi.herokuapp.com/api/v1/movies', { delay: 1000 })
+  );
   const movies = rawData.data.toSorted(
     (a, b) =>
       new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
   );
 
   return <DisplayMovies movies={movies} />;
+}
+```
+
+```jsx src/fetchData.js
+let cache = new Map();
+
+//this fetchData uses simple caching
+export function fetchData(url, options) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url, options));
+  }
+  return cache.get(url);
+}
+
+// this fetchData uses NO caching
+export function fetchDataNoCaching(url, options) {
+  return getData(url, options);
+}
+
+async function getData(url, options) {
+  const { delay, ...rest } = options ?? {};
+
+  if (delay) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
+  }
+
+  const response = await fetch(url, rest);
+  return await response.json();
+}
+
+export function removeFromCache(url) {
+  if (cache.has(url)) {
+    cache.delete(url);
+  }
 }
 ```
 
@@ -782,8 +540,8 @@ export default function DisplayMovies({ movies }) {
 ```json package.json
 {
   "dependencies": {
-    "react": "18.3.0-canary-ad720f36e-20240206",
-    "react-dom": "18.3.0-canary-ad720f36e-20240206",
+    "react": "rc",
+    "react-dom": "rc",
     "react-scripts": "latest"
   },
   "scripts": {
@@ -841,6 +599,1795 @@ button:focus-visible {
   float: left;
   margin-right: 15px;
   width: 200px;
+}
+
+.spinner {
+  display: block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Exemple d'un appel simple avec Suspense
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { useState } from 'react';
+import ArtistPage from './ArtistPage.js';
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  if (show) {
+    return (
+      <ArtistPage
+        artist={{
+          id: 'the-beatles',
+          name: 'The Beatles',
+        }}
+      />
+    );
+  } else {
+    return (
+      <button onClick={() => setShow(true)}>
+        Open The Beatles artist page
+      </button>
+    );
+  }
+}
+```
+
+```js src/ArtistPage.js active
+import { Suspense } from 'react';
+import Albums from './Albums.js';
+
+export default function ArtistPage({ artist }) {
+  return (
+    <>
+      <h1>{artist.name}</h1>
+      <Suspense fallback={<Loading />}>
+        <Albums artistId={artist.id} />
+      </Suspense>
+    </>
+  );
+}
+
+function Loading() {
+  return (
+    <h2>
+      <span className='spinner'></span> Loading...
+    </h2>
+  );
+}
+```
+
+```js src/Albums.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Albums({ artistId }) {
+  const albums = use(fetchData(`/${artistId}/albums`));
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url === '/the-beatles/albums') {
+    return await getAlbums();
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getAlbums() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+}
+```
+
+```css
+.spinner {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Exemple d'un suspense pour deux appels en cascade
+
+Les deux appels sont en cascades, mais le rendu apparait une fois les 2 complétés
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { useState } from 'react';
+import ArtistPage from './ArtistPage.js';
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  if (show) {
+    return (
+      <ArtistPage
+        artist={{
+          id: 'the-beatles',
+          name: 'The Beatles',
+        }}
+      />
+    );
+  } else {
+    return (
+      <button onClick={() => setShow(true)}>
+        Open The Beatles artist page
+      </button>
+    );
+  }
+}
+```
+
+```js src/ArtistPage.js active
+import { Suspense } from 'react';
+import Albums from './Albums.js';
+import Biography from './Biography.js';
+import Panel from './Panel.js';
+
+export default function ArtistPage({ artist }) {
+  return (
+    <>
+      <h1>{artist.name}</h1>
+      <Suspense fallback={<Loading />}>
+        <Biography artistId={artist.id} />
+        <Panel>
+          <Albums artistId={artist.id} />
+        </Panel>
+      </Suspense>
+    </>
+  );
+}
+
+function Loading() {
+  return (
+    <h2>
+      <span className='spinner' /> Loading...
+    </h2>
+  );
+}
+```
+
+```js src/Panel.js
+export default function Panel({ children }) {
+  return <section className='panel'>{children}</section>;
+}
+```
+
+```js src/Biography.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Biography({ artistId }) {
+  const bio = use(fetchData(`/${artistId}/bio`));
+  return (
+    <section>
+      <p className='bio'>{bio}</p>
+    </section>
+  );
+}
+```
+
+```js src/Albums.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Albums({ artistId }) {
+  const albums = use(fetchData(`/${artistId}/albums`));
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url === '/the-beatles/albums') {
+    return await getAlbums();
+  } else if (url === '/the-beatles/bio') {
+    return await getBio();
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getBio() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 1500);
+  });
+
+  return `The Beatles were an English rock band, 
+    formed in Liverpool in 1960, that comprised 
+    John Lennon, Paul McCartney, George Harrison 
+    and Ringo Starr.`;
+}
+
+async function getAlbums() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+}
+```
+
+```css
+.bio {
+  font-style: italic;
+}
+
+.panel {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Exemple de suspenses imbriqués, pour deux appels en cascade
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { useState } from 'react';
+import ArtistPage from './ArtistPage.js';
+
+export default function App() {
+  const [show, setShow] = useState(false);
+  if (show) {
+    return (
+      <ArtistPage
+        artist={{
+          id: 'the-beatles',
+          name: 'The Beatles',
+        }}
+      />
+    );
+  } else {
+    return (
+      <button onClick={() => setShow(true)}>
+        Open The Beatles artist page
+      </button>
+    );
+  }
+}
+```
+
+```js src/ArtistPage.js active
+import { Suspense } from 'react';
+import Albums from './Albums.js';
+import Biography from './Biography.js';
+import Panel from './Panel.js';
+
+export default function ArtistPage({ artist }) {
+  return (
+    <>
+      <h1>{artist.name}</h1>
+      <Suspense fallback={<BigSpinner />}>
+        <Biography artistId={artist.id} />
+        <Suspense fallback={<AlbumsGlimmer />}>
+          <Panel>
+            <Albums artistId={artist.id} />
+          </Panel>
+        </Suspense>
+      </Suspense>
+    </>
+  );
+}
+
+function BigSpinner() {
+  return (
+    <h2>
+      <span className='spinner'></span> Loading...
+    </h2>
+  );
+}
+
+function AlbumsGlimmer() {
+  return (
+    <div className='glimmer-panel'>
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+    </div>
+  );
+}
+```
+
+```js src/Panel.js
+export default function Panel({ children }) {
+  return <section className='panel'>{children}</section>;
+}
+```
+
+```js src/Biography.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Biography({ artistId }) {
+  const bio = use(fetchData(`/${artistId}/bio`));
+  return (
+    <section>
+      <p className='bio'>{bio}</p>
+    </section>
+  );
+}
+```
+
+```js src/Albums.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Albums({ artistId }) {
+  const albums = use(fetchData(`/${artistId}/albums`));
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url === '/the-beatles/albums') {
+    return await getAlbums();
+  } else if (url === '/the-beatles/bio') {
+    return await getBio();
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getBio() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+
+  return `The Beatles were an English rock band, 
+    formed in Liverpool in 1960, that comprised 
+    John Lennon, Paul McCartney, George Harrison 
+    and Ringo Starr.`;
+}
+
+async function getAlbums() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+}
+```
+
+```css
+.bio {
+  font-style: italic;
+}
+
+.panel {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-panel {
+  border: 1px dashed #aaa;
+  background: linear-gradient(
+    90deg,
+    rgba(221, 221, 221, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-line {
+  display: block;
+  width: 60%;
+  height: 20px;
+  margin: 10px;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## On perd l'affichage pendant le chargement
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { Suspense, useState } from 'react';
+import SearchResults from './SearchResults.js';
+
+export default function App() {
+  const [query, setQuery] = useState('');
+  return (
+    <>
+      <label>
+        Search albums:
+        <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      </label>
+      <Suspense fallback={<h2>Loading...</h2>}>
+        <SearchResults query={query} />
+      </Suspense>
+    </>
+  );
+}
+```
+
+```js src/SearchResults.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function SearchResults({ query }) {
+  if (query === '') {
+    return null;
+  }
+  const albums = use(fetchData(`/search?q=${query}`));
+  if (albums.length === 0) {
+    return (
+      <p>
+        No matches for <i>"{query}"</i>
+      </p>
+    );
+  }
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url.startsWith('/search?q=')) {
+    return await getSearchResults(url.slice('/search?q='.length));
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getSearchResults(query) {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+
+  const allAlbums = [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+
+  const lowerQuery = query.trim().toLowerCase();
+  return allAlbums.filter((album) => {
+    const lowerTitle = album.title.toLowerCase();
+    return (
+      lowerTitle.startsWith(lowerQuery) ||
+      lowerTitle.indexOf(' ' + lowerQuery) !== -1
+    );
+  });
+}
+```
+
+```css
+input {
+  margin: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Conserver une cache des données grâce à useDeferred
+
+useDeferred est basé sur une autre valeur, mais conserve une copie de la valeur précédente
+
+useDeferred fait un rendu avec la valeur précédente (sans le commit), pour ensuite faire le rendu avec la nouvelle valeur. Si le nouveau rendu est complété, on le commit. Sinon, si celui-ci suspend, on commit alors le rendu avec la valeur précédente.
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { Suspense, useState, useDeferredValue } from 'react';
+import SearchResults from './SearchResults.js';
+
+export default function App() {
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const isStale = query !== deferredQuery;
+  return (
+    <>
+      <label>
+        Search albums:
+        <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      </label>
+      <Suspense fallback={<h2>Loading...</h2>}>
+        <div style={{ opacity: isStale ? 0.5 : 1 }}>
+          <SearchResults query={deferredQuery} />
+        </div>
+      </Suspense>
+    </>
+  );
+}
+```
+
+```js src/SearchResults.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function SearchResults({ query }) {
+  if (query === '') {
+    return null;
+  }
+  const albums = use(fetchData(`/search?q=${query}`));
+  if (albums.length === 0) {
+    return (
+      <p>
+        No matches for <i>"{query}"</i>
+      </p>
+    );
+  }
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url.startsWith('/search?q=')) {
+    return await getSearchResults(url.slice('/search?q='.length));
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getSearchResults(query) {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+
+  const allAlbums = [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+
+  const lowerQuery = query.trim().toLowerCase();
+  return allAlbums.filter((album) => {
+    const lowerTitle = album.title.toLowerCase();
+    return (
+      lowerTitle.startsWith(lowerQuery) ||
+      lowerTitle.indexOf(' ' + lowerQuery) !== -1
+    );
+  });
+}
+```
+
+```css
+input {
+  margin: 10px;
+}
+```
+
+</Sandpack>
+
+---
+
+## Suspense à un niveau global
+
+Ici, on fait un suspense au niveau du routage complet. La transition n'est pas fluide.
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { Suspense, useState } from 'react';
+import IndexPage from './IndexPage.js';
+import ArtistPage from './ArtistPage.js';
+import Layout from './Layout.js';
+
+export default function App() {
+  return (
+    <Suspense fallback={<BigSpinner />}>
+      <Router />
+    </Suspense>
+  );
+}
+
+function Router() {
+  const [page, setPage] = useState('/');
+
+  function navigate(url) {
+    setPage(url);
+  }
+
+  let content;
+  if (page === '/') {
+    content = <IndexPage navigate={navigate} />;
+  } else if (page === '/the-beatles') {
+    content = (
+      <ArtistPage
+        artist={{
+          id: 'the-beatles',
+          name: 'The Beatles',
+        }}
+      />
+    );
+  }
+  return <Layout>{content}</Layout>;
+}
+
+function BigSpinner() {
+  return <h2>🌀 Loading...</h2>;
+}
+```
+
+```js src/Layout.js
+export default function Layout({ children }) {
+  return (
+    <div className='layout'>
+      <section className='header'>Music Browser</section>
+      <main>{children}</main>
+    </div>
+  );
+}
+```
+
+```js src/IndexPage.js
+export default function IndexPage({ navigate }) {
+  return (
+    <button onClick={() => navigate('/the-beatles')}>
+      Open The Beatles artist page
+    </button>
+  );
+}
+```
+
+```js src/ArtistPage.js
+import { Suspense } from 'react';
+import Albums from './Albums.js';
+import Biography from './Biography.js';
+import Panel from './Panel.js';
+
+export default function ArtistPage({ artist }) {
+  return (
+    <>
+      <h1>{artist.name}</h1>
+      <Biography artistId={artist.id} />
+      <Suspense fallback={<AlbumsGlimmer />}>
+        <Panel>
+          <Albums artistId={artist.id} />
+        </Panel>
+      </Suspense>
+    </>
+  );
+}
+
+function AlbumsGlimmer() {
+  return (
+    <div className='glimmer-panel'>
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+    </div>
+  );
+}
+```
+
+```js src/Albums.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Albums({ artistId }) {
+  const albums = use(fetchData(`/${artistId}/albums`));
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/Biography.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Biography({ artistId }) {
+  const bio = use(fetchData(`/${artistId}/bio`));
+  return (
+    <section>
+      <p className='bio'>{bio}</p>
+    </section>
+  );
+}
+```
+
+```js src/Panel.js
+export default function Panel({ children }) {
+  return <section className='panel'>{children}</section>;
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url === '/the-beatles/albums') {
+    return await getAlbums();
+  } else if (url === '/the-beatles/bio') {
+    return await getBio();
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getBio() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+
+  return `The Beatles were an English rock band, 
+    formed in Liverpool in 1960, that comprised 
+    John Lennon, Paul McCartney, George Harrison 
+    and Ringo Starr.`;
+}
+
+async function getAlbums() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+}
+```
+
+```css
+main {
+  min-height: 200px;
+  padding: 10px;
+}
+
+.layout {
+  border: 1px solid black;
+}
+
+.header {
+  background: #222;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+
+.bio {
+  font-style: italic;
+}
+
+.panel {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-panel {
+  border: 1px dashed #aaa;
+  background: linear-gradient(
+    90deg,
+    rgba(221, 221, 221, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-line {
+  display: block;
+  width: 60%;
+  height: 20px;
+  margin: 10px;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+```
+
+</Sandpack>
+
+---
+
+## StartTransition à la rescousse
+
+StartTransition indique un changement de State qui n'est pas urgent, et non bloquant. Si un autre événement lance un setState, le rendu de transition sera interrompu et redémmaré plus tard.
+
+<Sandpack>
+
+```json package.json hidden
+{
+  "dependencies": {
+    "react": "rc",
+    "react-dom": "rc"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+```js src/App.js
+import { Suspense, startTransition, useState } from 'react';
+import IndexPage from './IndexPage.js';
+import ArtistPage from './ArtistPage.js';
+import Layout from './Layout.js';
+
+export default function App() {
+  return (
+    <Suspense fallback={<BigSpinner />}>
+      <Router />
+    </Suspense>
+  );
+}
+
+function Router() {
+  const [page, setPage] = useState('/');
+
+  function navigate(url) {
+    startTransition(() => {
+      setPage(url);
+    });
+  }
+
+  let content;
+  if (page === '/') {
+    content = <IndexPage navigate={navigate} />;
+  } else if (page === '/the-beatles') {
+    content = (
+      <ArtistPage
+        artist={{
+          id: 'the-beatles',
+          name: 'The Beatles',
+        }}
+      />
+    );
+  }
+  return <Layout>{content}</Layout>;
+}
+
+function BigSpinner() {
+  return <h2>🌀 Loading...</h2>;
+}
+```
+
+```js src/Layout.js
+export default function Layout({ children }) {
+  return (
+    <div className='layout'>
+      <section className='header'>Music Browser</section>
+      <main>{children}</main>
+    </div>
+  );
+}
+```
+
+```js src/IndexPage.js
+export default function IndexPage({ navigate }) {
+  return (
+    <button onClick={() => navigate('/the-beatles')}>
+      Open The Beatles artist page
+    </button>
+  );
+}
+```
+
+```js src/ArtistPage.js
+import { Suspense } from 'react';
+import Albums from './Albums.js';
+import Biography from './Biography.js';
+import Panel from './Panel.js';
+
+export default function ArtistPage({ artist }) {
+  return (
+    <>
+      <h1>{artist.name}</h1>
+      <Biography artistId={artist.id} />
+      <Suspense fallback={<AlbumsGlimmer />}>
+        <Panel>
+          <Albums artistId={artist.id} />
+        </Panel>
+      </Suspense>
+    </>
+  );
+}
+
+function AlbumsGlimmer() {
+  return (
+    <div className='glimmer-panel'>
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+      <div className='glimmer-line' />
+    </div>
+  );
+}
+```
+
+```js src/Albums.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Albums({ artistId }) {
+  const albums = use(fetchData(`/${artistId}/albums`));
+  return (
+    <ul>
+      {albums.map((album) => (
+        <li key={album.id}>
+          {album.title} ({album.year})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+```js src/Biography.js
+import { use } from 'react';
+import { fetchData } from './data.js';
+
+export default function Biography({ artistId }) {
+  const bio = use(fetchData(`/${artistId}/bio`));
+  return (
+    <section>
+      <p className='bio'>{bio}</p>
+    </section>
+  );
+}
+```
+
+```js src/Panel.js
+export default function Panel({ children }) {
+  return <section className='panel'>{children}</section>;
+}
+```
+
+```js src/data.js
+// Note: the way you would do data fetching depends on
+// the framework that you use together with Suspense.
+// Normally, the caching logic would be inside a framework.
+
+let cache = new Map();
+
+export function fetchData(url) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url));
+  }
+  return cache.get(url);
+}
+
+async function getData(url) {
+  if (url === '/the-beatles/albums') {
+    return await getAlbums();
+  } else if (url === '/the-beatles/bio') {
+    return await getBio();
+  } else {
+    throw Error('Not implemented');
+  }
+}
+
+async function getBio() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
+
+  return `The Beatles were an English rock band, 
+    formed in Liverpool in 1960, that comprised 
+    John Lennon, Paul McCartney, George Harrison 
+    and Ringo Starr.`;
+}
+
+async function getAlbums() {
+  // Add a fake delay to make waiting noticeable.
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return [
+    {
+      id: 13,
+      title: 'Let It Be',
+      year: 1970,
+    },
+    {
+      id: 12,
+      title: 'Abbey Road',
+      year: 1969,
+    },
+    {
+      id: 11,
+      title: 'Yellow Submarine',
+      year: 1969,
+    },
+    {
+      id: 10,
+      title: 'The Beatles',
+      year: 1968,
+    },
+    {
+      id: 9,
+      title: 'Magical Mystery Tour',
+      year: 1967,
+    },
+    {
+      id: 8,
+      title: "Sgt. Pepper's Lonely Hearts Club Band",
+      year: 1967,
+    },
+    {
+      id: 7,
+      title: 'Revolver',
+      year: 1966,
+    },
+    {
+      id: 6,
+      title: 'Rubber Soul',
+      year: 1965,
+    },
+    {
+      id: 5,
+      title: 'Help!',
+      year: 1965,
+    },
+    {
+      id: 4,
+      title: 'Beatles For Sale',
+      year: 1964,
+    },
+    {
+      id: 3,
+      title: "A Hard Day's Night",
+      year: 1964,
+    },
+    {
+      id: 2,
+      title: 'With The Beatles',
+      year: 1963,
+    },
+    {
+      id: 1,
+      title: 'Please Please Me',
+      year: 1963,
+    },
+  ];
+}
+```
+
+```css
+main {
+  min-height: 200px;
+  padding: 10px;
+}
+
+.layout {
+  border: 1px solid black;
+}
+
+.header {
+  background: #222;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+
+.bio {
+  font-style: italic;
+}
+
+.panel {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-panel {
+  border: 1px dashed #aaa;
+  background: linear-gradient(
+    90deg,
+    rgba(221, 221, 221, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-line {
+  display: block;
+  width: 60%;
+  height: 20px;
+  margin: 10px;
+  border-radius: 4px;
+  background: #f0f0f0;
 }
 ```
 

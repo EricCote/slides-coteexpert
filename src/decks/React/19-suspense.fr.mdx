@@ -4,6 +4,8 @@ Title: Suspense et Erreurs
 
 # Suspense et Erreurs
 
+import mcuFiles from './mcu/mcu.js';
+
 ---
 
 ## Gestion des erreurs et des attentes
@@ -27,26 +29,291 @@ Title: Suspense et Erreurs
 
 ---
 
-## wow
+## Utiliser Suspense
 
-<Sandpack  >
+Enlevez le Suspense
 
-```js
-import { useState, useRef, useEffect, memo, useCallback, use } from 'react';
+<Sandpack files={mcuFiles} >
+
+```jsx src/App.js active
+import { use, Suspense, useRef } from 'react';
+import DisplayMovies from './DisplayMovies';
+import useRerender from './useRerender';
+import { fetchData, removeFromCache } from './fetchData';
+//FetchData is a fetch that uses simple caching.
+//simple but it works
+
+const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
+const defaultLimit = 3;
 
 export default function App() {
-  const data = use('wow');
-  return <div>test</div>;
+  const nbRef = useRef();
+  const url = baseUrl + (nbRef.current?.value ?? defaultLimit);
+  const moviePromise = fetchData(url, { delay: 2000 });
+  const forceRerender = useRerender();
+
+  return (
+    <>
+      <h1>MCU Movies</h1>
+      <input
+        defaultValue={defaultLimit}
+        type='number'
+        ref={nbRef}
+        style={{ width: '5em' }}
+      />
+      <button onClick={forceRerender}>Force Rerender</button>
+      <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
+
+      <Suspense fallback={<div className='spinner' role='status'></div>}>
+        <Movies moviePromise={moviePromise} />
+      </Suspense>
+    </>
+  );
+}
+
+function Movies({ moviePromise }) {
+  const rawData = use(moviePromise);
+  const movies = rawData.data.toSorted(
+    (a, b) =>
+      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+  );
+
+  return <DisplayMovies movies={movies} />;
 }
 ```
 
-```json package.json
-{
-  "dependencies": {
-    "react": "rc",
-    "react-dom": "rc",
-    "react-scripts": "^5.0.0"
-  }
+</Sandpack>
+
+---
+
+## Gestion des erreurs
+
+- Quand il y a une erreur dans un composant, son rendu sera interrompu
+- L'interruption de rendu remonte l'arborescence de composants
+- On arrête de remonter au `<ErrorBoundary>` (similaire au `<Suspense>`)
+- La prop `fallback` est utilisé pour remplacer l'arborescence en erreur
+
+<hr />
+
+- Le composant `<ErrorBoundary>` n'est pas intégré à React
+  - Il faut le package `react-error-boundary`
+  - L'auteur, Brian Vaughn, a été membre de l'équipe "React Core" chez Meta de 2016 à 2022
+  - Sera possiblement intégré dans une version future de React.
+
+---
+
+## Simple Error Boundary
+
+Tester avec nombre négatif, rerender. Enlever le boundary...
+
+<Sandpack files={mcuFiles}  >
+
+```jsx src/App.js active
+import { use, Suspense, useRef } from 'react';
+import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
+import DisplayMovies from './DisplayMovies';
+import useRerender from './useRerender';
+import { fetchData, removeFromCache } from './fetchData';
+//FetchData is a fetch that uses simple caching.
+//simple but it works
+
+const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
+const defaultLimit = 3;
+
+export default function App() {
+  const nbRef = useRef();
+  const url = baseUrl + (nbRef.current?.value ?? defaultLimit);
+  const moviePromise = fetchData(url, { delay: 2000 });
+  const forceRerender = useRerender();
+
+  return (
+    <>
+      <h1>MCU Movies</h1>
+      <input
+        defaultValue={defaultLimit}
+        type='number'
+        ref={nbRef}
+        style={{ width: '5em' }}
+      />
+      <button onClick={forceRerender}>Force Rerender</button>
+      <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
+
+      <ErrorBoundary fallback={<div>Something unexpected happened!</div>}>
+        <Suspense fallback={<div className='spinner' role='status'></div>}>
+          <Movies moviePromise={moviePromise} />
+        </Suspense>
+      </ErrorBoundary>
+    </>
+  );
+}
+
+function Movies({ moviePromise }) {
+  const rawData = use(moviePromise);
+  const movies = rawData.data.toSorted(
+    (a, b) =>
+      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+  );
+
+  return <DisplayMovies movies={movies} />;
+}
+```
+
+</Sandpack>
+
+---
+
+## Error Boundary with "Fallback Component"
+
+Will push extra props to the fallback.
+
+<Sandpack files={mcuFiles}  >
+
+```jsx src/App.js active
+import { use, Suspense, useRef } from 'react';
+import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
+import DisplayMovies from './DisplayMovies';
+import useRerender from './useRerender';
+import { fetchData, removeFromCache } from './fetchData';
+//FetchData is a fetch that uses simple caching.
+//simple but it works
+
+const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
+const defaultLimit = 3;
+
+export default function App() {
+  const nbRef = useRef();
+  const url = baseUrl + (nbRef.current?.value ?? defaultLimit);
+  const moviePromise = fetchData(url, { delay: 2000 });
+  const forceRerender = useRerender();
+
+  return (
+    <>
+      <h1>MCU Movies</h1>
+      <input
+        defaultValue={defaultLimit}
+        type='number'
+        ref={nbRef}
+        style={{ width: '5em' }}
+      />
+      <button onClick={forceRerender}>Force Rerender</button>
+      <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
+
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onReset={(details) => {
+          nbRef.current.value = defaultLimit;
+          forceRerender();
+        }}
+      >
+        <Suspense fallback={<div className='spinner' role='status'></div>}>
+          <Movies moviePromise={moviePromise} />
+        </Suspense>
+      </ErrorBoundary>
+    </>
+  );
+}
+
+function Movies({ moviePromise }) {
+  const rawData = use(moviePromise);
+  const movies = rawData.data.toSorted(
+    (a, b) =>
+      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+  );
+
+  return <DisplayMovies movies={movies} />;
+}
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role='alert'>
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+---
+
+## Error Boundary using context
+
+Will get data from context.
+
+<Sandpack files={mcuFiles}  >
+
+```jsx src/App.js active
+import { use, Suspense, useRef } from 'react';
+import {
+  ErrorBoundary,
+  useErrorBoundary,
+  ErrorBoundaryContext,
+} from 'react-error-boundary';
+import DisplayMovies from './DisplayMovies';
+import useRerender from './useRerender';
+import { fetchData, removeFromCache } from './fetchData';
+//FetchData is a fetch that uses simple caching.
+//simple but it works
+
+const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
+const defaultLimit = 3;
+
+export default function App() {
+  const nbRef = useRef();
+  const url = baseUrl + (nbRef.current?.value ?? defaultLimit);
+  const moviePromise = fetchData(url, { delay: 2000 });
+  const forceRerender = useRerender();
+
+  return (
+    <>
+      <h1>MCU Movies</h1>
+      <input
+        defaultValue={defaultLimit}
+        type='number'
+        ref={nbRef}
+        style={{ width: '5em' }}
+      />
+      <button onClick={forceRerender}>Force Rerender</button>
+      <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
+
+      <ErrorBoundary
+        fallback={<ErrorFallback />}
+        onReset={(details) => {
+          nbRef.current.value = defaultLimit;
+          forceRerender();
+        }}
+      >
+        <Suspense fallback={<div className='spinner' role='status'></div>}>
+          <Movies moviePromise={moviePromise} />
+        </Suspense>
+      </ErrorBoundary>
+    </>
+  );
+}
+
+function Movies({ moviePromise }) {
+  const rawData = use(moviePromise);
+  const movies = rawData.data.toSorted(
+    (a, b) =>
+      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+  );
+
+  return <DisplayMovies movies={movies} />;
+}
+
+function ErrorFallback() {
+  const { error, resetErrorBoundary } = use(ErrorBoundaryContext);
+  return (
+    <div role='alert'>
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
 }
 ```
 
