@@ -1821,14 +1821,14 @@ input {
 
 ---
 
-## Conserver l'affichage des données grâce à useDeferred
+## Conserver l'affichage des données grâce à useDeferredValue
 
 `useDeferred` est basé sur une autre valeur, mais conserve une copie de la valeur précédente
 
 - `useDeferred` fait deux rendus
 - Un premier avec la valeur précédente (sans l'afficher, le "commit")
-- Un second avec la nouvelle valeur
-  - Si ce second rendu complète immédiatement, on l'affiche (commit).
+- Cédule le second avec la nouvelle valeur
+  - Si ce second rendu est complété immédiatement, on l'affiche (commit).
   - Sinon (si on suspend), on affiche alors le premier rendu (avec la valeur précédente).
 
 <Sandpack v19>

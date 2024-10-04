@@ -192,7 +192,17 @@ function setOnlineStatus() {
 
 ---
 
-## State hooks
+## Liste des Hooks
+
+Légende:
+
+🆕 React 18 (2022)
+
+🆕🆕 React 19 (2024)
+
+---
+
+## Hooks de l'état
 
 useState: Gère la persistance de valeurs et provoque un re-rendu quand la valeur change
 
@@ -200,17 +210,19 @@ useReducer: Gère la persistance de valeurs pour des états complexes, en utilis
 
 useContext: Accède aux données du contexte et provoque un re-rendu quand le contexte change
 
-useRef: Gère la persistance d'une valeur mutative, ne provoque JAMAIS de re-rendu
+useRef: Gère la persistance d'une valeur mutative, ne provoque JAMAIS de re-rendu, permet d'être lié à un élément du DOM
+
+useImperativeHandle: Personnalise l'instance d'une `ref` retournée au composant parent
 
 ---
 
 ## Hooks de perfomance
 
-(cours avancé)
-
 useCallback: Mémoïser des callbacks pour prévenir des re-rendus
 
 useMemo: Mémoïser des valeurs pour prévenir des re-calculs non-nécessaires
+
+---
 
 ## Hooks et les Effets
 
@@ -226,23 +238,25 @@ useLayoutEffect: Similaire à useEffect, lancé après le rendu et les modifs du
 
 ## Hooks et les autres scénarios
 
-useimperativeHandle: Personnalise l'instance d'une ref retournée au composant parent
-
 useDebugValue: Affichage d'infos dans React DevTools par notre Hook personnalisé
 
 🆕 useId: génère un nom unique mais persistant
 
 ---
 
-Hooks et le concurrent rendering
+## Hooks et le concurrent rendering
 
 🆕 useDeferredValue: Génère un rendu avec le résultat précédent tant que le nouveau résultat n'a pas fini de suspendre
 
 🆕🆕 useOptimistic: Génère un rendu avec un résultat fourni (optimiste) tant que le nouveau résultat n'a pas fini de suspendre
 
-🆕 useTransition: Permet d'encapsuler des setState() (qui génèrent un re-rendu synchrone) de façon asynchrone, dans une transition. Cela permet de garder le reste de notre IU interactive. Un rendu de transition peut se faire interrompre sans problème. Permet aussi de gérer l'attente via une prop d'état de la transition, plutôt qu'un suspense.
+🆕 useTransition: Permet d'encapsuler des setState() (qui génèrent un re-rendu synchrone) de façon asynchrone, dans une "transition". La transition fait un rendu avec le résultat précédent, tant que le nouveau résultat n'a pas fini de suspendre
+
+🆕🆕 use: encapsule une `promise` pour obtenir des données. Si la `promise` est complétée, on poursuit le rendu. Sinon, on interrompt et suspend le rendu. On cédule un nouveau rendu quand la `promise` complètée.
 
 ---
+
+## Hooks pour formulaire
 
 🆕🆕 useActionState: génère une méthode d'action et un état qui contient le résultat retourné par cette méthode. On lie par la suite la prop `action` du `<form>`, ou la prop formAction d'un `<button>`
 
