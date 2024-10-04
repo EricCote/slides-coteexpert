@@ -1,4 +1,4 @@
-## Gérer l'état du chargement manuellement
+## OBSOLETE Gérer l'état du chargement manuellement
 
 <Sandpack >
 
@@ -11,6 +11,11 @@ export default function App() {
   const [isLoading, setLoading] = useState(false);
 
   async function getMovies() {
+    //Artificial slowdown
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
     //get the data
     setLoading(true);
     const response = await fetch('https://mcuapi.herokuapp.com/api/v1/movies');

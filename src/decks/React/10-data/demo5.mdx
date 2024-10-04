@@ -1,19 +1,26 @@
 ## use Hook with caching (v19)
 
-<Sandpack >
+<Sandpack v19 >
 
 ```jsx src/fetchData.js
 let cache = new Map();
 
-export function fetchData(url) {
+export function fetchData(url, options) {
   if (!cache.has(url)) {
-    cache.set(url, getData(url));
+    cache.set(url, getData(url, options));
   }
   return cache.get(url);
 }
 
-async function getData(url) {
-  const response = await fetch(url);
+async function getData(url, options) {
+  const { delay, ...rest } = options ?? {};
+  if (delay) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
+  }
+
+  const response = await fetch(url, rest);
   return await response.json();
 }
 
@@ -30,29 +37,28 @@ import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
 import { fetchData, removeFromCache } from './fetchData';
 //FetchData is a fetch that uses simple caching.
-//simple but it works
+//simple but it works, no warning from react
 
 const url = 'https://mcuapi.herokuapp.com/api/v1/movies';
 
 export default function App() {
-  const moviePromise = fetchData(url);
-  const rerender = useRerender();
+  const forceRerender = useRerender();
 
   return (
     <>
       <h1>MCU Movies</h1>
-      <button onClick={rerender}>Force Rerender</button>
+      <button onClick={forceRerender}>Force Rerender</button>
       <button onClick={() => removeFromCache(url)}>Remove Cached Data</button>
 
       <Suspense fallback={<div>Loading...</div>}>
-        <Movies moviePromise={moviePromise} />
+        <Movies />
       </Suspense>
     </>
   );
 }
 
-function Movies({ moviePromise }) {
-  const rawData = use(moviePromise);
+function Movies() {
+  const rawData = use(fetchData(url, { delay: 1000 }));
   const movies = rawData.data.toSorted(
     (a, b) =>
       new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
@@ -68,11 +74,11 @@ import { useState } from 'react';
 export default function useRerender() {
   const [, setRerender] = useState();
 
-  function rerender() {
+  function forceRerender() {
     setRerender({});
   }
 
-  return rerender;
+  return forceRerender;
 }
 ```
 
@@ -95,23 +101,6 @@ export default function DisplayMovies({ movies }) {
   ) : (
     <div>No movies yet</div>
   );
-}
-```
-
-```json package.json
-{
-  "dependencies": {
-    "react": "next",
-    "react-dom": "next",
-    "react-error-boundary": "latest",
-    "react-scripts": "latest"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  }
 }
 ```
 

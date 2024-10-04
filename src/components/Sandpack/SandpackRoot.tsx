@@ -15,7 +15,7 @@ import {
 import { createFileMap, StylesCSSPath, AppJSPath } from './createFileMap';
 //import { CustomTheme } from './Themes';
 //import { useSandpackLint } from './useSandpackLint';
-import { template } from './template';
+import { template, templateV19 } from './template';
 
 type SandpackProps = {
   children: ReactNode;
@@ -25,6 +25,7 @@ type SandpackProps = {
   s?: number;
   tailwind?: boolean;
   bootstrap?: boolean;
+  v19?: boolean;
 };
 
 const sandboxStyle = `
@@ -86,6 +87,7 @@ function SandpackRoot(props: SandpackProps) {
     s,
     tailwind = false,
     bootstrap = false,
+    v19 = false,
     ...rest
   } = props;
   myOptions = myOptions ?? {};
@@ -108,6 +110,7 @@ function SandpackRoot(props: SandpackProps) {
       ...myOptions,
     };
   }
+
   myOptions! = {
     // codeEditor: { extensions: [lintExtensions] },
     editorHeight: '500px',
@@ -136,11 +139,13 @@ function SandpackRoot(props: SandpackProps) {
     files[AppJSPath].active = true;
   }
 
+  const templateUsed = v19 ? templateV19 : template;
+
   return (
     <div className='sandpack sandpack--playground w-full my-8' dir='ltr'>
       <Sandpack
         // template='react'
-        files={{ ...template, ...files }}
+        files={{ ...templateUsed, ...files }}
         theme={myDark}
         options={myOptions}
         customSetup={{

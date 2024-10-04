@@ -19,7 +19,7 @@ root.render(
     hidden: true,
     code: JSON.stringify(
       {
-        name: 'react.dev',
+        name: 'reactacademy.live',
         version: '0.0.0',
         main: '/src/index.js',
         scripts: {
@@ -51,5 +51,32 @@ root.render(
   <div id="root"></div>
 </body>
 </html>`,
+  },
+};
+
+export const templateV19 = {
+  ...template,
+  '/package.json': {
+    hidden: true,
+    code: JSON.stringify(
+      {
+        name: 'reactacademy.live',
+        version: '0.0.0',
+        main: '/src/index.js',
+        scripts: {
+          start: 'react-scripts start',
+          build: 'react-scripts build',
+          test: 'react-scripts test --env=jsdom',
+          eject: 'react-scripts eject',
+        },
+        dependencies: {
+          react: 'rc',
+          'react-dom': 'rc',
+          'react-scripts': 'latest',
+        },
+      },
+      null,
+      2
+    ),
   },
 };

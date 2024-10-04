@@ -1,6 +1,12 @@
-## Gérer l'état du chargement dans la prochaine version de React
+## Suspense et use dans la prochaine version de React
 
-<Sandpack >
+- `use` permet d'appeler une promesse pendant rendu
+- `use` interrompt le rendu quand la promesse n'est pas encore complétée
+- et cela interrompt le rendu du parent, grand-parent et ainsi de suite
+- l'interruption remonte l'arboresence jusqu'au `<suspense>`, qui fait un rendu du `fallback`
+- Quand la promesse complète, on fait un nouveau rendu du `<suspense>`
+
+<Sandpack v19 >
 
 ```jsx src/App.js active
 import { use, Suspense } from 'react';
@@ -8,31 +14,35 @@ import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
 
 async function getMovies() {
+  //Artificial slowdown
+  await new Promise((resolve) => {
+    setTimeout(resolve, 1000);
+  });
+
   const response = await fetch('https://mcuapi.herokuapp.com/api/v1/movies');
-  return response.json();
+  return await response.json();
 }
 
 export default function App() {
   //Because there is no caching in this version,
   //any rerender will trigger a new network call
-  //This is bad
-  const moviePromise = getMovies();
-  const rerender = useRerender();
+  //This is bad, React will show warning
+  const forceRerender = useRerender();
 
   return (
     <>
       <h1>MCU Movies</h1>
-      <button onClick={rerender}>Force Rerender</button>
+      <button onClick={forceRerender}>Force Rerender</button>
 
       <Suspense fallback={<div>Loading...</div>}>
-        <Movies moviePromise={moviePromise} />
+        <Movies />
       </Suspense>
     </>
   );
 }
 
-function Movies({ moviePromise }) {
-  const rawData = use(moviePromise);
+function Movies() {
+  const rawData = use(getMovies());
   const movies = rawData.data.toSorted(
     (a, b) =>
       new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
@@ -48,11 +58,11 @@ import { useState } from 'react';
 export default function useRerender() {
   const [, setRerender] = useState();
 
-  function rerender() {
+  function forceRerender() {
     setRerender({});
   }
 
-  return rerender;
+  return forceRerender;
 }
 ```
 
@@ -75,23 +85,6 @@ export default function DisplayMovies({ movies }) {
   ) : (
     <div>No movies yet</div>
   );
-}
-```
-
-```json package.json
-{
-  "dependencies": {
-    "react": "next",
-    "react-dom": "next",
-    "react-error-boundary": "latest",
-    "react-scripts": "latest"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  }
 }
 ```
 
