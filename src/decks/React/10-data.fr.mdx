@@ -2927,15 +2927,24 @@ main {
 
 ---
 
-## Calling an api
+## Calling an API the classic way
 
 <Sandpack>
 
 ```js src/ContactApi.js
+// This encapsulates calls to the Rest API.
+// GetAllContacts()
+// getContact(id)
+// saveContact(contact) //(create and update)
+// deleteContact(id)
+// registerNotification(fn)
+// unregisterNotification(fn)
+// resetContacts()
+
 const base = 'https://contacts.reactacademy.live/api';
 
 export default class ContactApi {
-  static ws = null;
+  static ws = null; //WebSocket for notifications
 
   static getAllContacts() {
     return fetch(`${base}/contacts`).then((resp) => resp.json());
@@ -3015,23 +3024,39 @@ import ContactApi from './ContactApi';
 import ContactTable from './ContactTable';
 
 export default function App() {
-  const [contacts, setContacts] = useState([]);
+  return <ContactContainer />;
+}
 
+function ContactContainer() {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Effect to show data after first render
   useEffect(() => {
     refreshData();
-    // ContactApi.registerNotifications(refreshData);
-    // return () => {
-    //   ContactApi.unregisterNotifications();
-    // };
   }, []);
 
-  // This is the modern way of calling data (async)
+  // Effect to register for change notification
+  // useEffect(() => {
+  //   ContactApi.registerNotification(refreshData);
+  //   return () => {
+  //     ContactApi.unregisterNotification();
+  //   };
+  // }, []);
+
+  // This calls data (async)
   async function refreshData() {
     try {
+      setLoading(true);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1500);
+      });
       const data = await ContactApi.getAllContacts();
       setContacts(data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -3051,25 +3076,29 @@ export default function App() {
   return (
     <>
       <h1>Contacts (using Hooks)</h1>
-      <ContactTable
-        contacts={contacts}
-        modifyContact={modifyContact}
-        deleteContact={deleteContact}
-      />
+
+      {loading ? (
+        <div className='spinner' />
+      ) : (
+        <ContactTable
+          contacts={contacts}
+          modifyContact={modifyContact}
+          deleteContact={deleteContact}
+        />
+      )}
     </>
   );
 }
-
-// to show a spinner while loading:
-// { isLoading ? <Spinner /> : <ContactTable /> }
 ```
 
 ```jsx src/ContactTable.jsx
 import { useState } from 'react';
-//import { Table, Button, Form as F } from 'react-bootstrap';
-//import { Link, Form } from 'react-router-dom';
 
-function ContactTable({ contacts, modifyContact, deleteContact }) {
+export default function ContactTable({
+  contacts,
+  modifyContact,
+  deleteContact,
+}) {
   const [modificationRow, setModificationRow] = useState(null);
 
   function modifyRow(id) {
@@ -3091,7 +3120,7 @@ function ContactTable({ contacts, modifyContact, deleteContact }) {
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th></th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -3119,7 +3148,7 @@ function ContactTable({ contacts, modifyContact, deleteContact }) {
               <td colSpan={5}>
                 <button
                   title='Create Contact'
-                  variant='primary'
+                  type='button'
                   onClick={() => {
                     setModificationRow(0);
                   }}
@@ -3135,8 +3164,6 @@ function ContactTable({ contacts, modifyContact, deleteContact }) {
   );
 }
 
-export default ContactTable;
-
 function Row({ contact, setRow, deleteContact }) {
   return (
     <tr key={contact.id}>
@@ -3147,21 +3174,19 @@ function Row({ contact, setRow, deleteContact }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         }}
-        className='align-middle text-body-secondary text-truncate'
         title={contact.id.toString()}
       >
         {contact.id}
       </td>
-      <td className='align-middle'>{contact.firstName}</td>
-      <td className='align-middle'>{contact.lastName}</td>
-      <td className='align-middle'>
+      <td>{contact.firstName}</td>
+      <td>{contact.lastName}</td>
+      <td>
         <a href={`mailto:{contact.email}`}>{contact.email}</a>
       </td>
-      <td className='align-middle' style={{ display: 'flex' }}>
+      <td style={{ display: 'flex' }}>
         <button
-          variant='primary'
-          className='me-3'
           title='Edit'
+          type='button'
           onClick={() => {
             setRow(contact.id);
           }}
@@ -3169,16 +3194,15 @@ function Row({ contact, setRow, deleteContact }) {
           🖊️
         </button>
         <button
-          variant='secondary'
-          className='me-3'
           title='Details'
+          type='button'
           onClick={() => alert(`goto details for ${contact.firstName}`)}
         >
           🧾
         </button>
         <button
           title='Delete'
-          variant='danger'
+          type='button'
           onClick={() => deleteContact(contact.id)}
         >
           🗑️
@@ -3191,14 +3215,10 @@ function Row({ contact, setRow, deleteContact }) {
 function EditRow({ contact, setRow }) {
   return (
     <tr key={contact.id} className='bg-warning'>
-      <td
-        style={{ maxWidth: 70 }}
-        className='align-middle text-body-secondary text-truncate'
-        title={contact.id.toString()}
-      >
+      <td style={{ maxWidth: 70 }} title={contact.id.toString()}>
         <input name='id' placeholder='ID' defaultValue={contact.id} readOnly />
       </td>
-      <td className='align-middle'>
+      <td>
         <input
           name='firstName'
           placeholder='First Name'
@@ -3219,14 +3239,13 @@ function EditRow({ contact, setRow }) {
           defaultValue={contact.email}
         />
       </td>
-      <td className='align-middle'>
-        <button variant='success' className='me-3' title='Save' type='submit'>
+      <td>
+        <button title='Save' type='submit'>
           ✔️
         </button>
         <button
-          variant='warning'
-          className='me-3'
           title='Cancel'
+          type='button'
           onClick={() => {
             setRow(null);
           }}
@@ -3253,6 +3272,480 @@ table > * > * > * {
 
 table > tbody > tr:nth-of-type(odd) > * {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+table th {
+  text-align: left;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.4em 1em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #d9d9d9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  margin: 0.1em;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+input {
+  display: inline-block;
+  width: 100%;
+  padding: 0.2rem 0.4rem;
+  margin: 0.1rem 0rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.spinner {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner;
+  border: 0.25em solid currentcolor;
+  border-right-color: transparent;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg) /* rtl:ignore */;
+  }
+}
+```
+
+</Sandpack>
+
+---
+
+## Calling an API with React 19
+
+- No useEffects needed
+
+<Sandpack v19>
+
+```js src/ContactApi.js
+// This encapsulates calls to the Rest API.
+// GetAllContacts()
+// getContact(id)
+// saveContact(contact) //(create and update)
+// deleteContact(id)
+// registerNotification(fn)
+// unregisterNotification(fn)
+// resetContacts()
+
+import { use } from 'react';
+import { fetchData, removeFromCache } from './fetchData';
+
+const base = 'https://contacts.reactacademy.live/api';
+
+export default class ContactApi {
+  static ws = null; //WebSocket for notifications
+
+  static getAllContacts() {
+    return use(fetchData(`${base}/contacts`));
+  }
+
+  static async refreshContacts() {
+    removeFromCache(`${base}/contacts`);
+    await fetchData(`${base}/contacts`, {
+      delay: 1500,
+    });
+  }
+
+  static removeContacts() {
+    removeFromCache(`${base}/contacts`);
+  }
+
+  static getContact(contactId) {
+    return fetch(`${base}/contacts/${contactId}`).then((resp) => resp.json());
+  }
+
+  static saveContact(contact) {
+    // Simulate server-side validation
+
+    const minContactLength = 3;
+    if (contact.firstName.length < minContactLength) {
+      throw new Error(
+        `First Name must be at least ${minContactLength} characters.`
+      );
+    }
+
+    if (contact.lastName.length < minContactLength) {
+      throw new Error(
+        `Last Name must be at least ${minContactLength} characters.`
+      );
+    }
+
+    if (contact.id) {
+      //if id, update contact
+      return fetch(`${base}/contacts/${contact.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contact), // body data type must match "Content-Type" header
+      });
+    } else {
+      //if no id, create contact
+      return fetch(`${base}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contact), // body data type must match "Content-Type" header
+      }).then((resp) => resp.json());
+    }
+  }
+
+  static deleteContact(contactId) {
+    return fetch(`${base}/contacts/${contactId}`, { method: 'DELETE' });
+  }
+
+  static async registerNotification(fn) {
+    if (this.ws === null) {
+      // this.ws = {};
+      const res = await fetch(`${base}/negotiate`);
+      const url = await res.json();
+      this.ws = new WebSocket(url.url);
+
+      this.ws.onopen = () => console.log('connected');
+
+      this.ws.onmessage = () => {
+        fn();
+      };
+    }
+  }
+
+  static async unregisterNotification() {
+    if (this.ws !== null) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+  static resetContacts() {
+    return fetch(`${base}/contacts/reset`);
+  }
+}
+```
+
+```jsx src/App.js
+import { useEffect, useState, Suspense, use } from 'react';
+import { removeFromCache, fetchData } from './fetchData';
+import useRerender from './useRerender';
+import ContactApi from './ContactApi';
+import ContactTable from './ContactTable';
+
+export default function App() {
+  return (
+    <Suspense fallback={<div className='spinner' />}>
+      <ContactContainer />
+    </Suspense>
+  );
+}
+
+function ContactContainer() {
+  const contacts = ContactApi.getAllContacts();
+  const forceRerender = useRerender();
+
+  // Effect to register for change notification
+  // useEffect(() => {
+  //   ContactApi.registerNotification(refreshData);
+  //   return () => {
+  //     ContactApi.unregisterNotification();
+  //   };
+  // }, []);
+
+  async function modifyContact(formData) {
+    const contact = Object.fromEntries(formData);
+    if (contact.id === '0') contact.id = 0;
+    if (contact.id === null) return;
+    await ContactApi.saveContact(contact);
+    await ContactApi.refreshContacts();
+    forceRefresh();
+  }
+
+  async function deleteContact(id) {
+    await ContactApi.deleteContact(id);
+  }
+
+  return (
+    <>
+      <h1>Contacts (using Hooks)</h1>
+      <ContactTable
+        contacts={contacts}
+        modifyContact={modifyContact}
+        deleteContact={deleteContact}
+      />
+    </>
+  );
+}
+```
+
+```jsx src/ContactTable.jsx
+import { useState, useActionState, useOptimistic } from 'react';
+import { removeFromCache, fetchData } from './fetchData';
+
+export default function ContactTable({
+  contacts,
+  modifyContact,
+  deleteContact,
+}) {
+  const [modificationRow, setModificationRow] = useState(null);
+  const [optimisticContacts, setOptimisticContacts] = useOptimistic(
+    contacts,
+    (contacts, newContact) =>
+      newContact.id === 0
+        ? [...contacts, newContact]
+        : contacts.map((c) => (c.id === newContact.id ? newContact : c))
+  );
+  const [ctx, submitAction, isPending] = useActionState(
+    async (previousState, formData) => {
+      setOptimisticContacts(Object.fromEntries(formData));
+      setModificationRow(null);
+
+      await modifyContact(formData);
+      return null;
+    },
+    null
+  );
+
+  function modifyRow(id) {
+    setModificationRow(id);
+  }
+
+  return (
+    <form action={submitAction}>
+      <table>
+        <thead>
+          <tr>
+            <th style={{ maxWidth: 70 }}>id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {optimisticContacts.map((contact) =>
+            contact.id === modificationRow && !isPending ? (
+              <EditRow key={contact.id} contact={contact} setRow={modifyRow} />
+            ) : (
+              <Row
+                key={contact.id}
+                contact={contact}
+                setRow={modifyRow}
+                deleteContact={deleteContact}
+              />
+            )
+          )}
+        </tbody>
+        <tfoot>
+          {modificationRow === 0 ? (
+            <EditRow
+              contact={{ id: 0, firstName: '', lastName: '', email: '' }}
+              setRow={modifyRow}
+            />
+          ) : (
+            <tr>
+              <td colSpan={5}>
+                <button
+                  title='Create Contact'
+                  type='button'
+                  onClick={() => {
+                    setModificationRow(0);
+                  }}
+                >
+                  ➕ Create Contact
+                </button>
+              </td>
+            </tr>
+          )}
+        </tfoot>
+      </table>
+    </form>
+  );
+}
+
+function Row({ contact, setRow, deleteContact }) {
+  return (
+    <tr key={contact.id}>
+      <td
+        style={{
+          maxWidth: 70,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+        title={contact.id.toString()}
+      >
+        {contact.id}
+      </td>
+      <td>{contact.firstName}</td>
+      <td>{contact.lastName}</td>
+      <td>
+        <a href={`mailto:{contact.email}`}>{contact.email}</a>
+      </td>
+      <td style={{ display: 'flex' }}>
+        <button
+          title='Edit'
+          type='button'
+          onClick={() => {
+            setRow(contact.id);
+          }}
+        >
+          🖊️
+        </button>
+        <button
+          title='Details'
+          type='button'
+          onClick={() => alert(`goto details for ${contact.firstName}`)}
+        >
+          🧾
+        </button>
+        <button
+          title='Delete'
+          type='button'
+          onClick={() => deleteContact(contact.id)}
+        >
+          🗑️
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+function EditRow({ contact, setRow }) {
+  return (
+    <tr key={contact.id} className='bg-warning'>
+      <td style={{ maxWidth: 70 }} title={contact.id.toString()}>
+        <input name='id' placeholder='ID' defaultValue={contact.id} readOnly />
+      </td>
+      <td>
+        <input
+          name='firstName'
+          placeholder='First Name'
+          defaultValue={contact.firstName}
+        />
+      </td>
+      <td className='align-middle'>
+        <input
+          name='lastName'
+          placeholder='Last Name'
+          defaultValue={contact.lastName}
+        />
+      </td>
+      <td className='align-middle'>
+        <input
+          name='email'
+          placeholder='name@email.com'
+          defaultValue={contact.email}
+        />
+      </td>
+      <td>
+        <button title='Save' type='submit'>
+          ✔️
+        </button>
+        <button
+          title='Cancel'
+          type='button'
+          onClick={() => {
+            setRow(null);
+          }}
+        >
+          ❌
+        </button>
+      </td>
+    </tr>
+  );
+}
+```
+
+```jsx src/fetchData.js
+let cache = new Map();
+
+//this fetchData uses simple caching
+export function fetchData(url, options) {
+  if (!cache.has(url)) {
+    cache.set(url, getData(url, options));
+  }
+  return cache.get(url);
+}
+
+async function getData(url, options) {
+  const { delay, ...rest } = options ?? {};
+
+  //artificial delay
+  if (delay) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
+  }
+
+  const response = await fetch(url, rest);
+  return await response.json();
+}
+
+export function removeFromCache(url) {
+  if (cache.has(url)) {
+    cache.delete(url);
+  }
+}
+```
+
+```jsx src/useRerender.jsx
+import { useState } from 'react';
+
+export default function useRerender() {
+  const [, setRerender] = useState();
+
+  function forceRerender() {
+    setRerender({});
+  }
+
+  return forceRerender;
+}
+```
+
+```css
+table {
+  border-collapse: collapse;
+}
+
+table > * > * > * {
+  border-width: 0px;
+  border-bottom-width: 1px;
+  border-color: #dddddd;
+  border-style: solid;
+}
+
+table > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+table th {
+  text-align: left;
 }
 
 button {
