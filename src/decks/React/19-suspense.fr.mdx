@@ -16,7 +16,7 @@ import mcuFiles from './mcu/mcu.js';
 - Un composant qui ne peut compléter son rendu va aussi interrompre le rendu de son parent.
 - L'interruption remonte jusqu'à ce qu'on rencontre un parent qui intercepte l'erreur ou l'attente
 - Cette interception se fait avec un composant `<ErrorBoundery>` ou `<Suspense>`
-- Plusieurs Frameworks incluent un `<ErrorBoundary>` global
+- Tous les Frameworks incluent leur propre `<ErrorBoundary>` global
 
 ---
 
@@ -31,7 +31,7 @@ import mcuFiles from './mcu/mcu.js';
 
 ## Utiliser Suspense
 
-Enlevez le Suspense
+Test: Enlevez le Suspense
 
 <Sandpack files={mcuFiles} >
 
@@ -40,8 +40,6 @@ import { use, Suspense, useRef } from 'react';
 import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
 import { fetchData, removeFromCache } from './fetchData';
-//FetchData is a fetch that uses simple caching.
-//simple but it works
 
 const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
 const defaultLimit = 3;
@@ -114,8 +112,6 @@ import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
 import { fetchData, removeFromCache } from './fetchData';
-//FetchData is a fetch that uses simple caching.
-//simple but it works
 
 const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
 const defaultLimit = 3;
@@ -164,7 +160,7 @@ function Movies({ moviePromise }) {
 
 ## Error Boundary with "Fallback Component"
 
-Will push extra props to the fallback.
+Le fallback a accès des paramètres.
 
 <Sandpack files={mcuFiles}  >
 
@@ -174,8 +170,6 @@ import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import DisplayMovies from './DisplayMovies';
 import useRerender from './useRerender';
 import { fetchData, removeFromCache } from './fetchData';
-//FetchData is a fetch that uses simple caching.
-//simple but it works
 
 const baseUrl = 'https://mcuapi.herokuapp.com/api/v1/movies?limit=';
 const defaultLimit = 3;
@@ -217,7 +211,8 @@ function Movies({ moviePromise }) {
   const rawData = use(moviePromise);
   const movies = rawData.data.toSorted(
     (a, b) =>
-      new Date(a.release_date).valueOf() - new Date(b.release_date).valueOf()
+      new Date(a.release_date).valueOf() - //
+      new Date(b.release_date).valueOf()
   );
 
   return <DisplayMovies movies={movies} />;

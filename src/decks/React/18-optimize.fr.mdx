@@ -40,15 +40,16 @@ Il y a plusieurs approches pour optimiser la performace des applications React.
 
 ---
 
-## Bonne pratiques REACT
+## Bonne pratiques React Server
 
 - Permettre de pré-générer le html sur le serveur
-- Permet d'éviter le phénomème de la page blanche
+- Évite la "page blanche initiale" pendant le chargement du JS
 
-- Client-Side Rendering (CSR) génère le html sur le navigateur
+- Client-Side Rendering (CSR) génère le html sur le navigateur (Page blanche)
 - Static-Side Generation (SSG) pré-génère le html au moment du build
 - Server-Side Rendering (SSR) génère le html sur le serveur au moment de la requête
 - Modèles hybrides, certaines pages sont SSG et d'autres sont SSR
+- React Server Component (RSC) permet une architecture où certains composants sont serveurs, d'autres sont clients, d'autres sont les deux.
 
 ---
 
