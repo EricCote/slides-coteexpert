@@ -40,7 +40,7 @@ title: 'Éliminer les Effects inutiles'
     - React appelle l'Effect
     - React cédule le changement de state et un nouveau rendu
     - React fait un second rendu avec les données filtrées
-  - Ces transformations peuvent être appelées du rendu du composant
+  - Ces transformations devraient être appelées directement du rendu, sans Effect
 - **Gérer un événement utilisateur**
   - On pourrait gérer le POST vers '/api/buy' avec un Effect.
   - Mais au moment de l'exécution de l'effect, il n'est plus possible de déterminer l'action exacte de l'utilisateur (ex: le bouton cliqué)
@@ -57,7 +57,8 @@ title: 'Éliminer les Effects inutiles'
 
 ## Problème: Utiliser un Effect pour modifier un prop ou un état
 
-Suppose you have a component with two state variables: `firstName` and `lastName`. You want to calculate a `fullName` from them by concatenating them. Moreover, you'd like `fullName` to update whenever `firstName` or `lastName` change. Your first instinct might be to add a `fullName` state variable and update it in an Effect:
+- Imaginons un `fullName` dérivant de `firstName` et `lastName`
+- On pourrait imaginer gérer `fullName` dans un état, synchronisé via un Effect: (Mauvais)
 
 ```js {5-9}
 function Form() {
@@ -73,11 +74,12 @@ function Form() {
 }
 ```
 
+- Mauvais: ceci génère des rendus additionnels
+- un premier rendu avec le `fullName` moisi, et un second avec le `fullName` mis à jour
+
 ---
 
 ## Solution: Calculer la valeur durant le rendu
-
-This is more complicated than necessary. It is inefficient too: it does an entire render pass with a stale value for `fullName`, then immediately re-renders with the updated value. Remove the state variable and the Effect:
 
 ```js {4-5}
 function Form() {
@@ -89,13 +91,16 @@ function Form() {
 }
 ```
 
-**When something can be calculated from the existing props or state, [don't put it in state.](/learn/choosing-the-state-structure#avoid-redundant-state) Instead, calculate it during rendering.** This makes your code faster (you avoid the extra "cascading" updates), simpler (you remove some code), and less error-prone (you avoid bugs caused by different state variables getting out of sync with each other). If this approach feels new to you, [Thinking in React](/learn/thinking-in-react#step-3-find-the-minimal-but-complete-representation-of-ui-state) explains what should go into state.
+- Ce que l'on peut calculer (à partir de props ou d'état) ne devrait pas être stocké dans un état, mais plutôt calculé au rendu.
+  - Plus rapide (on évite des rendus additionnels)
+  - Plus simple
+  - Moins de bogues
 
 ---
 
 ## Problème: Utiliser Effect pour faire du travail ou des calculs
 
-This component computes `visibleTodos` by taking the `todos` it receives by props and filtering them according to the `filter` prop. You might feel tempted to store the result in state and update it from an Effect:
+- Voici un autre mauvais exemple, pour fitrer le visuel d'une liste.
 
 ```js {4-8}
 function TodoList({ todos, filter }) {
@@ -115,7 +120,7 @@ function TodoList({ todos, filter }) {
 
 ## Solution 1: Faire le travail ou le calcul dans le rendu
 
-Like in the earlier example, this is both unnecessary and inefficient. First, remove the state and the Effect:
+On peut éliminer l'État et l'Effect
 
 ```js {3-4}
 function TodoList({ todos, filter }) {
@@ -130,9 +135,9 @@ function TodoList({ todos, filter }) {
 
 ## Solution 2: Cacher le résultat quand le travail est long
 
-Usually, this code is fine! But maybe `getFilteredTodos()` is slow or you have a lot of `todos`. In that case you don't want to recalculate `getFilteredTodos()` if some unrelated state variable like `newTodo` has changed.
+Si `getFilteredTodos()` est lent ou qu'il y a beaucoup de `todos`, il faut limiter le nombre d'appels à la fonction
 
-You can cache (or ["memoize"](https://en.wikipedia.org/wiki/Memoization)) an expensive calculation by wrapping it in a [`useMemo`](/reference/react/useMemo) Hook:
+On peut cacher le résultat dans une mémoïsation avec `useMemo`
 
 ```js {5-8}
 import { useMemo, useState } from 'react';
@@ -147,7 +152,7 @@ function TodoList({ todos, filter }) {
 }
 ```
 
-Or, written as a single line:
+Écrit de facon courte:
 
 ```js {5-6}
 import { useMemo, useState } from 'react';
@@ -163,15 +168,16 @@ function TodoList({ todos, filter }) {
 }
 ```
 
-**This tells React that you don't want the inner function to re-run unless either `todos` or `filter` have changed.** React will remember the return value of `getFilteredTodos()` during the initial render. During the next renders, it will check if `todos` or `filter` are different. If they're the same as last time, `useMemo` will return the last result it has stored. But if they are different, React will call the inner function again (and store its result).
+On n'exécute pas la fonction tant que `todos` or `filter` conservent leurs valeurs. On retourne plutôt le dernier résultat caché.
 
-The function you wrap in [`useMemo`](/reference/react/useMemo) runs during rendering, so this only works for [pure calculations.](/learn/keeping-components-pure)
+La fonction passée à `useMemo` doit être pure, car elle roule pendant un rendu.
 
 ---
 
 ## Déterminer si un calcul est long
 
-In general, unless you're creating or looping over thousands of objects, it's probably not expensive. If you want to get more confidence, you can add a console log to measure the time spent in a piece of code:
+- Si l'on créé ou l'on boucle sur des milliers d'objets, l'exécution peut être lente.
+- On peut utiliser la console pour mesurer la durée d'une fonction
 
 ```js {1,3}
 console.time('filter array');
@@ -179,7 +185,8 @@ const visibleTodos = getFilteredTodos(todos, filter);
 console.timeEnd('filter array');
 ```
 
-Perform the interaction you're measuring (for example, typing into the input). You will then see logs like `filter array: 0.15ms` in your console. If the overall logged time adds up to a significant amount (say, `1ms` or more), it might make sense to memoize that calculation. As an experiment, you can then wrap the calculation in `useMemo` to verify whether the total logged time has decreased for that interaction or not:
+- Le résulat sera: `filter array: 0.15ms`
+- Si la durée est significative (plus de `1ms`), on pourrait mémoïser avec `useMemo`
 
 ```js
 console.time('filter array');

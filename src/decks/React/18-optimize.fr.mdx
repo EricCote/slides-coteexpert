@@ -1,5 +1,5 @@
 ---
-Title: Optimisation
+title: Optimisation
 ---
 
 import nameGen from './18-optimize/nameGen.js';
@@ -25,7 +25,7 @@ Il y a plusieurs approches pour optimiser la performace des applications React.
 - On élimine le code non-nécessaire (tree-shaking)
 - React réduit le nombre de 'warnings' envoyés à la console
 - React désactive le `StrictMode`
-  - Le `StrictMode`génère deux rendus la première fois qu'un composant apparait
+  - Le `StrictMode` génère deux rendus et deux effets pour chque rendu demandé
     <hr />
 
 ---
@@ -34,7 +34,7 @@ Il y a plusieurs approches pour optimiser la performace des applications React.
 
 - Réduire la taille du téléchargement
   - Utiliser le bon type d'image (jpeg, png, web, svg)
-  - Uiliser la bonne taille d'image
+  - Uiliser la bonne taille d'image (largeur x hauteur)
   - Ne conserver que les classes CSS nécessaires
   - Activer la compression GZIP sur http
 
@@ -74,6 +74,11 @@ Il y a plusieurs approches pour optimiser la performace des applications React.
 
 ## Composants controllés
 
+- Un composant controllé est géré par React
+  - Provoque un re-rendu à chaque lettre tapée
+- Un composant non-controllé n'est pas géré par React
+- Ici, chaque rendu change la couleur du fond
+
 <Sandpack>
 
 ```js
@@ -106,7 +111,7 @@ export default function App() {
     `)
         }
       >
-        Display
+        Submit Values
       </button>
     </div>
   );
@@ -138,6 +143,17 @@ button {
 ---
 
 ## Liste avec "memoization"
+
+Quand on appelle un composant mémoïsé avec:
+
+- Les mêmes props:
+  - On retourne le virtual DOM précédent
+- De nouvelles props:
+  - On exécute le rendu et on le sauvegarde
+    <hr /> {/* */}
+- À tester avec Dev tools:
+  - Avec et sans `Memoization`
+  - Avec et sans `key`
 
 <Sandpack  files={{'src/nameGen.js': nameGen}}>
 
@@ -218,14 +234,13 @@ button {
 
 </Sandpack>
 
-<br />À tester avec Dev tools:
-
-- Avec et sans `Memoization`
-- Avec et sans `key`
-
 ---
 
 ## Liste avec useCallback
+
+- Pour conserver l'identité d'un callback, on utilise useCallback
+- Avec Dev Tools
+  - Tester avec et sans `useCallBack`
 
 <Sandpack  files={{'src/nameGen.js': nameGen}}>
 
@@ -313,10 +328,6 @@ button {
 ```
 
 </Sandpack>
-<br/>
-Avec Dev Tools
-
-- tester avec et sans `useCallBack`
 
 ---
 
@@ -328,20 +339,60 @@ Avec Dev Tools
   - Sa portée est limitée à l'appel de la fonction englobante (ou closure)
 - `useCallback` permet de conserver une référence à une fonction imbriquée
   - Sa portée est au niveau du composant (Hook) et du tableau de dépendances
+- Sans `useCallback`, la `mémoïsation` échoue dans les scénarios avec callback
 
 ---
 
 ## Difficultés de useCallback
 
-- Si c'est pour modifier un state, il faut réécrire le setState avec une fonction _setter_.
-- Il faut mettre les bonnes dépendances dans le tableau de dépendances.
+- S'il y a du code pour modifier un état, il faut réécrire le setState avec une fonction _updater_. (Sinon, le callback est regénéré à chaque modification d'état)
+
+```js
+const [list, setList] = useState([]);
+
+// good ✅
+const removeMessage = useCallback((message) => {
+  setList((list) => list.filter((x) => x.message !== message));
+}, []);
+
+// bad 🚫
+const removeMessage = useCallback(
+  (message) => {
+    setList(list.filter((x) => x.message !== message));
+  },
+  [list]
+);
+```
+
+- Ne pas oublier les bonnes dépendances dans le tableau de dépendances.
 - C'est complexe à gérer partout.
 
 ---
 
+## useMemo
+
+- Permet de mémoïser le résultat d'une fonction
+- Tant que les dépendances ne changent pas, on utilise le résultat en cache
+- Permet de réduire le temps d'éxécution quand le résultat est caché
+- Permet d'éviter des re-rendus quand on utilise avec `React.memo`
+- Ré-exécute le code quand les dépendances changent
+
+  <hr />
+
+- Similaire à `useCallback`, mais ce dernier mémoïse la fonction (pas le résultat de l'exécution)
+- Permet d'éviter des re-rendus quand on passe des fonctions à des composants mémoïsés
+- Dans les coulisses, l'implantation de `useCallback` dépend de `useMemo`
+
+```js
+// Simplified implementation (inside React)
+function useCallback(fn, dependencies) {
+  return useMemo(() => fn, dependencies);
+}
+```
+
 ## Fonctionalité Future
 
-**React-Compiler** va automatiquement générer de la _mémoization_ ainsi que les `useCallbacks`.
+**React-Compiler** va automatiquement générer de la _mémoïsation_ ainsi que les `useCallbacks`.
 
 - Prévu en 2025
 - Possède aussi des optimisations additionnelles pour le code
