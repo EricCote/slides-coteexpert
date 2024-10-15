@@ -94,7 +94,7 @@ Il faut:
 Le Hook [`useState`](https://reactjs.org/reference/react/useState) fournit ces deux choses.
 
 1. **Variable state (État)** Garde les données entre les rendus.
-2. **Fonction state setter (Fonction modification d'état)** pour modifier la donnée et générer un rendu.
+2. **Fonction setter ou setState (Fonction modification d'état)** pour modifier la donnée et générer un rendu.
 
 ---
 
@@ -115,17 +115,7 @@ const [data, setData] = useState(0);
 
 ## Modifier le state
 
-<TwoColumns top>
-
 On modifie le state dans `handleClick`.
-
-```js
-function handleClick() {
-  setIndex(index + 1);
-}
-```
-
-</TwoColumns>
 
 <Sandpack    files={{
     "src/data.js": myFile
@@ -190,7 +180,7 @@ button {
 - `useState` n'est pas le seul _hook_. Toute fonction démarrant par "`use`" est un _hook_.
 - Les _hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://reactjs.org/learn/render-and-commit#step-1-trigger-a-render).
 - Les _hooks_ permettent de se connecter ("hook into") dans les fonctionnalités de React.
-- L'état (State) est une fonctionalité, mais on en verra d'autres.
+- L'état (State) est une fonctionnalité, mais on en verra d'autres.
 
 ---
 
@@ -207,7 +197,7 @@ On ne peut **PAS** appeler un hook dans:
 - une boucle
 - une fonction imbriquée (gestionnaire d'événements).
 
-Même si les hooks sont des fonctions, vaut mieux considérer ceux-ci comme des déclarations des besoins de votre composant. On utilise les fonctionalités React au "top niveau" d'un composant, de la même façon qu'on importe les modules au début des fichiers.
+Même si les hooks sont des fonctions, vaut mieux considérer ceux-ci comme des déclarations des besoins de votre composant. On utilise les fonctionnalités React au "top niveau" d'un composant, de la même façon qu'on importe les modules au début des fichiers.
 
 ---
 
@@ -873,9 +863,9 @@ Le rendu doit toujours être une [fonction pure](https://react.dev/learn/keeping
 - **'Mêmes entrées, mêmes sorties'** Avec les même entrées et paramètres, le composant retourne le même JSX
 - **On ne touche à rien à l'extérieur du composant** On ne doit modifier ni objets, ni variables existantes.
 
-  - Si on oublie ces pricipes, on pourrait rencontrer des bogues difficiles à détecter.
-  - Quand on développe en **Strict Mode**, React appelle chaque fonction 2 fois au rendu initial.
-  - Ceci aide à détecter les fonctions impures.
+  - Si on oublie ces principes, on pourrait rencontrer des bogues difficiles à détecter
+  - Quand on développe en **Strict Mode**, React appelle chaque fonction 2 fois au rendu
+  - Ceci aide à détecter les fonctions impures
 
 ---
 

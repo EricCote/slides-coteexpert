@@ -41,7 +41,7 @@ Que faire s'il y a un effet de bord, mais qu'il n'y a pas d'événement spécifi
 - C'est utile pour se synchroniser avec un système externe
 - Mais c'est trop si c'est pour modifier le state en fonction d'un autre state
 
-**Note:** On utilisera _Effect_ pour parler de la fonctionalité offerte par `useEffect`.
+**Note:** On utilisera _Effect_ pour parler de la fonctionnalité offerte par `useEffect`.
 
 ---
 
@@ -102,9 +102,9 @@ function VideoPlayer({ src, isPlaying }) {
 
 ---
 
-## Ne pas référer au DOM pendant le render
+## Ne pas référer au DOM pendant le rendu
 
-On serait tenté d'appeler `play()` ou `pause()` pendant le render, mais ça ne fonctionne pas:
+On serait tenté d'appeler `play()` ou `pause()` pendant le rendu, mais ça ne fonctionne pas:
 
 <Sandpack >
 
@@ -608,7 +608,7 @@ input {
 
 </Sandpack>
 
-`Connecting...` apparaît deux fois car, en mode _dev_ avec `<StrictMode>`, le rendu initial roule deux fois, **incluant** les _Effects_.
+`Connecting...` apparaît deux fois car, en mode _dev_ avec `<StrictMode>`, le rendu roule deux fois, **incluant** les _Effects_.
 
 ---
 

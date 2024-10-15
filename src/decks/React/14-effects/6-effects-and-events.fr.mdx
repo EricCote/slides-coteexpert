@@ -8,36 +8,39 @@ title: 'Effects et Événements'
 
 ## Intro
 
-Event handlers only re-run when you perform the same interaction again. Unlike event handlers, Effects re-synchronize if some value they read, like a prop or a state variable, is different from what it was during the last render. Sometimes, you also want a mix of both behaviors: an Effect that re-runs in response to some values but not others. This page will teach you how to do that.
+- Les gestionnaires d'événements ré-exécutent quand on répète les mêmes interactions.
+- Mais les Effects re-synchronisent si une valeur lue (tel prop ou tel état) est différent du dernier rendu.
+- Différentes valeurs sont utilisées par différents Effects.
 
 ---
 
 ## Contenu
 
-- How to choose between an event handler and an Effect
-- Why Effects are reactive, and event handlers are not
-- What to do when you want a part of your Effect's code to not be reactive
-- What Effect Events are, and how to extract them from your Effects
-- How to read the latest props and state from Effects using Effect Events
+- Comment choisir entre festionnaire d'événement et Effect
+- Pourquoi les Effects sont réactifs, mais pas les gestionnaires d'événements
+- Que faire pour qu'une partie de l'Effet ne soit pas réactive
+- Comment utiliser un Événement d'Effect
+- Comment lire les props et l'état avec un Événment d'Effect
 
 ---
 
 ## Choisir entre gestionnaires d'événement et Effects
 
-First, let's recap the difference between event handlers and Effects.
+Il faut déterminer pourquoi le code doit rouler.
 
-Imagine you're implementing a chat room component. Your requirements look like this:
-
-1. Your component should automatically connect to the selected chat room.
-1. When you click the "Send" button, it should send a message to the chat.
-
-Let's say you've already implemented the code for them, but you're not sure where to put it. Should you use event handlers or Effects? Every time you need to answer this question, consider [_why_ the code needs to run.](/learn/synchronizing-with-effects#what-are-effects-and-how-are-they-different-from-events)
+- Parce qu'une interaction utilisateur génère une action?
+- Parce qu'on veut synchroniser un système externe suite à un affichage?
 
 ---
 
-## Gestionnaires d'événements exécutent suite à des interactions
+## Exemple de clavardage
 
-From the user's perspective, sending a message should happen _because_ the particular "Send" button was clicked. The user will get rather upset if you send their message at any other time or for any other reason. This is why sending a message should be an event handler. Event handlers let you handle specific interactions:
+- Imaginons un composant clavardage, avec les besoins suivants:
+
+1. Le composant se connecte à une salle de clavardage
+1. Quand on clique "Send", un message est envoyé à la salle de clavardage
+
+- Pour le bouton "Send", un gestionnaire d'événement sur le clic s'impose
 
 ```js {4-6}
 function ChatRoom({ roomId }) {
@@ -56,15 +59,12 @@ function ChatRoom({ roomId }) {
 }
 ```
 
-With an event handler, you can be sure that `sendMessage(message)` will _only_ run if the user presses the button.
-
 ---
 
 ## Effects exécutent quand la synchro est nécessaire
 
-Recall that you also need to keep the component connected to the chat room. Where does that code go?
-
-The _reason_ to run this code is not some particular interaction. It doesn't matter why or how the user navigated to the chat room screen. Now that they're looking at it and could interact with it, the component needs to stay connected to the selected chat server. Even if the chat room component was the initial screen of your app, and the user has not performed any interactions at all, you would _still_ need to connect. This is why it's an Effect:
+- On se connecte au clavardage, même sans interaction utilisateur
+- C'est un Effect
 
 ```js {3-9}
 function ChatRoom({ roomId }) {
@@ -80,11 +80,13 @@ function ChatRoom({ roomId }) {
 }
 ```
 
-With this code, you can be sure that there is always an active connection to the currently selected chat server, _regardless_ of the specific interactions performed by the user. Whether the user has only opened your app, selected a different room, or navigated to another screen and back, your Effect ensures that the component will _remain synchronized_ with the currently selected room, and will [re-connect whenever it's necessary.](/learn/lifecycle-of-reactive-effects#why-synchronization-may-need-to-happen-more-than-once)
+- Le code se connecte et re-connecte au clavardage quand c'est nécessaire
 
 ---
 
-## Exemple
+## Exemple Clavadage
+
+- Les détails sont dans la console
 
 <Sandpack>
 
@@ -170,13 +172,18 @@ select {
 
 ---
 
-## Valeurs réactives et logique réactive
+## Valeurs réactives
 
-Intuitively, you could say that event handlers are always triggered "manually", for example by clicking a button. Effects, on the other hand, are "automatic": they run and re-run as often as it's needed to stay synchronized.
+- Les gestionnaires d'événements sont déclanchées "manuellement" (clic du bouton)
+- Les Effects sont automatiques
+  - ré-exécutent autant de fois que nécessaire pour garder la synchro
 
-There is a more precise way to think about this.
+<hr />
 
-Props, state, and variables declared inside your component's body are called "reactive values". In this example, `serverUrl` is not a reactive value, but `roomId` and `message` are. They participate in the rendering data flow:
+- Les props, l'état et les variables du composant sont des **valeurs réactives**
+- Dans l'exemple suivant:
+  - `serverUrl` n'est pas une valeur réactive
+  - `roomId` et `message` sont réactifs car ils participent au rendu
 
 ```js [[2, 3, "roomId"], [2, 4, "message"]]
 const serverUrl = 'https://localhost:1234';
@@ -188,18 +195,31 @@ function ChatRoom({ roomId }) {
 }
 ```
 
-Reactive values like these can change due to a re-render. For example, the user may edit the `message` or choose a different `roomId` in a dropdown. Event handlers and Effects respond to changes differently:
+---
 
-- **Logic inside event handlers is _not reactive._** It will not run again unless the user performs the same interaction (e.g. a click) again. Event handlers can read reactive values without "reacting" to their changes.
-- **Logic inside Effects is _reactive._** If your Effect reads a reactive value, [you have to specify it as a dependency.](/learn/lifecycle-of-reactive-effects#effects-react-to-reactive-values) Then, if a re-render causes that value to change, React will re-run your Effect's logic with the new value.
+## Logique réactive (code)
 
-Let's revisit the previous example to illustrate this difference.
+- Les valeurs réactives génèrent un re-rendu quand ils changent
+
+<hr />
+
+- Le code d'un **gestionnaire d'événement** n'est **pas réactif**
+- L'événement n'exécute qu'avec interaction (clic du bouton)
+- Les changements d'état n'affectent pas les événements
+
+<hr />
+
+- Le code d'un **Effect** est **réactif**.
+- Si React lit une valeur réactive
+  - Il faut l'ajouter dans la liste de dépendances
+- Un re-rendu peut être causé suite à un changement d'une valeur réactive
+  - Le code de l'Effect exécute suite à la modification d'une dépendance
 
 ---
 
 ## Logique dans les gestionnaires d'événement n'est pas réactive
 
-Take a look at this line of code. Should this logic be reactive or not?
+Le code suivant est-il réactif?
 
 ```js [[2, 2, "message"]]
 // ...
@@ -207,7 +227,10 @@ sendMessage(message);
 // ...
 ```
 
-From the user's perspective, **a change to the `message` does _not_ mean that they want to send a message.** It only means that the user is typing. In other words, the logic that sends a message should not be reactive. It should not run again only because the "reactive value" has changed. That's why it belongs in the event handler:
+- Du point de vue utilisateur, changer le message ne signifie **pas** qu'on veut l'envoyer
+- Ceci n'est pas du code réactif
+- N'exécute pas suite au changement d'une valeur réactive
+- On place ce code dans un gestionnaire d'événement
 
 ```js {2}
 function handleSendClick() {
@@ -215,13 +238,13 @@ function handleSendClick() {
 }
 ```
 
-Event handlers aren't reactive, so `sendMessage(message)` will only run when the user clicks the Send button.
+- Ce code exécute suite au clic du bouton "Send"
 
 ---
 
 ## Code dans les Effects est réactif
 
-Now let's return to these lines:
+Le code suivant est-il réactif?
 
 ```js [[2, 2, "roomId"]]
 // ...
@@ -230,7 +253,9 @@ connection.connect();
 // ...
 ```
 
-From the user's perspective, **a change to the `roomId` _does_ mean that they want to connect to a different room.** In other words, the logic for connecting to the room should be reactive. You _want_ these lines of code to "keep up" with the "reactive value", and to run again if that value is different. That's why it belongs in an Effect:
+- Quand on change le `roomId`, on se reconnecte à une salle de clavardage différente
+- La logique de connexion est réactive
+- On place ce code dans un Effect:
 
 ```js {2-3}
 useEffect(() => {
@@ -242,15 +267,14 @@ useEffect(() => {
 }, [roomId]);
 ```
 
-Effects are reactive, so `createConnection(serverUrl, roomId)` and `connection.connect()` will run for every distinct value of `roomId`. Your Effect keeps the chat connection synchronized to the currently selected room.
+- Ré-exécute quand `roomId` change. Synchronise la connexion à la salle selectionnée
 
 ---
 
 ## Extraire la logique non-réactive hors des Effects
 
-Things get more tricky when you want to mix reactive logic with non-reactive logic.
-
-For example, imagine that you want to show a notification when the user connects to the chat. You read the current theme (dark or light) from the props so that you can show the notification in the correct color:
+- Il faut parfois mélanger de la logique réactive et non-réactive ensemble
+- Ajoutons un thème (_dark_ ou _light_) pour afficher la notification avec une couleur associée:
 
 ```js {1,4-6}
 function ChatRoom({ roomId, theme }) {
@@ -263,7 +287,7 @@ function ChatRoom({ roomId, theme }) {
     // ...
 ```
 
-However, `theme` is a reactive value (it can change as a result of re-rendering), and [every reactive value read by an Effect must be declared as its dependency.](/learn/lifecycle-of-reactive-effects#react-verifies-that-you-specified-every-reactive-value-as-a-dependency) Now you have to specify `theme` as a dependency of your Effect:
+- Parce que `theme` est réactif, il faut l'ajouter dans la liste de dépendance de `useEffect`.
 
 ```js {5,11}
 function ChatRoom({ roomId, theme }) {
@@ -284,7 +308,7 @@ function ChatRoom({ roomId, theme }) {
 
 ## Code
 
-Play with this example and see if you can spot the problem with this user experience:
+En jouant avec cet exemple, trouvez le problème
 
 <Sandpack>
 
@@ -992,19 +1016,11 @@ Effect Events are non-reactive "pieces" of your Effect code. They should be next
 
 ---
 
-## Défis
+## Défi 6.1
 
-## Réparer une variable qui ne se met pas à jour
+#### Réparer une variable qui ne se met pas à jour
 
-This `Timer` component keeps a `count` state variable which increases every second. The value by which it's increasing is stored in the `increment` state variable. You can control the `increment` variable with the plus and minus buttons.
-
-However, no matter how many times you click the plus button, the counter is still incremented by one every second. What's wrong with this code? Why is `increment` always equal to `1` inside the Effect's code? Find the mistake and fix it.
-
-<Hint>
-
-To fix this code, it's enough to follow the rules.
-
-</Hint>
+Ce composant augmente le compteur de `increment` à chaque seconde. Mais quand on modifie `increment`, cela n'affecte pas l'affichage. Réparez.
 
 <Sandpack>
 
@@ -1066,17 +1082,13 @@ button {
 
 ---
 
-## Réparer un compteur qui gèle
+## Défi 6.2
 
-This `Timer` component keeps a `count` state variable which increases every second. The value by which it's increasing is stored in the `increment` state variable, which you can control it with the plus and minus buttons. For example, try pressing the plus button nine times, and notice that the `count` now increases each second by ten rather than by one.
+#### Réparer un compteur qui gèle
 
-There is a small issue with this user interface. You might notice that if you keep pressing the plus or minus buttons faster than once per second, the timer itself seems to pause. It only resumes after a second passes since the last time you've pressed either button. Find why this is happening, and fix the issue so that the timer ticks on _every_ second without interruptions.
+Si on clique le bouton "+" et "-" plusieurs fois rapidement, le compteur gèle pendant l'interaction, et dégèle une seconde après la dernière interaction.
 
-<Hint>
-
-It seems like the Effect which sets up the timer "reacts" to the `increment` value. Does the line that uses the current `increment` value in order to call `setCount` really need to be reactive?
-
-</Hint>
+Réparez pour que le compteur compte sans aucune interruption.
 
 <Sandpack>
 
@@ -1152,15 +1164,23 @@ button {
 
 </Sandpack>
 
+<Hint>
+
+Utilisez `useEffectEvent`
+
+</Hint>
+
 ---
 
-## Réparer un délai non-ajustable
+## Défi 6.3
 
-In this example, you can customize the interval delay. It's stored in a `delay` state variable which is updated by two buttons. However, even if you press the "plus 100 ms" button until the `delay` is 1000 milliseconds (that is, a second), you'll notice that the timer still increments very fast (every 100 ms). It's as if your changes to the `delay` are ignored. Find and fix the bug.
+#### Réparer un délai non-ajustable
+
+Le délai est ignoré quand on modifie sa valeur. Réparez le bogue.
 
 <Hint>
 
-Code inside Effect Events is not reactive. Are there cases in which you would _want_ the `setInterval` call to re-run?
+Éliminez un des `useEffectEvent` et ramenez ce code dans `useEffect`.
 
 </Hint>
 
@@ -1268,17 +1288,17 @@ button {
 
 ---
 
-## Réparer un délai de notification
+## Défi 6.4
 
-When you join a chat room, this component shows a notification. However, it doesn't show the notification immediately. Instead, the notification is artificially delayed by two seconds so that the user has a chance to look around the UI.
+#### Réparer un délai de notification
 
-This almost works, but there is a bug. Try changing the dropdown from "general" to "travel" and then to "music" very quickly. If you do it fast enough, you will see two notifications (as expected!) but they will _both_ say "Welcome to music".
+Quand on joint une salle de clavardage, une notification apparait avec 2 secondes de délai.
 
-Fix it so that when you switch from "general" to "travel" and then to "music" very quickly, you see two notifications, the first one being "Welcome to travel" and the second one being "Welcome to music". (For an additional challenge, assuming you've _already_ made the notifications show the correct rooms, change the code so that only the latter notification is displayed.)
+Le bogue, c'est que si on change de salle 2 fois rapidement, la notification affiche 2 fois la dernière salle. Réparez le bogue pour faire apparaitre les différentes salles sélectionnées dans le bon ordre.
 
 <Hint>
 
-Your Effect knows which room it connected to. Is there any information that you might want to pass to your Effect Event?
+Effect sait quelle salle se connecter. Mais le Effect Event ne le sait pas. Faudrait-il un paramètre?
 
 </Hint>
 

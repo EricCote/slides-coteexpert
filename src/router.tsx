@@ -7,7 +7,14 @@ import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/React/14-effects/4-remove-effects.fr.mdx';
+import Status from './decks/React/14-effects/5-effect-lifecycle.fr.mdx';
+//./decks/React/14-effects/3-effects.fr.mdx   (55)
+//./decks/React/14-effects/4-remove-effects.fr.mdx  (43)
+//./decks/React/14-effects/5-effect-lifecycle.fr.mdx (49)
+//./decks/React/14-effects/6-effects-and-events.fr.mdx  (28)
+//./decks/React/14-effects/7-reduce-effect-dependencies.fr.mdx (58)
+//./decks/React/14-effects/8-custom-hooks.fr.mdx  (56)
+
 //import Status2 from './decks/React/5-data/6-effects-and-events.fr.mdx';
 import { useLanguage } from './components/slides/LanguageProvider';
 

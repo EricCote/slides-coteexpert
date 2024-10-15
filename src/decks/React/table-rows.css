@@ -1,0 +1,3 @@
+.my-tbl tr > * {
+  border-bottom: 1px solid;
+}
