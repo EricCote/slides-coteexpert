@@ -34,7 +34,7 @@ Les Actions gèrent l'envoi de données:
 
 ---
 
-## Ancienne façon de gérer les actions
+## Ancienne façon de gérer les formulaires
 
 Approche classique de React 16-17
 
@@ -164,14 +164,15 @@ import { redirect, updateName } from './util.js';
 
 // Using <form> Actions and useActionState
 export default function ChangeName({ name, setName }) {
-  const [error, submitAction, isPending] = useActionState(
-    async (previousState, formData) => {
-      const error = await updateName(formData.get('name'));
+  const [state, submitAction, isPending] = useActionState(
+    async (currentState, formData) => {
+      const name = formData.get('name');
+      const error = await updateName(name);
       if (error) {
-        return error;
+        return { error };
       }
       redirect('/path');
-      return null;
+      return { name };
     },
     null
   );
@@ -180,9 +181,9 @@ export default function ChangeName({ name, setName }) {
     <form action={submitAction}>
       <input type='text' name='name' />
       <button type='submit' disabled={isPending}>
-        Update
+        {isPending ? 'Updating...' : 'Update'}
       </button>
-      {error && <p>{error}</p>}
+      {state?.error && <p>{state.error}</p>}
     </form>
   );
 }
@@ -212,42 +213,49 @@ export async function updateName(name) {
 
 ## useActionState en détail
 
-```jsx
-const [state, submitAction, isPending] = useActionState(
-  async (previousState, newName) => {
-    const data = await updateName(newName);
-    if (data.error) {
-      // You can return any result of the action.
-      // Here, we return the state.
-      return data;
-    }
-
-    // handle success
-    return data;
-  },
-  null
-);
+```js
+const [state, formAction, isPending] = useActionState(fn, initialState, permalink?);
 ```
+
+**fn:** fonction appelée quand le formulaire exécute
+
+```js
+function fn(currentState, formData) {
+  // ...
+  return 'next state';
+}
+```
+
+**initialState:** État initial pour l'action. (Après la première exécution, on utilise plutôt l'état précédent).
+
+**permalink:** Si on utilise du SSR, c'est un hyperlien qui est utilisé par le html avant l'hydratation. Après l'hydratation, c'est React qui gère et ce paramètre n'est plus utilisé.
+
+<hr />
+
+**state:** Au premier rendu, c'est l'état initial. Aux rendus suivants, c'est la valeur de retour de l'action
+
+**action:** Action qu'on peut passer au formulaire. (Voir prochaine diapo)
+
+**isPending:** Indique si nous sommes dans une transition
 
 ---
 
 ## Actions avec `<form>`
 
-On peut passer **action** à `<form>`.
+- On peut passer **action** à `<form>`.
 
 ```jsx
 <form action={actionFunction}>
 ```
 
-On peut passer **formAction** à `<input>` et `<button>` ce qui modifie le **action** du `<form>` parent.
+- On peut passer **formAction** à `<input>` et `<button>` ce qui modifie le **action** du `<form>` parent.
 
 ```jsx
 <input type='submit' formAction={actionFunction} />
 ```
 
-Quand l'action réussit, React fait un reset des composants non-controllés.
-
-On peut appeler `requestFormReset()` pour forcer un reset.
+- Quand l'action complète, React fait un reset des composants non-controllés
+- On peut appeler `requestFormReset()` pour forcer une ré-initialisation
 
 ---
 
@@ -275,21 +283,29 @@ const { pending, data, method, action } = useFormStatus();
 <Sandpack  v19 >
 
 ```jsx src/App.js active
-import { useState, useTransition, useActionState, useOptimistic } from 'react';
+import {
+  useState,
+  useTransition,
+  useActionState,
+  useOptimistic,
+  useRef,
+} from 'react';
 import { useFormStatus } from 'react-dom';
 import { redirect, updateName } from './util.js';
 
 export default function ChangeName() {
   async function submitAction(formData) {
     const data = await updateName(formData.get('name'));
+    return data;
   }
 
   return (
     <form action={submitAction}>
       <Status />
       <p>
-        <label>Change Name: </label>
-        <input type='text' name='name' />
+        <label>
+          Change Name: <input type='text' name='name' />
+        </label>
         <button>Submit</button>
       </p>
     </form>
@@ -297,8 +313,19 @@ export default function ChangeName() {
 }
 
 function Status() {
-  const { pending } = useFormStatus();
-  return pending ? <p>Pending...</p> : <p>Done!</p>;
+  const { pending, data, action, method } = useFormStatus();
+  return pending && <p>Sending</p>;
+
+  // const renderCount = useRef(0);
+  // renderCount.current += 1;
+  // const { pending, data, action, method } = useFormStatus();
+  // return pending ? (
+  //   <p>Sending...</p>
+  // ) : renderCount.current < 3 ? (
+  //   <p>Initial state</p>
+  // ) : (
+  //   <p>Sent!</p>
+  // );
 }
 ```
 
@@ -348,7 +375,9 @@ function ChangeName({ currentName, onUpdateName }) {
 
   return (
     <form action={submitAction}>
-      <p>Your name is: {optimisticName}</p>
+      <p style={{ opacity: currentName !== optimisticName ? 0.5 : 1 }}>
+        Your name is: {optimisticName}
+      </p>
       <p>
         <label>Change Name: </label>
         <input
@@ -374,7 +403,7 @@ export function redirect(page) {
 
 export async function updateName(name) {
   await wait(1000);
-  alert(`Success updating name to '${name}'`);
+  // alert(`Success updating name to '${name}'`);
   return name;
 }
 ```
@@ -428,7 +457,9 @@ function ChangeName({ currentName, onUpdateName }) {
   return (
     <form action={submitAction}>
       <Status />
-      <p>Your name is: {optimisticName}</p>
+      <p style={{ opacity: currentName !== optimisticName ? 0.5 : 1 }}>
+        Your name is: {optimisticName}
+      </p>
       <p>
         <label>Change Name: </label>
         <input
@@ -465,3 +496,149 @@ export async function updateName(name) {
 ```
 
 </Sandpack>
+
+---
+
+## Use(Promise)
+
+Le nouveau hook permet de charger des données de facon asynchrone via `Promise`
+
+Si la `Promise` n'est pas complété, on interompt le render, et on affiche le Suspense parent
+
+Quand la `promise` est complétée, un re-rendu est exécuté, avec le résultat disponible
+
+Voir le chapitre 10 pour des exemples.
+
+---
+
+## Server Components
+
+Permet de générer des composants sur un environnement serveur.
+
+2 modes:
+
+1. Composants générés au moment du build, sur le serveur CI (continuous integration).
+2. Composants générés dynamiquement sur un serveur Web (similaire à PHP ou ASP.NET)
+
+Voir le chapitre 23
+
+---
+
+## Server Actions
+
+Permet d'avoir un "endpoint serveur" qui reçoit une requête asynchrone du client React. Compatible avec le RSC et les nouveaux Actions.
+
+```js
+'use server';
+
+export async function updateName(name) {
+  if (!name) {
+    return { error: 'Name is required' };
+  }
+  await db.users.updateName(name);
+}
+```
+
+Voir chapitre 23
+
+---
+
+## Ref est une prop
+
+Plus besoin d'utiliser `forwardRef()`. Ref est maintenant passé dans nos props de composants
+
+```jsx
+function MyInput({ placeholder, ref }) {
+  return <input placeholder={placeholder} ref={ref} />;
+}
+
+//...
+<MyInput ref={ref} />;
+```
+
+- `forwardRef()` sera déprécié dans une version future
+- Il existe un codemod pour mettre à jour nos apps
+
+---
+
+## `<Context>` est un Provider
+
+On utilise maintenant `<Context>` plutôt que `<Context.Provider>`:
+
+```jsx
+const ThemeContext = createContext('');
+
+function App({ children }) {
+  return <ThemeContext value='dark'>{children}</ThemeContext>;
+}
+```
+
+- `<Context.Provider>` sera déprécié dans une version future
+- Il existe un codemod pour mettre à jour nos apps
+
+---
+
+## Fonction Cleanup pour les refs
+
+Les fonctions de rappel (callback) pour ref peuvent maintenant retourner un cleanup quand le composant est démonté (unmounted)
+
+```jsx
+<div ref={(node) => {
+  console.log(node);
+
+  return () => {
+    console.log('Nettoyage', node)
+  }
+}}>
+```
+
+- Avant, on regardait si la valeur de node était nulle.
+- La valeur de null du node ref sera déprécié dans une version future
+- Il existe un codemod pour mettre à jour nos apps
+
+---
+
+## Valeur initiale pour `useDeferredValue`
+
+```jsx
+function Search({ deferredValue }) {
+  // On initial render the value is ''.
+  // Then a re-render is scheduled with the deferredValue.
+  const value = useDeferredValue(deferredValue, '');
+
+  return <Results data={value} />;
+}
+```
+
+Le second paramètre a été ajouté pour le rendu initial
+
+---
+
+## Métadonnées
+
+Les balises `<title>`, `<link>`, et `<meta>`sont réservées pour la section `<head>`.
+
+Traditionnellement, React ne touche pas au `<head>`. Des librairies (telles que React-Helmet) permettaient de modifier le head.
+
+Dorénavant, quand React détecte une balise de métadonnée dans un composant, cette balise sera automatiquement déplacée par React vers le `<head>`.
+
+```jsx
+function BlogPost({ post }) {
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <title>{post.title}</title>
+      <meta name='author' content='Josh' />
+      <link rel='author' href='https://twitter.com/joshcstory/' />
+      <meta name='keywords' content={post.keywords} />
+      <p>Blah blah blah</p>
+    </article>
+  );
+}
+```
+
+---
+
+## Meilleur support pour les stylesheets
+
+on peut maintenant indiquer l
