@@ -9,28 +9,35 @@ description: other
 
 ## Réagir aux saisies avec l'état
 
-React utilise une approche **déclarative** pour manipuler l'interface.
-Plutôt que de manipuler des pièces individuelles de l'interface, on
-décrit les états du composant, et on bascule d'après les interaction
-de l'usager.
+- React utilise une approche **déclarative** pour manipuler l'interface.
+- On évite de manipuler directement l'interface
+- On décrit les différents états du composant
+- On spécifie les interactions pour basculer entre ces états
 
 ---
 
 ## Approche impérative
 
-Quand on conçoit des interactions, on pense à comment l'interface _change_ en réaction aux actions d'un usager. Considérez un fomulaire avec lequel l'usager envoie une réponse.
+Quand on imagine des interactions, on pense à comment l'interface _change_ en réaction aux actions de l'utilisateur
+
+- Imaginons un fomulaire avec lequel l'usager envoie une réponse:
+
+<hr />
 
 - Quand on tape dans le formulaire, le bouton "Envoyer" **devient actif.**
 - Quand on presse "Envoyer", le bouton et le formulaire **sont désactivés** et un disque rotatif **apparaît.**
 - Si la requête réseau complète avec succès, le formulaire **est caché** et le message "Merci" **apparaît**.
 - Si la requète réseau échoue, un message d'erreur **apparaît** et le formulaire est **réactivé**.
 
-En **programmation impérative**, ces verbes correspondent à comment implanter l'interaction. Il faut traduire ces verbes en instructions et séquences dans un langage de programmation.
+<hr />
+
+- En **programmation impérative**, ces verbes correspondent à comment implanter l'interaction
+- Il faut traduire ces verbes en instructions et séquences dans un langage de programmation.
 
 <Alert>
-  Ça se nomme programmation _impérative_ car il faut donner une "commande" pour
-  chaque élément du résultat. Du plateau rotatif au bouton, il faut expliquer
-  _comment_ modifier l'interface.
+  Ça se nomme **programmation _impérative_** car il faut donner une "commande"
+  pour chaque élément du résultat. Du plateau rotatif au bouton, il faut
+  expliquer _comment_ modifier l'interface.
 </Alert>
 
 ---
@@ -326,7 +333,7 @@ Ces pages sont nommées "guide de styles dynamiques" et _"storybooks"_.
 
 ## Étape 2: Déterminer ce qui provoque les changements d'états
 
-On catégorise les déclancheurs en deux familles:
+On catégorise les déclencheurs en deux familles:
 
 - **Événements utilisateurs** : cliquer un bouton, taper dans un champ, naviguer un lien.
 - **Événements techniques** : réponse d'une requête réseau, un délai qui timeout, une image qui complète son chargeement.

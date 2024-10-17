@@ -9,7 +9,7 @@ title: 'Referencing Values with Refs'
 ## C'est quoi une ref
 
 - Permet de persister une information (similaire à l'État)
-- Ne déclanche pas de nouveau rendu quand on modifie sa valeur (différent de l'État)
+- Ne déclenche pas de nouveau rendu quand on modifie sa valeur (différent de l'État)
 
 ---
 
@@ -312,7 +312,7 @@ console.log(ref.current); // 5
 - Une _ref_ est un simple objet JavaScript avec une seule propriété nommée `current`, que l'on peut lire, modifier ou muter
 - React génère une ref grâce au Hook `useRef`
 - ref persiste `current` entre les re-rendus (similaire à l'état).
-- Modifier la valeur `current` d'un ref ne déclanche pas de re-rendu. (différent de l'état)
+- Modifier la valeur `current` d'un ref ne déclenche pas de re-rendu. (différent de l'état)
 - Éviter `ref.current` dans l'affichage. React ne génère pas de re-rendu
 
 ---

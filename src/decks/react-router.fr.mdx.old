@@ -399,7 +399,7 @@ Composant racine qui gère les routes, l'état (state), les contextes et les re-
 
 ## `<Link to="about">About Us</Link>`
 
-Composant génèrant un hyperlien, capture l'événement clic prenant en charge le "History API".
+Composant générant un hyperlien, capture l'événement clic prenant en charge le "History API".
 
 <hr />
 
