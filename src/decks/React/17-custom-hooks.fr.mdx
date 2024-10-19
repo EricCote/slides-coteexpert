@@ -519,7 +519,7 @@ function Form() {
 
 - C'est comme déclarer 2 variables d'états séparées
 - Un hook personnalisé partage la _logique d'état_, mais pas _l'état_
-- Chaque appel au hook personalisé est indépendant
+- Chaque appel au hook personnalisé est indépendant
 - Si on désire partager l'état, il faut remonter l'état dans l'arborescence
   - Passer l'info vers le bas avec des props (ou un contexte)
 
@@ -713,7 +713,7 @@ export function useChatRoom({ serverUrl, roomId }) {
 
 ## Appeler le hook
 
-- `ChatRoom` appelle le hook personalisé
+- `ChatRoom` appelle le hook personnalisé
   - sans se soucier du fonctionnement
 - Le code semble simplifié (la complexité est déplacée dans le hook)
 
