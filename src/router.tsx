@@ -1,13 +1,14 @@
 import Home from './homepage/Home';
 
 import Sandpack from './components/Sandpack';
+import SandpackWithHTMLOutput from './components/Sandpack/SandpackWithHTMLOutput';
 import Diagram from './components/slides/Diagram';
 import Illustration from './components/slides/Illustration';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
 
-import Status from './decks/React/14-effects/5-effect-lifecycle.fr.mdx';
+import Status from './decks/React/0-javascript.fr.mdx';
 //./decks/React/14-effects/3-effects.fr.mdx   (55)
 //./decks/React/14-effects/4-remove-effects.fr.mdx  (43)
 //./decks/React/14-effects/5-effect-lifecycle.fr.mdx (49)
@@ -20,6 +21,7 @@ import { useLanguage } from './components/slides/LanguageProvider';
 
 const components = {
   Sandpack,
+  SandpackWithHTMLOutput,
   Diagram,
   Illustration,
   Alert({ type = 'primary', children }: { type: string; children: any }) {

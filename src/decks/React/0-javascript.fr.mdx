@@ -1,0 +1,30 @@
+---
+route: javascript
+title: JavaScript Moderne
+description: JavaScript Moderne
+language: fr
+---
+
+# JavasScript Moderne
+
+Présentation par Éric Côté
+
+[React Academy](https://www.reactAcademy.live/)
+
+---
+
+## Exemple de décomposition
+
+<Sandpack s={70}  console>
+
+```js src/index.js active
+const obj = { prenom: 'Tom', nom: 'Hanks' };
+
+const { prenom, nom } = obj; // décomposition simple
+const { prenom: firstName, nom: lastName } = obj; // décomposition avec alias
+
+console.log(`${prenom} ${nom}`); // Tom Hanks
+console.log(`${lastName} ${firstName}`); // Hanks Tom
+```
+
+</Sandpack>

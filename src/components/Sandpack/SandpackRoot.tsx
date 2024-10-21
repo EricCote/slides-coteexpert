@@ -24,7 +24,9 @@ type SandpackProps = {
   files?: object;
   s?: number;
   tailwind?: boolean;
+  daisy?: boolean;
   bootstrap?: boolean;
+  console?: boolean;
   v19?: boolean;
 };
 
@@ -86,8 +88,10 @@ function SandpackRoot(props: SandpackProps) {
     files: additionalFiles,
     s,
     tailwind = false,
+    daisy = false,
     bootstrap = false,
     v19 = false,
+    console = false,
     ...rest
   } = props;
   myOptions = myOptions ?? {};
@@ -96,17 +100,37 @@ function SandpackRoot(props: SandpackProps) {
   if (s) {
     myOptions = { editorWidthPercentage: s, ...myOptions };
   }
+
   if (tailwind) {
     myOptions = {
       externalResources: ['https://cdn.tailwindcss.com'],
       ...myOptions,
     };
   }
+
+  if (daisy) {
+    myOptions = {
+      externalResources: [
+        'https://cdn.tailwindcss.com',
+        'https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css',
+      ],
+      ...myOptions,
+    };
+  }
+
   if (bootstrap) {
     myOptions = {
       externalResources: [
         'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css',
       ],
+      ...myOptions,
+    };
+  }
+
+  if (console) {
+    myOptions = {
+      layout: 'console',
+      showConsoleButton: false,
       ...myOptions,
     };
   }

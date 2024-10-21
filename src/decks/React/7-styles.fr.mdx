@@ -599,79 +599,38 @@ Liste partielle des bibliothèques Tailwind disponibles
 
 ## Exemple DaisyUI
 
-<Sandpack>
-
-```html public/index.html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My app</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.13/dist/full.min.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
-```
+<Sandpack daisy>
 
 ```js
 export default function App() {
-  function submit(evt) {
-    evt.preventDefault();
-    const formData = new FormData(evt.currentTarget);
-    alert(`Sending : ${JSON.stringify(Object.fromEntries(formData))}`);
-  }
-
   return (
-    <div className='h-[100vh] bg-slate-200'>
-      <h1 className='p-2 text-5xl font-extralight text-gray-900'>
-        Custom Form
-      </h1>
-      <p className='p-2'>This is a short form to fill out.</p>
-      <form className='p-2' onSubmit={submit}>
-        <div className='relative w-full mb-5  group'>
-          <input
-            type='email'
-            name='email'
-            id='email'
-            className='block bg-white rounded px-2 pb-1 pt-5 w-full text-base text-stone-500 bg-gray-50 border border-stone-300 appearance-none focus:outline-none ring-0 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 peer'
-            placeholder=' '
-            required
-          />
-          <label
-            htmlFor='email'
-            className='absolute text-base text-stone-500 focus:text-gray-900 duration-300 transform -translate-y-5 scale-90 text-sm top-6 z-10 origin-[0] start-2 peer-focus:text-sky-500 peer-focus:text-sm peer-placeholder-shown:scale-125 peer-placeholder-shown:-translate-y-2 peer-focus:scale-90 peer-focus:-translate-y-5'
-          >
-            Email address
-          </label>
-        </div>
-        <div className='relative w-full mb-5 group'>
-          <input
-            type='password'
-            name='password'
-            id='password'
-            className='block bg-white rounded px-2 pb-1 pt-5 w-full text-base text-stone-500 bg-gray-50 border border-stone-300 appearance-none focus:outline-none ring-0 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 peer'
-            placeholder=' '
-            required
-          />
-          <label
-            htmlFor='password'
-            className='absolute text-base text-stone-500 focus:text-gray-900 duration-300 transform -translate-y-5 scale-90 text-sm top-6 z-10 origin-[0] start-2 peer-focus:text-sky-500 peer-focus:text-sm peer-placeholder-shown:scale-125 peer-placeholder-shown:-translate-y-2 peer-focus:scale-90 peer-focus:-translate-y-5'
-          >
-            Password
-          </label>
-        </div>
-        <div className='mb-5 group'>
-          <button className='btn btn-primary' type='submit'>
-            Submit
-          </button>
-        </div>
-      </form>
+    <div className='m-8'>
+      <button
+        className='btn 
+              btn-primary 
+              text-white'
+        type='submit'
+      >
+        DaisyUI button
+      </button>
+      <button
+        className='rounded-md 
+              bg-blue-600 
+              mx-5 
+              px-6 
+              py-3 
+              font-semibold 
+              text-white 
+              shadow-sm 
+              hover:bg-blue-500 
+              focus-visible:outline 
+              focus-visible:outline-2 
+              focus-visible:outline-offset-2 
+              focus-visible:outline-blue-60'
+        type='submit'
+      >
+        Tailwind button
+      </button>
     </div>
   );
 }

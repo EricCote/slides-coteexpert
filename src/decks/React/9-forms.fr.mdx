@@ -506,7 +506,7 @@ export default function App() {
   function submit(evt) {
     evt.preventDefault();
     const data = {
-      fname: nameRef.current.value,
+      fname: fnameRef.current.value,
       email: emailRef.current.value,
     };
     alert(`Sending : ${JSON.stringify(data)}`);
