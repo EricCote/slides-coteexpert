@@ -26,6 +26,7 @@ type SandpackProps = {
   tailwind?: boolean;
   daisy?: boolean;
   bootstrap?: boolean;
+  leaflet?: boolean;
   console?: boolean;
   v19?: boolean;
 };
@@ -91,6 +92,7 @@ function SandpackRoot(props: SandpackProps) {
     daisy = false,
     bootstrap = false,
     v19 = false,
+    leaflet = false,
     console = false,
     ...rest
   } = props;
@@ -104,6 +106,13 @@ function SandpackRoot(props: SandpackProps) {
   if (tailwind) {
     myOptions = {
       externalResources: ['https://cdn.tailwindcss.com'],
+      ...myOptions,
+    };
+  }
+
+  if (leaflet) {
+    myOptions = {
+      externalResources: ['https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'],
       ...myOptions,
     };
   }

@@ -7,3 +7,126 @@ title: Interfaces avancées
 ---
 
 ## Interfaces et interactions
+
+---
+
+## Exemple avec Leaflet
+
+<Sandpack leaflet>
+
+```jsx src/App.js
+import('./leaf.css');
+import { useState } from 'react';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvent,
+} from 'react-leaflet';
+
+function MyPopupMarker({ content, position }) {
+  return (
+    <Marker position={position}>
+      <Popup>{content}</Popup>
+    </Marker>
+  );
+}
+
+function MyMarkersList() {
+  const [pins, setPins] = useState(defaultPins);
+  const [currentNumber, setCurrentNumber] = useState(4);
+
+  useMapEvent('click', (e) => {
+    setPins({
+      markers: [
+        ...pins.markers,
+        {
+          key: `marker${currentNumber}`,
+          position: [e.latlng.lat, e.latlng.lng],
+          content: `This is marker ${currentNumber}`,
+        },
+      ],
+    });
+    setCurrentNumber(currentNumber + 1);
+  });
+
+  return (
+    <>
+      {pins.markers.map(({ key, ...props }) => (
+        <MyPopupMarker key={key} {...props} />
+      ))}
+    </>
+  );
+}
+
+const defaultPins = {
+  markers: [
+    {
+      key: 'marker1',
+      position: [46.82, -71.22],
+      content: 'This is marker 1',
+    },
+    {
+      key: 'marker2',
+      position: [46.81, -71.21],
+      content: 'This is marker 2',
+    },
+    {
+      key: 'marker3',
+      position: [46.79, -71.23],
+      content: 'This is marker 3',
+    },
+  ],
+};
+
+export default function MapWithPins() {
+  return (
+    <>
+      <h1>Map with pins</h1>
+      <MapContainer center={[46.8141244, -71.22]} zoom={13}>
+        <TileLayer
+          attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        />
+        <MyMarkersList />
+      </MapContainer>
+    </>
+  );
+}
+```
+
+```css src/leaf.css
+/* @import url('/node_modules/leaflet/dist/leaflet.css');
+
+.leaflet-default-icon-path {
+  /* used only in path-guessing heuristic, see L.Icon.Default 
+  background-image: url(https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png);
+} */
+
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "leaflet": "latest",
+    "react-leaflet": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
