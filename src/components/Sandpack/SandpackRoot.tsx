@@ -12,7 +12,12 @@ import {
 //import { levelUp } from '@codesandbox/sandpack-themes';
 //import { SandpackLogLevel } from '@codesandbox/sandpack-client';
 //import { CustomPreset } from './CustomPreset';
-import { createFileMap, StylesCSSPath, AppJSPath } from './createFileMap';
+import {
+  createFileMap,
+  StylesCSSPath,
+  AppJSPath,
+  AppJSXPath,
+} from './createFileMap';
 //import { CustomTheme } from './Themes';
 //import { useSandpackLint } from './useSandpackLint';
 import { template, templateV19 } from './template';
@@ -169,7 +174,11 @@ function SandpackRoot(props: SandpackProps) {
     (f) => files[f].active === true && files[f].hidden === false
   );
   if (!activeFiles.length) {
-    files[AppJSPath].active = true;
+    if (files[AppJSXPath]) {
+      files[AppJSXPath].active = true;
+    } else {
+      files[AppJSPath].active = true;
+    }
   }
 
   const templateUsed = v19 ? templateV19 : template;

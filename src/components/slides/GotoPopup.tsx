@@ -1,6 +1,13 @@
 // This creates a "goto" popup when the user presses the letter G.
 // The popup prompts a slide number, and navigates to it.
-import { FormEvent, RefObject, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FormEvent,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import DarkModeMenu from '../dark-mode/DarkModeMenu';
 import { useLanguage } from './LanguageProvider';
@@ -19,12 +26,14 @@ const textes: TranslationObject = {
     slideNum: 'Numéro de Diapositive',
     cancel: 'Annuler',
     goto: 'Aller à la diapositive',
+    of: ' de ',
   },
   en: {
     dark: 'Dark Mode',
     slideNum: 'Slide Number',
     cancel: 'Cancel',
     goto: 'Go to Slide',
+    of: ' of ',
   },
 };
 
@@ -35,6 +44,8 @@ const options = { capture: true };
 
 function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
+  const [num, setNum] = useState<number>(+(location.hash?.slice(2) ?? 1));
+  const [maxPages, setMaxPages] = useState<number>(100);
   const txtNombre = useRef<HTMLInputElement>();
   let [lang] = useLanguage();
 
@@ -45,7 +56,7 @@ function GotoPopup() {
   function GotoPage(evt: FormEvent) {
     evt.preventDefault();
     //get the page number
-    const page = txtNombre.current!.value;
+    const page = num;
     setShow(false); // hide modal
     if (!Number.isInteger(+page)) return;
     // we need to change the page only once the fade animation
@@ -55,6 +66,10 @@ function GotoPopup() {
 
   function changePage(page: string) {
     location.assign(page);
+  }
+
+  function changeHandler(evt: ChangeEvent<HTMLInputElement>) {
+    setNum(+evt.target.value);
   }
 
   function handleKeyDown(evt: KeyboardEvent) {
@@ -89,9 +104,11 @@ function GotoPopup() {
       let div = document.createElement('div');
       div.innerHTML = (idx + 1).toString();
       div.className = 'corner-number';
+      div.title = (idx + 1).toString() + t('of') + results.length;
       slide.appendChild(div);
       div.onclick = () => setShow(true);
     });
+    setMaxPages(results.length);
 
     //Get the page number
     let pageRef: string = 's1';
@@ -136,8 +153,16 @@ function GotoPopup() {
             type='number'
             ref={txtNombre as RefObject<HTMLInputElement>}
             placeholder={t('slideNum')}
-            defaultValue={location.hash?.slice(2) || '1'}
+            //defaultValue={location.hash?.slice(2) || '1'}
+            value={num}
+            onChange={changeHandler}
           />
+          <Form.Range
+            min={1}
+            max={maxPages}
+            value={num}
+            onChange={changeHandler}
+          ></Form.Range>
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>

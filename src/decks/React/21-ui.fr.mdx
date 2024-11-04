@@ -10,12 +10,122 @@ title: Interfaces avancées
 
 ---
 
+## React Hook Form
+
+<Sandpack>
+
+```jsx
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+//returns true when email and password are equal
+function fakeLogin(email, password) {
+  const p = new Promise((resolve) => {
+    if (email === password) {
+      resolve(true);
+    } else {
+      resolve(false);
+    }
+  });
+  return p;
+}
+
+export default function ValidatedForm({ login = fakeLogin }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+  async function onSubmit(data) {
+    const result = await login(data.email, data.password);
+
+    if (result) {
+      alert('Login was a success');
+    } else {
+      alert(
+        'Login failed. Try using using a password that is identical to the email.'
+      );
+    }
+    reset();
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 5 }}
+    >
+      <div>
+        <label>
+          Email :{' '}
+          <input
+            {...register('email', {
+              required: 'required',
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: 'Entered value does not match email format',
+              },
+            })}
+            type='email'
+            style={{ backgroundColor: errors.email ? 'pink' : 'white' }}
+          />
+        </label>
+        {errors.email && (
+          <span style={{ color: 'red' }}> {errors.email?.message}</span>
+        )}
+      </div>
+      <div>
+        <label>
+          Password :{' '}
+          <input
+            {...register('password', {
+              required: 'required',
+              minLength: {
+                value: 5,
+                message: 'min length is 5',
+              },
+            })}
+            style={{ backgroundColor: errors.password ? 'pink' : 'white' }}
+            type='password'
+          />
+        </label>
+        {errors.password && (
+          <span style={{ color: 'red' }}> {errors.password?.message}</span>
+        )}
+      </div>
+      <button type='submit' style={{ width: 90 }}>
+        Submit
+      </button>
+    </form>
+  );
+}
+```
+
+```json package.json
+{
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "react-hook-form": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+```
+
+</Sandpack>
+
+---
+
 ## Exemple avec Leaflet
 
 <Sandpack leaflet>
 
-```jsx src/App.js
-import('./leaf.css');
+```jsx
 import { useState } from 'react';
 import {
   MapContainer,
@@ -84,7 +194,11 @@ export default function MapWithPins() {
   return (
     <>
       <h1>Map with pins</h1>
-      <MapContainer center={[46.8141244, -71.22]} zoom={13}>
+      <MapContainer
+        center={[46.8141244, -71.22]}
+        zoom={13}
+        style={{ height: '400px', width: '100%', margin: '0 auto' }}
+      >
         <TileLayer
           attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -93,21 +207,6 @@ export default function MapWithPins() {
       </MapContainer>
     </>
   );
-}
-```
-
-```css src/leaf.css
-/* @import url('/node_modules/leaflet/dist/leaflet.css');
-
-.leaflet-default-icon-path {
-  /* used only in path-guessing heuristic, see L.Icon.Default 
-  background-image: url(https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png);
-} */
-
-.leaflet-container {
-  height: 400px;
-  width: 100%;
-  margin: 0 auto;
 }
 ```
 
@@ -130,3 +229,5 @@ export default function MapWithPins() {
 ```
 
 </Sandpack>
+
+---
