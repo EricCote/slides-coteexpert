@@ -17,6 +17,13 @@
     "filename": "blazor.fr.mdx"
   },
   {
+    "route": "modern-js",
+    "title": "JavaScript Moderne",
+    "description": "Formation sur la syntaxe JS moderne qui est utile en React",
+    "language": "fr",
+    "filename": "modern-js.mdx"
+  },
+  {
     "filename": "react-pdf.fr.mdx"
   },
   {

@@ -79,3 +79,14 @@ export const templateV19 = {
     ),
   },
 };
+
+export const templateHtml = {
+  ...template,
+  '/src/index.js': {
+    hidden: true,
+    code: `
+import "./styles.css";
+import "./App.js";
+`,
+  },
+};

@@ -35,9 +35,9 @@ export default function Boutons() {
 
 ## Gestionnaire d'événement
 
-**Rappel** on peut passer une fonction dans les props.
+**Rappel:** on peut passer une fonction dans les props.
 
-`handleClick` est une fonction de type **gestionnaire d'événements** (event handler)
+- `handleClick` est une fonction de type **gestionnaire d'événements** (event handler)
 
 Les gestionnaires d'événements sont souvent:
 
@@ -49,7 +49,7 @@ Les gestionnaires d'événements sont souvent:
 
 ## À la volée (inline)
 
-On peut définir un gestionnaire d'événements en ligne, à la volée, directement dans le JSX.
+On peut définir un gestionnaire d'événements en ligne, à la volée, directement dans le JSX:
 
 ```js
 <button onClick={function handleClick() {
@@ -57,7 +57,7 @@ On peut définir un gestionnaire d'événements en ligne, à la volée, directem
 }}>
 ```
 
-On préfère souvent la syntaxe flèche, plus simple.
+On préfère souvent la syntaxe flèche, plus simple:
 
 ```js
 <button onClick={() => {
@@ -65,60 +65,29 @@ On préfère souvent la syntaxe flèche, plus simple.
 }}>
 ```
 
-Cette méthode en ligne (à la volée) est souvent utilisée pour les fonctions courtes.
+Cette méthode en ligne (à la volée) est souvent utilisée pour les fonctions courtes
 
 ---
 
 ## Passage des gestionnaires d'événements
 
-import './table.css';
+import './table-rows.css';
 
-<table className="my-tbl">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Passer fonction ✅</th>
-      <th>Appeler fonction ❌</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Par nom</th>
-      <td>
-```js
-<button onClick={handleClick}>
-```
-</td>
-<td>
-```js
-<button onClick={handleClick()}>
-```
-  </td>
-</tr>
-<tr>
-  <th>À la volée</th>
-  <td> 
-```js
-<button onClick={() => alert('...')}>
-```
-  </td>
-  <td>
-```js
-<button onClick={alert('...')}>
-``` 
-  </td>
-    </tr>
+<div className="my-tbl" >
 
-  </tbody>
-</table>
+|            | Passer la fonction ✅                   | Appeler (ou exécuter) la fonction ❌ |
+| ---------- | --------------------------------------- | ------------------------------------ |
+| Par nom    | `<button onClick={handleClick}>`        | `<button onClick={handleClick()}>`   |
+| À la volée | `<button onClick={() => alert('...')}>` | `<button onClick={alert('...')}>`    |
+
+</div>
 
 <hr />
 
-Les fonctions doivent être passées, PAS appelées. Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement.
-
-`<button onClick={handleClick}>` passe la fonction `handleClick`.
-
-`<button onClick={() => alert('...')}>` passe la fonction `() => alert('...')`.
+- Les fonctions doivent être passées, PAS appelées
+- Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement
+- `<button onClick={handleClick}>` passe la fonction `handleClick`
+- `<button onClick={() => alert('...')}>` passe la fonction flèche `() => alert('...')`
 
 ---
 
@@ -209,7 +178,7 @@ button {
 
 Par convention, vos gestionnaires d'événements commencent par `on`. ex: `onClick`.
 
-Dans cet exemple, on utilise onSmash:
+Dans cet exemple, on utilise `onSmash`:
 
 <Sandpack s="70">
 
@@ -240,7 +209,7 @@ button {
 
 ## Propagation d'événements
 
-Un événement peut se gérer à différents niveaux.
+Un événement peut se gérer à différents niveaux. ex: `<div>` et `<button>`
 
 Devinez l'ordre des événements de l'exemple suivant:
 
@@ -282,7 +251,7 @@ Les événements se propagent du gestionnaire le plus spécifique au gestionnair
 
 ## Interrompre la propagation
 
-Les gestionnaires d'événements reçoivent un **event object** nommé `e` par convention (e pour "event").
+Les gestionnaires d'événements reçoivent un **event object** nommé `e` par convention (`e` pour "`event`").
 
 Une méthode nommée `e.stopPropagation()` permet de stopper la propagation vers le parent.
 
@@ -363,7 +332,7 @@ Normalement, on gère les événements en mode **propagation**. Mais dans de **r
 
 Ce gestionnaire roule le code qui stoppe la propagation **et ensuite** appelle la prop `onClick` passée par le parent.
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns top>
 
 ```js {4-6}
 function Button({ onClick, children }) {
@@ -382,13 +351,13 @@ function Button({ onClick, children }) {
 
 On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. Ce patron est une **alternative** à la propagation. Contrairement à la propagation, ce n'est pas automatique. Mais c'est plus clair quel code est appelé et dans quel ordre.
 
-</aside>
+</TwoColumns>
 
 ---
 
 ## Comportement par défaut (formulaire)
 
-Certains événements du naviagateur sont associés à un comportement. Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
+- Certains événements du naviagateur sont associés à un comportement.
 
 <Sandpack>
 
@@ -410,6 +379,10 @@ button {
 ```
 
 </Sandpack>
+
+- Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
+- Cliquer un hyperlien charge une nouvelle page
+- Keypress, scrolling lancent des comportements
 
 ---
 
@@ -454,9 +427,27 @@ button {
 
 ## Gestionnaire d'événements et Effets de bord
 
-On peut mettre des effets de bord dans un gestionnaire d'événement.
+- On peut mettre des effets de bord dans un gestionnaire d'événement.
 
-En fait, c'est la **meilleure place**, car un gestionnaire n'a pas besoin d'être pur (contrairement au rendu de composants.)
+- En fait, c'est la **meilleure place**
+- Un gestionnaire n'a pas besoin d'être pur
+  - Contrairement au rendu d'un composant qui doit être pur
+
+---
+
+## Événements synthétiques
+
+- React utilise son propre système d'événements
+- Encapsule le système d'événements du navigateur
+- React fait un énorme travail pour cacher les incohérence des événements du DOM
+- React n'utilise pas `addEventListener`
+- React ne peut annuler un événement en retournant `false` (on doit utiliser `preventDefault()` ou `stopPropagation()` ) <hr />
+- React utilise `onClick`, alors que le navigateur utilise `onclick`
+- React gère le `onChange` pour chaque lettre tapée, mais le navigateur utilise `oninput`
+- React nomme cela `onDoubleClick`, mais le navigateur utilise `ondblclick`
+- REact n'a pas de `onLoad`
+  <hr />
+- Pour utiliser une version de React sans événements synthétiques, [Preact](https://preactjs.com)
 
 ---
 
@@ -523,7 +514,10 @@ export default function App() {
   }
 
   return (
-    <div style={{ width: '100%', height: '100%' }} onClick={handleClickOutside}>
+    <div
+      style={{ width: '100%', height: '100vh' }}
+      onClick={handleClickOutside}
+    >
       <ColorSwitch onChangeColor={handleChangeColor} />
       <br />
       <br />
@@ -534,5 +528,3 @@ export default function App() {
 ```
 
 </Sandpack>
-
----

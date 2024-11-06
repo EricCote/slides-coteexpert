@@ -1,0 +1,153 @@
+---
+route: modern-js
+title: JavaScript Moderne
+description: Formation sur la syntaxe JS moderne qui est utile en React
+language: fr
+---
+
+# JavaScript Moderne
+
+---
+
+## Navigation des diapositives
+
+- Navigation rapide: <kbd>ctrl</kbd>-<kbd>g</kbd> ou <kbd>command</kbd>-<kbd>g</kbd>
+- Navigation rapide: cliquer sur le numéro de page en haut à droite
+- On peut utiliser les flèches
+
+---
+
+## Définir variables
+
+- `var`, `let` et `const` sont similaires
+
+- `var` pollue l'objet global lorsqu'il est appelé dans le contexte du navigateur. (L'objet global =`window` dans le navigateur)
+- Dans une fonction, `var` est remonté (hoisted) à la portée de la fonction
+- Dans un module, `var` est remonté (hoisted) à la portée du module
+
+- `let/const` ne pollue jamais l'objet global, et ne remonte pas (pas de hoist)
+- C'est limité à la portée du bloc, permettant d'isoler `let/const` dans un bloc `if`, `switch`, `while`, `for`, `try` ou `catch`
+- Avec `let`, on peut réassigner une variable. Avec `const`, il n'est pas possible de réassigner une variable. ATTENTION : On peut toujours modifier un objet ou un tableau par mutation.
+
+---
+
+## Exemple de "hoisting" avec var
+
+<Sandpack s="80" html>
+
+```js
+function hoisting() {
+  x = 'valeur de x';
+  // next line is hoisted to
+  // the beginning of the function
+  var x;
+  root.innerHTML = x;
+}
+
+hoisting();
+```
+
+</Sandpack>
+
+- Modifiez `var` vers `const` ou `let`
+- Ni `const` ni `let` ne permettent le _"hoisting"_
+- On préfère `const` et `let` pour cette raison.
+
+---
+
+## Exemple de bloc avec let
+
+<Sandpack s="80" html>
+
+```js
+let total = 0;
+
+for (let i = 0; i < 10; i++) {
+  //on peut accéder i dans le bloc
+  total += i;
+}
+
+//on ne peut PAS accéder i à l'extérieur du bloc
+//root.innerHTML = i;
+```
+
+</Sandpack>
+
+- Modifiez `let` vers `var` (ou `const`)
+- Pas de hoisting avec `let` ou `const`
+
+---
+
+## Const et mutations
+
+- On ne peut pas pas réassigner une `const`
+- On peut muter un objet ou array dans une `const` 😮
+
+<Sandpack s="80" html>
+
+```js
+const obj = { nom: 'Donald', age: 79 };
+
+//Ceci échoue, pas de réassignation avec const
+//obj = { nom: 'Kamala', age: 60 };
+
+//on permet la mutation
+obj.age = 80;
+
+root.innerHTML = '<pre>' + JSON.stringify(obj, null, 2) + '</pre>';
+```
+
+</Sandpack>
+
+- Remplacez `const` par `let`, et décommentez la réassignation
+
+---
+
+## Evaluation d'expression en booléen
+
+falsy: `false`, `0`, `""`, `null`, `undefined`, `NaN`
+truthy: tout le reste (incluant `[]`, `{}`, `"0"`, `"false"`)
+
+---
+
+## Evaluation d'expression en booléen
+
+<Sandpack s="80" html>
+
+```js
+ul = document.createElement('ul');
+document.body.appendChild(ul);
+
+evaluate(false);
+evaluate('');
+evaluate(0);
+evaluate(NaN);
+evaluate(null);
+evaluate(undefined);
+
+evaluate(true);
+evaluate(5);
+evaluate({});
+evaluate([]);
+evaluate([0]);
+evaluate('random');
+evaluate('0');
+evaluate('false');
+evaluate(new Date());
+
+function evaluate(x) {
+  let result;
+  if (x) {
+    result = ' est truthy';
+  } else {
+    result = ' est falsy';
+  }
+  const li = document.createElement('li');
+  ul.appendChild(li);
+  li.textContent = `${JSON.stringify(x)} ${result}`;
+}
+```
+
+</Sandpack>
+
+---

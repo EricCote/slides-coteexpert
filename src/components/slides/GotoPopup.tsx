@@ -44,7 +44,7 @@ const options = { capture: true };
 
 function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
-  const [num, setNum] = useState<number>(+(location.hash?.slice(2) ?? 1));
+  const [num, setNum] = useState<number>(+location.hash?.slice(2) || 1);
   const [maxPages, setMaxPages] = useState<number>(100);
   const txtNombre = useRef<HTMLInputElement>();
   let [lang] = useLanguage();
@@ -127,6 +127,9 @@ function GotoPopup() {
 
   //If we've just started re-rendering after starting to show the popup, set the focus.
   useEffect(() => {
+    const article = document.querySelector('article')!;
+    setNum(Math.round(article.scrollLeft / article.clientWidth) + 1);
+
     if (show) {
       txtNombre.current!.focus();
       txtNombre.current!.select();

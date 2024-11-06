@@ -24,7 +24,7 @@ description: other
 - Voici les conventions de **Vite**
 - Une page `index.html` possède un `<div id="root"> </div>`
   - le `div` est vide
-- le script de démarrage se nomme `index.js`
+- le script de démarrage se nomme `main.tsx` (ou `index.js`)
 
 - On pourrait générer des données dans la racine SANS utiliser React
 
@@ -50,6 +50,7 @@ rootNode.innerHTML = '<h2>Bonjour tous!</h2>';
   </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/index.js"></script>
   </body>
 </html>
 ```
@@ -83,19 +84,19 @@ body {
 
 ## Point d'entrée React
 
-- `Index.js` doit importer `react-dom/client`
+- Point d'entrée JS doit importer `react-dom/client`
 
-- `ReactDOM.createRoot` permet de créer une racine React pour le `<div>`.
+- `createRoot` permet de créer une racine React pour le `<div>` racine.
 
 ```js
-//On importe ReactDOM
-import * as ReactDOM from 'react-dom/client';
+//On importe createRoot
+import { createRoot } from 'react-dom/client';
 
-//On trouve le div
-const rootNode = document.getElementById('root');
+//On trouve le divRoot
+const divRoot = document.getElementById('root');
 
-//On créé une racine React sur le div
-const root = ReactDOM.createRoot(rootNode);
+//On créé une racine React sur le divRoot
+const root = ReactDOM.createRoot(divRoot);
 
 //On affiche du jsx sur cette racine
 root.render(<h1>Bonjour Tous!</h1>);
@@ -184,8 +185,8 @@ root.render(<Bonjour />);
 
 **Règle** On distingue le Composant d'une balise DOM par la première lettre:
 
-- `div` et `h1` commencent par des minuscules. React génère des balises HTML.
-- `Bonjour` commence par une majuscule. React appelle le composant.
+- `div` et `h1` commencent par des minuscules: React génère des balises HTML.
+- `Bonjour` commence par une majuscule: React appelle le composant.
 
 ```js
 root.render(
@@ -214,12 +215,9 @@ export default function Bonjour() {
 }
 ```
 
-{/* prettier-ignore */}
 ```js
 export default function Bonjour() {
-  return (
-    <h2>Bonjour Tous!</h2>
-  );
+  return <h2>Bonjour Tous!</h2>;
 }
 ```
 
@@ -469,38 +467,18 @@ Ne pas oublier d'adapter l'importation avec la commande import
   alt='Default and named exports'
 />
 
-import './table.css';
+import './table-rows.css';
 
-<table className="my-tbl">
-  <thead>
-    <tr>
-      <th>Syntaxe</th>
-      <th >Export</th>
-      <th>Import</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th >par défaut</th>
-      <td >
-`export default function Button() {}`
-</td>
-<td>
-`import  Button  from './button.js';`
-  </td>
-</tr>
-<tr>
-  <th>Nommée</th>
-  <td > 
-`export         function Button() {}`
-  </td>
-  <td>
-`import {Button} from './button.js';` 
-  </td>
-    </tr>
+<div className="my-tbl" >
 
-  </tbody>
-</table>
+| Syntaxe    | Export                                | Import                                |
+| ---------- | ------------------------------------- | ------------------------------------- |
+| Par défaut | `export default function Button() {}` | `import  Button  from './button.js';` |
+| Nommée     | `export         function Button() {}` | `import {Button} from './button.js';` |
+
+</div>
+
+<br />
 
 - Avec un import par défaut, on peut renommer l'importation comme on veut.
 - ex: `import LeBouton from './button.js';`
@@ -772,9 +750,12 @@ body > div > div {
 
 ### Défi 9
 
-Dans l'objet ci-bas, l'url de l'image est séparé en 4 parties: base URL, `imageId`, `imageSize`, et l'extention de fichier.
+Dans l'objet ci-bas, l'url de l'image est séparé en 4 parties.
 
-Dans l'URL de l'image, nous voulons combiner ces attributs : base URL (toujours `'https://i.imgur.com/'`), `imageId` (`'7vQD0fP'`), `imageSize` (`'s'`), et l'extention de fichier (toujours `'.jpg'`). Quelque chose cloche avec le `src` de la balise `<img>`
+- base URL (toujours `'https://i.imgur.com/'`)
+- `imageId` (`'7vQD0fP'`),
+- `imageSize` (`'s'`),
+- l'extention de fichier (toujours `'.jpg'`).
 
 Réparez le code. (Indice: utilisez un gabarit (string template))
 
@@ -835,27 +816,47 @@ React utilise des props pour passer de l'information entre les composants.
 
 On peut passer des chaînes de caractères, des objets, des tableaux, des fonctions, etc.
 
-<hr />
+---
 
-### Props familiers
+## Props familiers
 
 `className, src, alt, width, height` sont des props familiers
 
-```jsx
-<img
-  className='avatar'
-  src='https://i.imgur.com/1bX5QH6.jpg'
-  alt='Lin Lanying'
-  width={100}
-  height={100}
-/>
+<Sandpack>
+
+```js
+function Avatar() {
+  return (
+    <img
+      className='avatar'
+      src='https://i.imgur.com/1bX5QH6.jpg'
+      alt='Lin Lanying'
+      width={100}
+      height={100}
+    />
+  );
+}
+
+export default function Profile() {
+  return <Avatar />;
+}
 ```
+
+```css
+body {
+  min-height: 120px;
+}
+.avatar {
+  margin: 20px;
+  border-radius: 50%;
+}
+```
+
+</Sandpack>
 
 ---
 
-## Passer des props
-
-#### Pousser des props au composant enfant
+## Pousser des props au composant enfant
 
 ```jsx
 <Avatar
@@ -864,6 +865,8 @@ On peut passer des chaînes de caractères, des objets, des tableaux, des foncti
   rounded
 />
 ```
+
+`rounded` n'est pas spécifié, c'est initialisé à `true` par défaut
 
 ---
 
@@ -911,11 +914,14 @@ La valeur par défaut est utilisée quand `size` n'est pas présent ou quand `si
 
 <TwoColumns top>
 
-{/* prettier-ignore */}
 ```jsx
 // Approche détaillée
-function Profile({ person, size, 
-                   isSepia, thickBorder }) {
+function Profile({
+  person,
+  size, //
+  isSepia,
+  thickBorder,
+}) {
   return (
     <div className='card'>
       <Avatar
@@ -958,6 +964,75 @@ function Cadre({ children }) {
   return <div className='cadre'>{children}</div>;
 }
 ```
+
+---
+
+## Exemple avec children
+
+<Sandpack>
+
+```js src/App.js
+import Avatar from './Avatar.js';
+
+function Card({ children }) {
+  return <div className='card'>{children}</div>;
+}
+
+export default function Profile() {
+  return (
+    <Card>
+      <Avatar
+        size={100}
+        person={{
+          name: 'Katsuko Saruhashi',
+          imageId: 'YfeOqp2',
+        }}
+      />
+    </Card>
+  );
+}
+```
+
+```js src/Avatar.js
+import { getImageUrl } from './utils.js';
+
+export default function Avatar({ person, size }) {
+  return (
+    <img
+      className='avatar'
+      src={getImageUrl(person)}
+      alt={person.name}
+      width={size}
+      height={size}
+    />
+  );
+}
+```
+
+```js src/utils.js
+export function getImageUrl(person, size = 's') {
+  return 'https://i.imgur.com/' + person.imageId + size + '.jpg';
+}
+```
+
+```css
+.card {
+  width: fit-content;
+  margin: 5px;
+  padding: 5px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid #aaa;
+  border-radius: 20px;
+  background: #fff;
+}
+.avatar {
+  margin: 20px;
+  border-radius: 50%;
+}
+```
+
+</Sandpack>
 
 ---
 
@@ -1075,7 +1150,7 @@ li {
 
 ### Défi 11
 
-Dans cet exemple, `Avatar` reçoit une prop `size` numérique pour la taille du `<img>`. Dans cet exemple, la taille affiché est 40. Mais la taille de l'image téléchargée est 160px. La taille de l'image téléchargée devrait s'adapter d'après la taille affichée.
+Dans cet exemple, la taille affiché est 40. Mais la taille de l'image téléchargée est 160px.
 
 Changez le composant `Avatar` pour télécharger l'image d'après la taille d'affichage. Si la taille est moins de 90, passez le paramètre `s` (small) plutôt que `b` (big) à la fonction `getImageUrl`. Testez en affichant des Avatars de tailles différentes. (Bonus: on pourrait prendre en compte les écrans denses avec `window.devicePixelRatio`)
 
@@ -1193,7 +1268,7 @@ h1 {
 
 Différentes approches
 
-<TwoColumns>
+<TwoColumns top>
 <div>
 
 Méthode classique, utiliser des instructions `if`:
@@ -1226,6 +1301,156 @@ Méthode sans `else`, utiliser l'opérateur logique `&&`
 
 </div>
 
+</TwoColumns>
+
+---
+
+## Affichage conditionnel avec bloc if
+
+<Sandpack>
+
+```js
+function Item({ name, isPacked }) {
+  if (isPacked) {
+    return <li className='item'>{name} ✅</li>;
+  }
+  return <li className='item'>{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item isPacked={true} name='Space suit' />
+        <Item isPacked={true} name='Helmet with a golden leaf' />
+        <Item isPacked={false} name='Photo of Tam' />
+      </ul>
+    </section>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Affichage conditionnel avec null
+
+<Sandpack>
+
+```js
+function Item({ name, isPacked }) {
+  if (isPacked) {
+    return null;
+  }
+  return <li className='item'>{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item isPacked={true} name='Space suit' />
+        <Item isPacked={true} name='Helmet with a golden leaf' />
+        <Item isPacked={false} name='Photo of Tam' />
+      </ul>
+    </section>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Condition avec opérateur ternaire
+
+<Sandpack>
+
+```js
+function Item({ name, isPacked }) {
+  return (
+    <li className='item'>{isPacked ? <del>{name + ' ✅'}</del> : name}</li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item isPacked={true} name='Space suit' />
+        <Item isPacked={true} name='Helmet with a golden leaf' />
+        <Item isPacked={false} name='Photo of Tam' />
+      </ul>
+    </section>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Condition avec Opérateur logique &&
+
+<Sandpack>
+
+```js
+function Item({ name, isPacked }) {
+  return (
+    <li className='item'>
+      {name} {isPacked && '✅'}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item isPacked={true} name='Space suit' />
+        <Item isPacked={true} name='Helmet with a golden leaf' />
+        <Item isPacked={false} name='Photo of Tam' />
+      </ul>
+    </section>
+  );
+}
+```
+
+</Sandpack>
+
+---
+
+## Attention
+
+- Ne pas mettre un nombre dans l'opérande de gauche avec `&&`
+- Cela pourrait afficher 0, alors qu'on s'attend à ne rien afficher.
+- I faut convertir le nombre en booléen, avec une expression JS.
+
+<hr />
+
+<TwoColumns>
+
+<div>
+À éviter: 🚫
+
+```js
+messageCount && <p>New messages</p>;
+```
+
+</div>
+<div>
+Préférable: ✅
+
+```js
+messageCount > 0 && <p>New messages</p>;
+```
+
+</div>
 </TwoColumns>
 
 ---
@@ -1278,18 +1503,18 @@ Noubliez pas l'espace entre les deux étiquettes. `{' '}`
 <Sandpack>
 
 ```js
-function Item({ name, importance }) {
-  return <li className='item'>{name}</li>;
+function Item({ nom, importance }) {
+  return <li className='item'>{nom}</li>;
 }
 
 export default function PackingList() {
   return (
     <section>
-      <h1>Sally Ride's Packing List</h1>
+      <h1>Liste pour le voyage</h1>
       <ul>
-        <Item importance={9} name='Space suit' />
-        <Item importance={0} name='Helmet with a golden leaf' />
-        <Item importance={6} name='Photo of Tam' />
+        <Item importance={9} nom='Brosse à dents' />
+        <Item importance={0} nom='Maillot de bain' />
+        <Item importance={6} nom='Guitare' />
       </ul>
     </section>
   );
@@ -1342,7 +1567,7 @@ export default function ListeBoissons() {
 Il est facile d'utiliser des fonctions telles que `map` et `filter` pour travailler avec des données.
 
 ```js
-const personnalités = [
+const people = [
   'François Legault: politicien',
   'Isabelle Boulay: artiste',
   'François Bellefeuille: humoriste',
@@ -1351,69 +1576,139 @@ const personnalités = [
 ];
 ```
 
-```js
-const listeItems = personnalités.map((personne) => <li>{personne}</li>);
-```
+Convertir un tableau de string en tableau de JSX:
 
 ```js
-return <ul>{listeItems}</ul>;
+const listItems = people.map((person) => <li>{person}</li>);
 ```
+
+Afficher le JSX:
+
+```js
+return <ul>{listItems}</ul>;
+```
+
+---
+
+## Exemple simple
+
+<Sandpack>
+
+```js
+const people = [
+  'François Legault: politicien',
+  'Isabelle Boulay: artiste',
+  'François Bellefeuille: humoriste',
+  'Pierre Lapointe: artiste',
+  'Véronique Cloutier: animatrice',
+];
+
+export default function DisplayList() {
+  const listItems = people.map((person) => <li>{person}</li>);
+
+  return <ul>{listItems}</ul>;
+}
+```
+
+</Sandpack>
+
+Le warning dans la console sera expliqué dans quelques exemples.
 
 ---
 
 ## Données complexes
 
-Avec une structure plus complexe, filtrons et affichons:
+`.filter` est une fonction standard de js.
 
-<TwoColumns top>
+<Sandpack>
 
-```js
-const personnalités = [
-  {
-    id: 0,
-    nom: 'François Legault',
-    profession: 'politicien',
-  },
+```jsx src/App.jsx
+import { people } from './data.js';
+import { getImageUrl } from './utils.js';
 
-  {
-    id: 1,
-    nom: 'Isabelle Boulay',
-    profession: 'artiste',
-  },
-
+export default function List() {
+  const chemists = people.filter((person) => person.profession === 'chemist');
+  const listItems = chemists.map((person) => (
+    <li>
+      <img src={getImageUrl(person)} alt={person.name} />
+      <p>
+        <b>{person.name}:</b>
+        {' ' + person.profession + ' '}
+        known for {person.accomplishment}
+      </p>
+    </li>
+  ));
+  return <ul>{listItems}</ul>;
+}
 ```
 
-```js
-
+```js src/data.js
+export const people = [
+  {
+    id: 0,
+    name: 'Creola Katherine Johnson',
+    profession: 'mathematician',
+    accomplishment: 'spaceflight calculations',
+    imageId: 'MK3eW3A',
+  },
+  {
+    id: 1,
+    name: 'Mario José Molina-Pasquel Henríquez',
+    profession: 'chemist',
+    accomplishment: 'discovery of Arctic ozone hole',
+    imageId: 'mynHUSa',
+  },
   {
     id: 2,
-    nom: 'François Bellefeuille',
-    profession: 'humoriste',
+    name: 'Mohammad Abdus Salam',
+    profession: 'physicist',
+    accomplishment: 'electromagnetism theory',
+    imageId: 'bE7W1ji',
   },
   {
     id: 3,
-    nom: 'Pierre Lapointe',
-    profession: 'artiste',
+    name: 'Percy Lavon Julian',
+    profession: 'chemist',
+    accomplishment:
+      'pioneering cortisone drugs, steroids and birth control pills',
+    imageId: 'IOjWm71',
   },
   {
     id: 4,
-    nom: 'Véronique Cloutier',
-    profession: 'animatrice',
+    name: 'Subrahmanyan Chandrasekhar',
+    profession: 'astrophysicist',
+    accomplishment: 'white dwarf star mass calculations',
+    imageId: 'lrWQx8l',
   },
 ];
 ```
 
-</TwoColumns>
-
----
-
-### Filtrer les artistes
-
-`.filter` est une fonction standard de js.
-
-```js
-const artistes = personnalités.filter((p) => p.profession === 'artiste');
+```js src/utils.js
+export function getImageUrl(person) {
+  return 'https://i.imgur.com/' + person.imageId + 's.jpg';
+}
 ```
+
+```css
+ul {
+  list-style-type: none;
+  padding: 0px 10px;
+}
+li {
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+}
+img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+```
+
+</Sandpack>
 
 ---
 
@@ -1422,12 +1717,12 @@ const artistes = personnalités.filter((p) => p.profession === 'artiste');
 Map retourne un nouveau tableau d'éléments.
 
 ```js
-const listeItems = artistes.map((personne) => (
+const listItems = chemists.map((person) => (
   <li>
-    <img src={getImageUrl(personne)} alt={personne.nom} />
+    <img src={getImageUrl(person)} alt={person.name} />
     <p>
-      <b>{personne.nom}:</b>
-      {' ' + personne.profession}
+      <b>{person.name}:</b>
+      {' ' + person.profession}
     </p>
   </li>
 ));
@@ -1436,7 +1731,7 @@ const listeItems = artistes.map((personne) => (
 Afficher les résultats
 
 ```js
-return <ul>{listeItems}</ul>;
+return <ul>{listItems}</ul>;
 ```
 
 ---
@@ -1445,9 +1740,10 @@ return <ul>{listeItems}</ul>;
 
 Si on écrit une fonction fèche **avec** accolades {}, il faut mettre le `return` explicitement.
 
-{/* prettier-ignore */}
 ```js
-const liste = artistes.map((p) => { return <li>...</li>; });
+const liste = artistes.map((p) => {
+  return <li>...</li>;
+});
 ```
 
 Si on écrit une fonction flèche **sans** accolades, le `return` est implicite et il ne faut pas l'écrire.
@@ -1469,7 +1765,7 @@ Si on oublie de spécifier une `key` unique, un message est affiché dans la con
 Pour éliminer le message, il faut utiliser une clé unique.
 Il faut fournir cela pour n'importe quel tableau de JSX, incluant le `map`.
 
-Ceci améliore les performances si on doit trier, ajouter ou enlever
+Ceci améliore les performances si on doit _trier_, _ajouter_ ou _enlever_
 des éléments. Ceci permet à React de mieux comprendre ce qui a été modifié.
 
 ---
@@ -1540,7 +1836,7 @@ Maintenant, imaginons un ajout dans une liste JSX, mais **au tout début**:
 </div>
 </TwoColumns>
 
-Dans la phase commit, on compare par position. Il faut modifier tous les `<li>`, et ensuite ajouter un élément à la fin. C'est pas optimal, et tous les éléments sont regénérés dans le DOM.
+Dans la phase commit, on compare par position. Il faut donc modifier tous les `<li>`, et ensuite ajouter un élément à la fin. Cw n'est pas optimal. Tous les éléments sont regénérés dans le DOM.
 
 ---
 
@@ -1576,25 +1872,29 @@ Même scénario, un ajout au début, mais **avec des clés**:
 </div>
 </TwoColumns>
 
-Dans la phase commit, on compare par clé. Il suffit d'ajouter l'élément identifié par la clé `{9}`, toutes les autres clés demeurent identiques.
+Dans la phase commit, on compare par clé. Il suffit d'insérer l'élément identifié par la clé `{9}`, toutes les autres clés demeurent identiques.
 
 Ce gain de performance avec clés est clair quand on ajoute, quand on enlève, quand on trie, quand on filtre, etc.
 
 ---
 
-## D'où proviennent les clés
+## D'où proviennent les clés?
 
 1. Prendre la clé de la base de données quand les données proviennent d'une BD
-2. Si les données sont locales, on génère nos propres clés avec un `counter`, `crypto.randomUUID()` ou le package `uuid`.
+2. Si les données sont locales, on génère nos propres clés avec un
+
+- `counter`
+- `crypto.randomUUID()`
+- le package `uuid`
 
 **Important**
 
 - Les clés doivent être uniques
-- Les clés doivent être immuables, elles ne doivent pas être changées, ni regénérées.
-
-- `key` n'est PAS une prop, mais une caractéristique utilisée par React. Si la composante
-  a aussi besoin de cette info, il faut alors créer une prop avec un autre nom.
-  ex: `<Profile key={id} userId={id} />`.
+- Les clés doivent être immuables
+- Elles ne doivent être ni changées, ni regénérées
+- `key` n'est PAS une prop normale, mais une "caractéristique" utilisée par React
+- Si la composante a aussi besoin de cette info, il faut alors créer une prop avec un autre nom
+- ex: `<Profile key={id} userId={id} />`.
 
 ---
 
@@ -1891,6 +2191,10 @@ Pour la même "entrée", on obtient toujours le même résultat.
 
 ## Exemple d'un composant pur
 
+- Faire le rendu d'un composant devrait seulement générer du JSX
+- Cela n'affecte aucunement les variables ou les objets qui existent AVANT
+  le rendu
+
 <Sandpack>
 ```js src/App.js
 function Recipe({ nbPersonnes }) {
@@ -1911,7 +2215,7 @@ export default function App() {
       <h1>Recette de thé Chai</h1>
       <h2>Pour deux personnes</h2>
       <Recipe nbPersonnes={2} />
-      <h2>Pour un groupe</h2>
+      <h2>Pour quatre personnes</h2>
       <Recipe nbPersonnes={4} />
     </section>
   );
@@ -1924,11 +2228,7 @@ export default function App() {
 
 ## Effets de bord
 
-Faire le rendu d'un composant devrait seulement générer du JSX.
-On ne devrait jamais changer les variables ou les objets qui existent AVANT
-le rendu.
-
-Voici un composant qui brise la règle:
+Voici un composant qui brise la règle de la pureté:
 
 <Sandpack>
 
@@ -1958,7 +2258,10 @@ export default function TeaSet() {
 
 ### Éliminer les effets de bord
 
-Pour réparer, on pourrait utiliser des props:
+Pour réparer, on pourrait:
+
+- utiliser des props
+- éliminer les variables "globales"
 
 <Sandpack>
 
@@ -1982,19 +2285,23 @@ export default function TeaSet() {
 
 ---
 
-## Mode Strict
+## Mode Strict `<StrictMode>`
 
-Il est plus simple de détecter quand le rendu provoque des effets de bord avec le `<StrictMode>`.
+- Permet de détecter quand le rendu provoque des effets de bord
+- Chaque composant est rendu 2 fois.
+- Ça rend (parfois) les effets de bord plus visibles
 
-Avec le `StrictMode`, quand on est en mode développement, chaque composant est rendu 2 fois. Ça rend (parfois) les effets de bord plus visibles.
+<hr />
 
-`StrictMode` sera ignoré en production.
+- `<StrictMode>` est seulement actif mode développement
+- `<StrictMode>` est ignoré en production
 
 ---
 
 ## Mutation locale
 
-La mutation locale est permise. (C'est la mutation de variables préexistantes qui n'est pas permise.)
+- La mutation locale est permise
+- C'est la mutation de variables préexistantes qui n'est pas permise
 
 <Sandpack>
 
@@ -2014,19 +2321,23 @@ export default function RassemblementDeThé() {
 
 </Sandpack>
 
-Le code précédent est correct, car `tasses` est une variable locale. On peut modifier les variables locales sans problèmes.
-
-Si `tasses` était une variable globale, ce serait mauvais.
+- `tasses` est une variable locale.
+- On peut modifier les variables locales sans problèmes
+- Si `tasses` était une variable globale, ça serait mauvais
 
 ---
 
-## Où placer les effets de bords
+## Où placer les effets de bords?
 
-Il faut éviter les effets de bord dans le **rendu**.
-
-Il est parfois nécessaire d'utiliser des effets de bord. On peut alors utiliser les gestionnaires d'événements (event handlers), tel que `onClick` ou `onChange`.
-
-Aussi, il est possible de référer une fonction dans `useEffect`, qui exécute alors immédiatement après le rendu. (Similaire à un gestionnaire d'événement, **après** le rendu.)
+- Il faut éviter les effets de bord dans le **rendu**
+- Il est parfois nécessaire d'utiliser des effets de bord
+  <hr />
+- On peut utiliser les gestionnaires d'événements (event handlers) pour les Effects
+- Ex: `onClick` ou `onChange`
+  <hr />
+- Aussi, il est possible de passer une fonction dans `useEffect`,
+- `Effect` exécute alors immédiatement après le rendu.
+- Similaire à un gestionnaire d'événement, qui lance **après** le rendu.
 
 ---
 
@@ -2200,21 +2511,21 @@ h1 {
 
 ### Défi 22
 
-Sur votre composant d'horloge, on demande d'afficher les derniers "témoignages". Vous avez un composant "RangéeTémoignages" qui prend une liste de "témoignages". Vous ajoutez un "Ajoutez témoignage" au bout de cette liste. Ouille! Ceci génère un doublon. Comment réparer?
+Sur votre composant d'horloge, on demande d'afficher les derniers "récits". On ajoute "Ajouter Récit" au bout de cette liste. Ouille! Ceci génère un doublon à chaque seconde... Comment réparer?
 
 <Sandpack>
 
-```js src/RangeeTemoignages.js active
-export default function RangeeTemoignages({ temoignages }) {
-  temoignages.push({
-    id: 'create',
-    label: 'Ajouter témoignage',
+```js src/AfficheRecits.js active
+export default function AfficheRecits({ recits }) {
+  recits.push({
+    id: recits.length,
+    label: 'Ajouter Récit',
   });
 
   return (
     <ul>
-      {temoignages.map((temoignage) => (
-        <li key={temoignage.id}>{temoignage.label}</li>
+      {recits.map((recit) => (
+        <li key={recit.id}>{recit.label}</li>
       ))}
     </ul>
   );
@@ -2223,21 +2534,21 @@ export default function RangeeTemoignages({ temoignages }) {
 
 ```js src/App.js hidden
 import { useState, useEffect } from 'react';
-import RangeeTemoignages from './RangeeTemoignages.js';
+import AfficheRecits from './AfficheRecits.js';
 
-let temoignagesInitiaux = [
-  { id: 0, label: 'Témoignage de Sophie' },
-  { id: 1, label: 'Témoignage de Luc' },
+let RecitsInitiaux = [
+  { id: 0, label: 'Récit de Lucie' },
+  { id: 1, label: 'Récit de Marc' },
 ];
 
 export default function App() {
-  let [temoignages, setTemoignages] = useState([...temoignagesInitiaux]);
+  let [recits, setRecits] = useState([...RecitsInitiaux]);
   let time = useTime();
 
   // HACK: Prevent the memory from growing forever while you read docs.
   // We're breaking our own rules here.
-  if (temoignages.length > 100) {
-    temoignages.length = 100;
+  if (recits.length > 30) {
+    recits.length = 30;
   }
 
   return (
@@ -2249,7 +2560,7 @@ export default function App() {
       }}
     >
       <h2>Il est maintenant {time.toLocaleTimeString()}.</h2>
-      <RangeeTemoignages temoignages={temoignages} />
+      <AfficheRecits recits={recits} />
     </div>
   );
 }
@@ -2294,11 +2605,44 @@ li {
 
 ---
 
+## Arborescence de rendu
+
+Une arborescence de rendu représente les relations entre les composants parents et enfants
+
+<Diagram name="generic_render_tree" height={250} width={500} alt="">
+
+Arborescence de rendu
+
+</Diagram>
+
+- Les composants en haut, près de la racine, sont des composant de "top-niveau" (parfois: "container" )
+- Les composants en bas, sans enfants, sont des composants "feuilles" (parfois: "presentation")
+- Catégoriser est utile:
+  - Permet de comprendre le flot de données
+  - Permet de d'analyser la performance du rendu
+
+---
+
+## Arborescence de dépendances de modules
+
+L'arborescence de dépendances de modules visualise la relation entre les fichiers JavaScript
+
+<Diagram name="generic_dependency_tree" height={250} width={500} alt="A tree graph with five nodes. Each node represents a JavaScript module. The top-most node is labelled 'RootModule.js'. It has three arrows extending to the nodes: 'ModuleA.js', 'ModuleB.js', and 'ModuleC.js'. Each arrow is labelled as 'imports'. 'ModuleC.js' node has a single 'imports' arrow that points to a node labelled 'ModuleD.js'.">
+
+Une arborescence de dépendances de modules
+
+</Diagram>
+
+- Permet de visualiser le code à télécharger et exécuter
+- Permet de calculer la taille du bundle
+
+---
+
 ## Devoir #2
 
 Créez une WebApp React avec Vite qui doit afficher une liste de 5 vidéos YouTube.
 
-<aside style={{display:'grid', gridTemplateColumns:"1fr 1fr", columnGap:10}}>
+<TwoColumns top>
 <div>
 
 Liste des vidéos:
@@ -2328,7 +2672,7 @@ Comment afficher le premier vidéo:
 ```
 
 </div>
-</aside>
+</TwoColumns >
 
 ---
 

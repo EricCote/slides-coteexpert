@@ -240,7 +240,7 @@ This creates a new folder. Navigate to the new folder.
 
 - **node_modules** : contains dependencies and sub-dependencies. **Don't touch.** Use `npm install` or `npm update` to manage.
 - **src**: contains .js, .ts, .jsx, .css, and .svg files that are compiled by vite
-- **public**: contains files that are served, but not compiled by Vite (png, jpg, pdf, etc)
+- **public**: contains files that are served, but **not** compiled by Vite (png, jpg, pdf, etc)
 
 ---
 
@@ -297,43 +297,86 @@ This starts a web server in dev mode. Type the letter <kbd>o</kbd> and <kbd>ente
 
 ---
 
-## JSX, behind the curtain
+## JSX, behind the curtain (1/3)
 
-Typical JSX
+Typical JSX:
+
+<Sandpack s="70">
 
 ```jsx
-<h3 title='alarm'>This alarm is set to {alarmTime}</h3>
+const alarmTime = '10h40';
+
+const element = <h3 title='alarm'>This alarm is set to {alarmTime}</h3>;
+
+export default function App() {
+  return element;
+}
 ```
 
-Then JSX gets compiled by Babel, swc, TypeScript or another tool:
+```js src/more.js
+<pre>{JSON.stringify(element, null, 2)}</pre>
+```
 
-```js
-React.createElement(
+</Sandpack>
+
+---
+
+## JSX, behind the curtain (2/3)
+
+JSX then gets compiled by Babel, swc, TypeScript or another tool:
+
+<Sandpack s="70">
+
+```jsx
+import { createElement } from 'react';
+//import {jsx as _jsx} from 'react/jsx-runtime';
+
+const alarmTime = '10h41';
+
+const element = createElement(
   'h3',
   { title: 'alarm' },
   'This alarm is set to ',
   alarmTime
 );
+
+export default function App() {
+  return element;
+}
 ```
+
+</Sandpack>
+
+Note: since React 17, transpilers use `_jsx` instead of `createElement`
 
 ---
 
-## JSX, behind the curtain
+## JSX, behind the curtain (3/3)
 
 After execution, this generates a **React Element** (a simple JS object):
 
+<Sandpack s="70">
+
 ```js
-{
+const alarmTime = '10h42';
+
+const element = {
   type: 'h3',
   props: {
     title: 'alarm',
-    children: ["This alarm is set to ", alarmTime],
+    children: ['This alarm is set to ', alarmTime],
   },
   key: null,
   ref: null,
   $$typeof: Symbol.for('react.element'),
 };
+
+export default function () {
+  return element;
+}
 ```
+
+ </Sandpack>
 
 These React elements build a tree structure called **Virtual DOM**.
 
@@ -399,7 +442,7 @@ If you don't know which host to use, you can easily try Netlify (free)
 
 ---
 
-## Homework #1
+## Homework
 
 - Create a new React App using Vite
   - Use the Vite doc to create a React app with swc

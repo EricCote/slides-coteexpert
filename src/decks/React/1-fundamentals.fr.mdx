@@ -299,33 +299,70 @@ Ceci démarre un serveur web en mode dev. Taper la lettre <kbd>o</kbd> et <kbd>e
 
 ---
 
-## JSX dans les coulises
+## JSX dans les coulisses (1/3)
 
-JSX est écrit par un programmeur:
+Voici comment un programmeur génère du JSX:
+
+<Sandpack s="70">
 
 ```jsx
-<h3 title='alarme'>L'alarme sonne à {alarmTime}</h3>
+const alarmTime = '10h40';
+
+const element = <h3 title='alarme'>L'alarme sonne à {alarmTime}</h3>;
+
+export default function App() {
+  return element;
+}
 ```
 
-JSX est compilé par Babel (ou swc, etc):
-
-{/* prettier-ignore */}
-```jsx
-React.createElement(
-  'h3', 
-  { title: 'alarme' }, 
-  "L'alarme sonne à ", 
-  alarmTime);
+```js src/more.js
+<pre>{JSON.stringify(element, null, 2)}</pre>
 ```
+
+</Sandpack>
 
 ---
 
-## JSX dans les coulisses
+## JSX dans les coulisses (2/3)
+
+JSX est compilé par Babel (ou swc, etc):
+
+<Sandpack s="70">
+
+```jsx
+import { createElement } from 'react';
+//import {jsx as _jsx} from 'react/jsx-runtime';
+
+const alarmTime = '10h41';
+
+const element = createElement(
+  'h3',
+  { title: 'alarme' },
+  "L'alarme sonne à l'heure suivante : ",
+  alarmTime
+);
+
+export default function App() {
+  return element;
+}
+```
+
+</Sandpack>
+
+Note: le transpilateur utilise `_jsx` plutôt que `createElement`, depuis Reaxt 17.
+
+---
+
+## JSX dans les coulisses (3/3)
 
 Après exécution, cela génère un **élément React** (un simple objet JS):
 
+<Sandpack s="70">
+
 ```js
-{
+const alarmTime = '10h42';
+
+const element = {
   type: 'h3',
   props: {
     title: 'alarme',
@@ -335,7 +372,13 @@ Après exécution, cela génère un **élément React** (un simple objet JS):
   ref: null,
   $$typeof: Symbol.for('react.element'),
 };
+
+export default function () {
+  return element;
+}
 ```
+
+ </Sandpack>
 
 L'ensemble des éléments React génère une arborescence nommée **Virtual DOM**.
 
@@ -401,7 +444,7 @@ Si vous ne savez pas quel hébergeur utiliser, nous recommandons Netlify (gratui
 
 ---
 
-## Devoir #1
+## Devoir
 
 - Créer une nouvelle application React
 - Consultez la documentation de Vite pour créer une application React avec SWC

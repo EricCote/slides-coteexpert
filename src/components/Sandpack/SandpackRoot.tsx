@@ -20,7 +20,7 @@ import {
 } from './createFileMap';
 //import { CustomTheme } from './Themes';
 //import { useSandpackLint } from './useSandpackLint';
-import { template, templateV19 } from './template';
+import { template, templateV19, templateHtml } from './template';
 
 type SandpackProps = {
   children: ReactNode;
@@ -28,6 +28,7 @@ type SandpackProps = {
   options?: SandpackOptions;
   files?: object;
   s?: number;
+  html?: boolean;
   tailwind?: boolean;
   daisy?: boolean;
   bootstrap?: boolean;
@@ -93,6 +94,7 @@ function SandpackRoot(props: SandpackProps) {
     options: myOptions,
     files: additionalFiles,
     s,
+    html = false,
     tailwind = false,
     daisy = false,
     bootstrap = false,
@@ -181,7 +183,7 @@ function SandpackRoot(props: SandpackProps) {
     }
   }
 
-  const templateUsed = v19 ? templateV19 : template;
+  const templateUsed = v19 ? templateV19 : html ? templateHtml : template;
 
   return (
     <div className='sandpack sandpack--playground w-full my-8' dir='ltr'>

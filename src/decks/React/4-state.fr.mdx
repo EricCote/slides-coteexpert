@@ -7,6 +7,17 @@ date: '2023-02-22'
 
 ---
 
+## État
+
+- Un composant doit parfois modifier son affichage suite à une interaction.
+  - Taper sur le clavier met à jour un champ de saisie
+  - Cliquer "Suivant" sur un carousel photo affiche la prochaine image
+  - Cliquer "Acheter" ajoute un produit dans un panier d'achat
+- Un composant doit gérer sa "mémoire": la valeur du champ, l'image courante, le panier d'achat
+- Ce sont des exemples **d'États** (State)
+
+---
+
 import myFile from './4-state/datafile.js';
 
 ## Une variable ne suffit pas
@@ -107,9 +118,12 @@ import { useState } from 'react';
 const [data, setData] = useState(0);
 ```
 
-`data` est une variable d'état (pour lire), et `setData` est la fonction setter (pour modifier).
-
-> La syntaxe `[` et `]` se nomme _décomposition de tableau_ ([array destructuring](https://javascript.info/destructuring-assignment)) Cela permet de lire les valeurs provenant d'un tableau. Le tableau retourné par `useState` a toujours 2 items.
+- `data` est une variable d'état (pour lire)
+- `setData` est la fonction setter (pour modifier).
+  <hr />
+- La syntaxe `[` et `]` se nomme _décomposition de tableau_ ([array destructuring](https://javascript.info/destructuring-assignment))
+- Cela permet de lire les valeurs provenant d'un tableau
+- Le tableau retourné par `useState` a toujours 2 items
 
 ---
 
