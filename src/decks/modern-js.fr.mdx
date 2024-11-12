@@ -17,6 +17,224 @@ language: fr
 
 ---
 
+## Classique vs module
+
+- Il y a deux façons de charger un script: classique et module
+
+- Chargement classique de script JS, on utilise balise `<script>`
+
+```html
+<script src="js/vendor/jquery.js"></script>
+```
+
+- Chargement module, on ajoute un `type="module"`
+
+```html
+<script src="js/main.js" type="module"></script>
+```
+
+---
+
+## Chargement classique
+
+- Pour des raisons historiques, la lecture (parsing) du document web est interrompu avec la balise script
+- Mauvaise expérience usager
+- Dans le passé, on a recommendait de placer les balises scripts à la fin du document html
+
+**[Lien pour tester blocage](/sandbox/classic.html)**
+
+![Script blocking](/img/js/classic.svg)
+
+---
+
+## Chargement Async/Defer
+
+- **Async/Defer** permet de télécharger pendant la parsing, de façon asynchrone
+
+- **Async** exécute immédiatement quand le téléchargment se termine
+- **Async** interrompt la lecture de la page (parsing)
+- **Async** l'ordre d'exécution est incertain (dépend de la taille des fichiers et vitesse des serveurs)
+- **Defer** n'exécute qu'après que le parsing termine (pas d'interruption)
+- **Defer** l'ordre d'exécution est garanti d'être l'ordre d'apparition sur la page
+
+![Async DeferScript](/img/js/async.svg)
+
+**[Exemple async](/sandbox/async.html)**
+
+**[Exemple defer](/sandbox/defer.html)**
+
+---
+
+## Chargement module
+
+- **Module** JS télécharge des scripts additionnels avec la déclaration `import`
+- **Module** télécharge de façon asynchrone
+- - **Module** n'exécute qu'après que le parsing termine (`defer` automatique)
+- **Module async** exécute dès que les dépendances sont toutes téléchargées (pourrait interrompre le parsing)
+
+![Async module](/img/js/asyncdefer.svg)
+
+**[Exemple module](/sandbox/module.html)**
+
+---
+
+## Import et Export
+
+- Par défaut, la portée des variables et fonctions dans un module, c'est local au fichier.
+- Les modules ne permettent pas de créer des fonctions ou variables globales
+  - On contourne cette limitation en modifiant un objet global (ex: `window`)
+- Un script module peut exposer des fonctions et des variables à un autre script, via `export`
+- Il y a deux types d'exportation: exportation **nommée**, et exportation **par défaut**.
+- Un module n'expose qu'une exportation par défaut, mais peut partager plusieurs exportations nommées.
+
+---
+
+## Exportation
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+import { a, b, c, add } from './inline';
+
+display(a);
+display(JSON.stringify(b));
+display(JSON.stringify(c));
+display(add(4, 5));
+```
+
+```js src/inline.js active
+//Inline named exports
+export const a = 42;
+export const b = [4, 5, 6];
+export const c = { name: 'Tom' };
+
+export function add(a, b) {
+  return a + b;
+}
+```
+
+```js src/list.js
+//List named exports
+const a = 42;
+const b = [4, 5, 6];
+const c = { name: 'Tom' };
+
+function add(a, b) {
+  return a + b;
+}
+
+export { a, b, c, add };
+```
+
+```js src/alias.js
+//List named export with alias
+const num = 42;
+const b = [4, 5, 6];
+const c = { name: 'Tom' };
+
+function add(a, b) {
+  return a + b;
+}
+
+export { num as a, b, c, add };
+```
+
+```js src/inlineDefault.js
+//Inline exports with a default export (multiply)
+export const a = 42;
+export const b = [4, 5, 6];
+export const c = { name: 'Tom' };
+
+export function add(a, b) {
+  return a + b;
+}
+
+export default function multiply(a, b) {
+  return a * b;
+}
+```
+
+```js src/listDefault.js
+//List exports with a default export (multiply)
+const a = 42;
+const b = [4, 5, 6];
+const c = { name: 'Tom' };
+
+function add(a, b) {
+  return a + b;
+}
+
+function multiply(a, b) {
+  return a * b;
+}
+
+export { a, b, c, add, multiply as default };
+```
+
+</Sandpack>
+
+---
+
+## Importation
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+import result from './basic';
+
+display(result);
+```
+
+```js src/basic.js active
+//Imports both default and named exports
+import multiply, { a, b, c, add } from './export';
+
+const testResult = add(a, a);
+
+export default testResult;
+```
+
+```js src/alias.js
+//aliasing default is straightforward
+//aliasing named export uses 'as'
+import multiplication, { a as number, b, c, add } from './export';
+
+const testResult = multiplication(number, number);
+
+export default testResult;
+```
+
+```js src/namespace.js
+//uses a namespace object for named exports (the default one is 'name.default')
+import multiply, * as lib from './export';
+
+const testResult = lib.add(lib.a, lib.a);
+
+export default testResult;
+```
+
+```js src/export.js
+//Inline exports with a default export (multiply)
+export const a = 42;
+export const b = [4, 5, 6];
+export const c = { name: 'Tom' };
+
+export function add(a, b) {
+  return a + b;
+}
+
+export default function multiply(a, b) {
+  return a * b;
+}
+```
+
+</Sandpack>
+
+---
+
 ## Définir variables
 
 - `var`, `let` et `const` sont similaires
@@ -36,12 +254,14 @@ language: fr
 <Sandpack s="80" html>
 
 ```js
+import display from './display';
+
 function hoisting() {
-  x = 'valeur de x';
-  // next line is hoisted to
+  x = 'x value';
+  // next line (var) is hoisted to
   // the beginning of the function
   var x;
-  root.innerHTML = x;
+  display(x);
 }
 
 hoisting();
@@ -60,6 +280,8 @@ hoisting();
 <Sandpack s="80" html>
 
 ```js
+import display from './display';
+
 let total = 0;
 
 for (let i = 0; i < 10; i++) {
@@ -68,7 +290,7 @@ for (let i = 0; i < 10; i++) {
 }
 
 //on ne peut PAS accéder i à l'extérieur du bloc
-//root.innerHTML = i;
+//display(i)
 ```
 
 </Sandpack>
@@ -86,37 +308,39 @@ for (let i = 0; i < 10; i++) {
 <Sandpack s="80" html>
 
 ```js
+import display from './display';
+
 const obj = { nom: 'Donald', age: 79 };
 
 //Ceci échoue, pas de réassignation avec const
 //obj = { nom: 'Kamala', age: 60 };
 
 //on permet la mutation
-obj.age = 80;
+obj.age += 1;
 
-root.innerHTML = '<pre>' + JSON.stringify(obj, null, 2) + '</pre>';
+display(JSON.stringify(obj, null, 2));
 ```
 
 </Sandpack>
 
-- Remplacez `const` par `let`, et décommentez la réassignation
+- Décommentez la réassignation, et remplacez `const` par `let`
 
 ---
 
 ## Evaluation d'expression en booléen
 
-falsy: `false`, `0`, `""`, `null`, `undefined`, `NaN`
-truthy: tout le reste (incluant `[]`, `{}`, `"0"`, `"false"`)
+**falsy:** `false`, `0`, `""`, `null`, `undefined`, `NaN`
+
+**truthy:** tout le reste (incluant `[]`, `{}`, `"0"`, `"false"`)
 
 ---
 
 ## Evaluation d'expression en booléen
 
-<Sandpack s="80" html>
+<Sandpack s="65" html>
 
 ```js
-ul = document.createElement('ul');
-document.body.appendChild(ul);
+import display from './display';
 
 evaluate(false);
 evaluate('');
@@ -136,18 +360,529 @@ evaluate('false');
 evaluate(new Date());
 
 function evaluate(x) {
+  // Determine if its truthy or falsy
   let result;
   if (x) {
     result = ' est truthy';
   } else {
     result = ' est falsy';
   }
-  const li = document.createElement('li');
-  ul.appendChild(li);
-  li.textContent = `${JSON.stringify(x)} ${result}`;
+
+  // Display result on the page
+  display(`${JSON.stringify(x)}`.padEnd(10) + result);
 }
 ```
 
 </Sandpack>
 
 ---
+
+## Evaluation conditionnelle
+
+- Les évaluations suivantes font du court-circuitage
+  - JS n'évalue pas `eval2` si ce n'est pas nécessaire
+
+import './React/table-rows.css';
+
+<div className="my-tbl" >
+| Operation           | Syntaxe                            |  Description                                                                    |
+| ------------ | ---------------------------- | ----------------------------------------------------------------------- |
+| "ou" logique | `eval1` &#124;&#124; `eval2` | quand `eval1` est `truthy`, <br/> retourne `eval1`, <br/>sinon retourne `eval2` |
+| "et" logique | `eval1 && eval2` | quand `eval1` est `falsy`, <br/> retourne `eval1`, <br/>sinon retourne `eval2` |
+| coalesce | `eval1 ?? eval2` | quand `eval1` n'est ni `null`, ni `undefined`, <br/> retourne `eval1`, <br/>sinon retourne `eval2` |
+| condition ternaire | `test ? eval1 : eval2` | quand `test` est `truthy`, <br/> retourne `eval1`, <br/>sinon retourne `eval2` |
+
+</div>
+
+---
+
+## Evaluer avec opérations "et", "ou", "coalesce" et ternaire
+
+ <Sandpack s="55" html>
+
+```js
+import display from './display';
+
+evaluate(`'wow'     && ''`);
+evaluate(`'wow'     || ''`);
+evaluate(`''        && 'wow'`);
+evaluate(`''        || 'wow'`);
+display('------------------------------------');
+
+evaluate(`''        ?? 'rien'`);
+evaluate(`null      ?? 'rien'`);
+evaluate(`undefined ?? 'rien'`);
+display('------------------------------------');
+
+evaluate(`5 > 4 ? 'vrai' : 'faux'`);
+evaluate(`4 > 5 ? 'vrai' : 'faux'`);
+evaluate(`''    ? 'vrai' : 'faux'`);
+evaluate(`'wow' ? 'vrai' : 'faux'`);
+evaluate(`'wow' ? {val: true} : {val: false}`);
+
+function evaluate(str) {
+  // Display result on the page
+  display(str.padEnd(23) + ' ==> ' + JSON.stringify(eval(str)));
+}
+```
+
+</Sandpack>
+
+---
+
+## Déclarer fonctions
+
+ <Sandpack s="70" html>
+
+```js
+import display from './display';
+
+//classic function
+function f1() {
+  display('f1() is called');
+}
+
+//function expressions
+//privateName() has a block scope, so it is not accessible
+const f2 = function privateName() {
+  display('f2() is called');
+};
+
+//defining the function with anonymous function expression
+const f3 = function () {
+  display('f3() is called');
+};
+
+//defining with arrow function
+const f4 = () => {
+  display('f4() is called');
+};
+
+f1();
+f2();
+f3();
+f4();
+
+//iife: Immediately Invoked Function Expression
+//Also called a "Self-Invoking function"
+//no pollution of the global object with pre-ESM JS
+//Since ESM, not as useful
+((param) => {
+  display('iife() is called with ' + JSON.stringify(param));
+})('my param');
+```
+
+</Sandpack>
+
+---
+
+## Syntaxe fonction flèche avec `return` implicite
+
+- Si la fonction flèche ne possède qu'une instruction `return`
+- On peut érire la fonction flèche avec un `return` implicite en retirant les accolades `{}`
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+//prettier-ignore
+const explicitFunction = (a, b) => { return a + b; };
+const implicitFunction = (a, b) => a + b; //equivalent
+
+function testAdd() {
+  const txt1 = display('explicitFunction(4,5) ==> ' + explicitFunction(4, 5));
+  const txt2 = display('implicitFunction(4,5) ==> ' + implicitFunction(4, 5));
+}
+
+testAdd();
+```
+
+</Sandpack>
+
+---
+
+## Paramètre par défaut
+
+- Initialise avec défaut quand paramètre est vide ou `undefined`
+- `null` n'est pas initialisé
+- Pour gérer le `null` (et `undefined`), on pourrait utiliser l'opérateur `??` (`coalesce`)
+
+<Sandpack html>
+
+```js
+import display from './display';
+
+function countArray(array = []) {
+  // array = array ?? []
+  return array.length;
+}
+
+display(countArray());
+display(countArray(undefined));
+//display(countArray(null))
+```
+
+</Sandpack>
+
+---
+
+## Paramètres du reste 1/2
+
+- En anglais: _rest parameters_
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+function fn(a, b, ...theRest) {
+  // theRest is an array containing the rest of the parmams
+  display(`a ==> ${a}`);
+  display(`b ==> ${b}`);
+  display(`theRest ==> ${JSON.stringify(theRest)}`);
+}
+
+fn(5, 6, 7, 8, 9);
+```
+
+</Sandpack>
+
+---
+
+## Paramètres du reste (2/2)
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+function fn(...parameters) {
+  // parameters is an array containing all params
+  return parameters;
+}
+
+str = 'fn(5,6,7,8,9)';
+
+display(str + ' ==> ' + JSON.stringify(eval(str)));
+```
+
+</Sandpack>
+
+---
+
+## Syntaxe de décomposition
+
+- En anglais: _Spread Syntax_
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+function sum(x, y, z) {
+  return x + y + z;
+}
+
+const numbers = [2, 3, 4];
+
+//calling sum with an array.  Does not work
+display(sum(numbers));
+//the spread converts the array to function params
+display(sum(...numbers));
+```
+
+</Sandpack>
+
+---
+
+## Combiner syntaxe de décomposition et paramètres du reste
+
+- Spread syntax with objects
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+const numbers = [2, 3, 4];
+
+let strCall;
+
+//the spread converts the array to function params
+evaluate('sumEval(...numbers)');
+
+////There are multiple ways of adding the items of the array
+evaluate('sumFor(...numbers)');
+evaluate('sumForIn(...numbers)');
+evaluate('sumForOf(...numbers)');
+evaluate('sumForEach(...numbers, 5, 6)');
+evaluate('sumReduce(1, ...numbers)');
+
+//sums an array using array.join and eval
+function sumEval(...numbers) {
+  strCall = `sumEval(${JSON.stringify(numbers)})`; // [2,3,4,5,6]
+  const addingString = numbers.join('+'); // "2+3+4+5+6"
+  const sum = eval(addingString); // 20
+  return sum;
+}
+
+// uses "for"  loop
+function sumFor(...numbers) {
+  strCall = `sumFor(${JSON.stringify(numbers)})`;
+  let sum = 0;
+  for (let i = 0; i < numbers.length; i++) {
+    sum += numbers[i];
+  }
+  return sum;
+}
+
+// uses "for ... in" loop
+function sumForIn(...numbers) {
+  strCall = `sumForIn(${JSON.stringify(numbers)})`;
+  let sum = 0;
+  for (i in numbers) {
+    sum += numbers[i];
+  }
+  return sum;
+}
+
+// uses "for ... of" loop
+function sumForOf(...numbers) {
+  strCall = `sumForOf(${JSON.stringify(numbers)})`;
+  let sum = 0;
+  for (nb of numbers) {
+    sum += nb;
+  }
+  return sum;
+}
+
+// uses array.forEach()
+function sumForEach(...numbers) {
+  strCall = `sumForEach(${JSON.stringify(numbers)})`;
+  let sum = 0;
+  numbers.forEach((nb) => (sum += nb));
+  return sum;
+}
+
+// uses array.reduce
+function sumReduce(...numbers) {
+  strCall = `sumReduce(${JSON.stringify(numbers)})`;
+  let sum = numbers.reduce((total, nb) => total + nb, 0);
+  return sum;
+}
+
+function evaluate(str) {
+  // Display result on the page
+  result = eval(str);
+  display(str);
+  display(strCall.padEnd(23) + ' ==> ' + result);
+  display('---------------------------------------');
+}
+```
+
+</Sandpack>
+
+---
+
+## Syntaxe de décomposition avec tableaux
+
+- Spread syntax with arrays
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+const numbers = [2, 3, 4]; //[2,3,4]
+const moreNumbers = [1, ...numbers, 5]; //[1,2,3,4,5]
+const repeatedNumbers = [...numbers, ...numbers]; //[2,3,4,2,3,4]
+const clonedNumbers = [...numbers]; //[2,3,4]
+
+display(JSON.stringify(moreNumbers));
+display(JSON.stringify(repeatedNumbers));
+display(JSON.stringify(clonedNumbers));
+```
+
+</Sandpack>
+
+---
+
+## Syntaxe de décomposition avec objets
+
+- Spread syntax with objects
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+const person1 = { name: 'Donald', age: 79 }; // { name: 'Donald', age: 79 }
+const clonedPerson = { ...person1 }; // { name: 'Donald', age: 79 }
+const person2 = { city: 'NY', ...person1 }; // { city: 'NY', name: 'Donald', age: 79 }
+const person3 = { city: 'NY', ...person1, city: 'DC' }; // { city: 'DC', name: 'Donald', age: 79 }
+const person4 = { ...person2, ...person3 }; //{ city: 'DC', name: 'Donald', age: 79 }
+
+display(JSON.stringify(person1));
+display(JSON.stringify(clonedPerson));
+display(JSON.stringify(person2));
+display(JSON.stringify(person3));
+display(JSON.stringify(person4));
+```
+
+</Sandpack>
+
+---
+
+## Affecter par décomposition
+
+- Destructuring assignment
+
+<Sandpack s="70" html>
+
+```js
+import arrayNoDestructuring from './arrayNo';
+import arrayWithDestructuring from './arrayWith';
+import objectNoDestructuring from './objNo';
+import objectWithDestructuring from './objWith';
+
+arrayNoDestructuring();
+arrayWithDestructuring();
+objectNoDestructuring();
+objectWithDestructuring();
+```
+
+```js src/arrayNo.js
+import display from './display';
+
+export default function arrayNoDestructuring() {
+  display(`arrayNoDestructuring()`);
+  const list = [1, 2, 3];
+  let a = list[0]; // a=1
+  let b = list[2]; // b=3
+  display(`a=${a},  b=${b}`); //a=1,  b=3
+
+  // Swap the values, helped with temp var!
+  let tmp = a;
+  a = b;
+  b = tmp;
+  display(`a=${a},  b=${b}`); //a=3,  b=1
+  display(`--------------------------`);
+}
+```
+
+```js src/arrayWith.js active
+import display from './display';
+
+export default function arrayWithDestructuring() {
+  display(`arrayWithDestructuring()`);
+  const list = [1, 2, 3];
+  let [a, , b] = list; // a=1, b=3
+  display(`a=${a},  b=${b}`);
+  [b, a] = [a, b]; // Swap the values, no need for temp var!
+  display(`a=${a},  b=${b}`);
+  display(`--------------------------`);
+}
+```
+
+```js src/objNo.js
+import display from './display';
+
+export default function objectNoDestructuring() {
+  display(`objectNoDestructuring()`);
+  const emp = { firstName: 'Eric', lastName: 'Cote' };
+  const firstName = emp.firstName;
+  const lastName = emp.lastName;
+  display(`firstName=${firstName},  lastName=${lastName}`); //firstName=Eric,  lastName=Cote
+  //use an alias
+  const surname = emp.lastName;
+  display(`surname=${surname}`); //surname=Cote
+
+  function fn(emp) {
+    display(`fn() called`);
+    display(`firstName=${emp.firstName},  lastName=${emp.lastName}`); //firstName=Eric,  lastName=Cote
+  }
+  fn(emp);
+  display(`--------------------------`);
+}
+```
+
+```js src/objWith.js
+import display from './display';
+
+export default function objectWithDestructuring() {
+  display(`objectWithDestructuring()`);
+  const emp = { firstName: 'Eric', lastName: 'Cote' };
+  const { firstName, lastName } = emp;
+  display(`firstName=${firstName},  lastName=${lastName}`); //firstName=Eric,  lastName=Cote
+
+  const { lastName: surname } = emp;
+  display(`surname=${surname}`); // surname=Cote
+  function fn({ firstName, lastName }) {
+    display(`fn() called`);
+    display(`firstName=${firstName},  lastName=${lastName}`); //firstName=Eric,  lastName=Cote
+  }
+  fn(emp);
+  display(`--------------------------`);
+}
+```
+
+</Sandpack>
+
+---
+
+## Closures
+
+- Les variables dans les fonctions ont une portée de fonction.
+- Mais une variable la pourrait aller au-delà de cette portée si elle est référée par une fonction interne.
+- Dans ce cas là, la portée est celle de la référencec de la fonction imterne
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+function outer() {
+  let theVar = 42;
+  return function inner() {
+    return theVar;
+  };
+}
+const fn = outer();
+display(fn()); //returns 42!
+//theVar stays scoped while fn is reachable.
+//this is not the case in languages that
+//don't support closures.
+```
+
+</Sandpack>
+
+---
+
+## Closures
+
+<Sandpack s="70" html>
+
+```js
+import display from './display';
+
+function createCounter() {
+  let count = 0;
+  return function incrementCounter() {
+    count += 1;
+    return count;
+  };
+}
+const counter = createCounter();
+
+//-------------------------------------
+//display a button to test counter
+
+const button = document.createElement('button');
+root.appendChild(button);
+const txtNode = document.createTextNode('Increment()');
+button.appendChild(txtNode);
+button.addEventListener('click', () => display(counter()));
+```
+
+</Sandpack>

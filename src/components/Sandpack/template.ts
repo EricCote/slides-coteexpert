@@ -89,4 +89,17 @@ import "./styles.css";
 import "./App.js";
 `,
   },
+  '/src/display.js': {
+    hidden: true,
+    code: `
+const pre = document.createElement('pre');
+root.appendChild(pre);
+pre.setAttribute('style', 'font-size: 1.2em');
+
+export default function display(txt) {
+  const txtNode = document.createTextNode(txt + '\\n');
+  pre.appendChild(txtNode);
+}
+`,
+  },
 };
