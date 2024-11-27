@@ -86,8 +86,6 @@ import './table-rows.css';
 
 - Les fonctions doivent être passées, PAS appelées
 - Si on se trompe, le code exécute au moment du rendu plutôt qu'au moment de l'événement
-- `<button onClick={handleClick}>` passe la fonction `handleClick`
-- `<button onClick={() => alert('...')}>` passe la fonction flèche `() => alert('...')`
 
 ---
 
@@ -103,6 +101,8 @@ function handleClick() {
   alert(message);
 }
 
+//replace onClick function with handleClick: it now fails to display.
+//then move handleclick in AlertButton, and fix it (because closure)
 function AlertButton({ message, children }) {
   return <button onClick={() => alert(message)}>{children}</button>;
 }
@@ -110,8 +110,8 @@ function AlertButton({ message, children }) {
 export default function Toolbar() {
   return (
     <div>
-      <AlertButton message='On joue le film'>Jouer Film</AlertButton>
-      <AlertButton message='On télécharge'>Téléchager Image</AlertButton>
+      <AlertButton message='Play movie'>Play movie</AlertButton>
+      <AlertButton message='Upload'>Upload Image</AlertButton>
     </div>
   );
 }
@@ -134,23 +134,35 @@ Il est possible de passer un gestionnaire d'événements dans les props
 <Sandpack s="70">
 
 ```js
-function Button({ onClick, children }) {
-  return <button onClick={onClick}>{children}</button>;
+function BlueButton({ onClick, children }) {
+  return (
+    <button
+      style={{
+        borderRadius: '5px',
+        backgroundColor: 'lightblue',
+        padding: '10px',
+        margin: '10px',
+        border: 'none',
+        display: 'block',
+      }}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
 }
 
 function PlayButton({ movieName }) {
   function handlePlayClick() {
-    alert(`On joue ${movieName}!`);
+    alert(`Now playing ${movieName}!`);
   }
 
-  return <Button onClick={handlePlayClick}>Jouer "{movieName}"</Button>;
+  return <BlueButton onClick={handlePlayClick}>Play "{movieName}"</BlueButton>;
 }
 
 function UploadButton() {
   return (
-    <Button onClick={() => alert('On télécharge une image')}>
-      Upload Image
-    </Button>
+    <BlueButton onClick={() => alert('Upload Image')}>Upload Image</BlueButton>
   );
 }
 
@@ -158,6 +170,8 @@ export default function Toolbar() {
   return (
     <div>
       <PlayButton movieName='SpiderMan 2' />
+      <PlayButton movieName='James Bond' />
+      <PlayButton movieName='Star Wars' />
       <UploadButton />
     </div>
   );
@@ -166,7 +180,6 @@ export default function Toolbar() {
 
 ```css
 button {
-  margin-right: 10px;
 }
 ```
 
@@ -190,8 +203,8 @@ function Button({ onSmash, children }) {
 export default function App() {
   return (
     <div>
-      <Button onSmash={() => alert('Je joue film!')}>Jouer film</Button>
-      <Button onSmash={() => alert('Je télécharge!')}>Télécharger image</Button>
+      <Button onSmash={() => alert('Playing movie!')}>Play movie</Button>
+      <Button onSmash={() => alert('Uploading!')}>Upload image</Button>
     </div>
   );
 }
@@ -221,11 +234,11 @@ export default function Toolbar() {
     <div
       className='Toolbar'
       onClick={() => {
-        alert('On a cliqué sur la barre!');
+        alert('Bar was clicked!');
       }}
     >
-      <button onClick={() => alert('Je joue!')}>Jouer film</button>
-      <button onClick={() => alert('Je télécharge!')}>Télécharger Image</button>
+      <button onClick={() => alert('Playing movie!')}>Play movie</button>
+      <button onClick={() => alert('Uploading!')}>Upload image</button>
     </div>
   );
 }
@@ -276,11 +289,11 @@ export default function Toolbar() {
     <div
       className='Toolbar'
       onClick={() => {
-        alert('On a cliqué sur la barre!');
+        alert('Bar was clicked');
       }}
     >
-      <Button onClick={() => alert('Je joue!')}>Jouer film</Button>
-      <Button onClick={() => alert('Je télécharge!')}>Télécharger Image</Button>
+      <Button onClick={() => alert('Playing movie')}>Play Movie</Button>
+      <Button onClick={() => alert('Uploading Image')}>Upload Image</Button>
     </div>
   );
 }
@@ -307,7 +320,8 @@ Il existe deux facons de s'attacher avec le gestionnaires d'événement:
 1. En **capture**, du parent plus générique vers l'enfant plus spécifique (on descend)
 2. En **propagation**, de l'enfant plus spécifique vers le parent plus générique (on remonte)
 
-Normalement, on gère les événements en mode **propagation**. Mais dans de **rares** situations, on préférera gérer un événement en mode **capture**.
+- Normalement, on gère les événements en mode **propagation**.
+- Dans de **rares** situations, on préfère gérer en mode **capture**.
 
 ```js
 <div
@@ -349,24 +363,28 @@ function Button({ onClick, children }) {
 }
 ```
 
-On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. Ce patron est une **alternative** à la propagation. Contrairement à la propagation, ce n'est pas automatique. Mais c'est plus clair quel code est appelé et dans quel ordre.
-
+<div>
+- On peut donc rouler du code avant (ou après) avoir appelé le gestionnaire `onClick`. 
+- Ici, on bloque la propagation. 
+- Ici, contrairement à la propagation, ce n'est pas automatique. 
+- C'est plus clair quel code est appelé et dans quel ordre.
+</div>
 </TwoColumns>
 
 ---
 
 ## Comportement par défaut (formulaire)
 
-- Certains événements du naviagateur sont associés à un comportement.
+- Certains événements du navigateur sont associés à un comportement. (_behavior_)
 
 <Sandpack>
 
 ```js
 export default function Signup() {
   return (
-    <form onSubmit={() => alert('On envoie!')}>
+    <form onSubmit={() => alert('Submitting!')}>
       <input />
-      <button>Envoyer</button>
+      <button>Submit</button>
     </form>
   );
 }
@@ -382,7 +400,7 @@ button {
 
 - Un `submit` sur un `<Form>` (déclenché par le click d'un bouton), provoque un "reload" de la page.
 - Cliquer un hyperlien charge une nouvelle page
-- Keypress, scrolling lancent des comportements
+- _Keypress_, _scrolling_ lancent aussi des comportements (_behavior_)
 
 ---
 
@@ -398,11 +416,11 @@ export default function Signup() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        alert('On envoie!');
+        alert('Submitting');
       }}
     >
       <input />
-      <button>Envoyer</button>
+      <button>Submit</button>
     </form>
   );
 }
@@ -418,20 +436,20 @@ button {
 
 ---
 
-## Ne pas confondre les deux:
+## Ne pas confondre les deux
 
-- [`e.stopPropagation()`](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) empêche les gestionnaire d'événements parents de se déclencher
-- [`e.preventDefault()` ](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) empêche le comportement par défaut de se déclencher. (Pour les quelques composants qui ont un comportement par défaut.)
+- [`e.stopPropagation()`](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) empêche les gestionnaires d'événements parents de se déclencher
+- [`e.preventDefault()` ](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) empêche le comportement par défaut de se déclencher. (Pour les quelques éléments qui ont un comportement par défaut.)
 
 ---
 
 ## Gestionnaire d'événements et Effets de bord
 
-- On peut mettre des effets de bord dans un gestionnaire d'événement.
-
+- On peut mettre des **effets** de bord dans un gestionnaire d'événement
 - En fait, c'est la **meilleure place**
 - Un gestionnaire n'a pas besoin d'être pur
   - Contrairement au rendu d'un composant qui doit être pur
+  - On peut donc remplacer `useEffect` par des événements
 
 ---
 
@@ -439,15 +457,16 @@ button {
 
 - React utilise son propre système d'événements
 - Encapsule le système d'événements du navigateur
-- React fait un énorme travail pour cacher les incohérence des événements du DOM
+- React fait un énorme travail pour cacher les incohérences des événements du DOM
 - React n'utilise pas `addEventListener`
-- React ne peut annuler un événement en retournant `false` (on doit utiliser `preventDefault()` ou `stopPropagation()` ) <hr />
-- React utilise `onClick`, alors que le navigateur utilise `onclick`
-- React gère le `onChange` pour chaque lettre tapée, mais le navigateur utilise `oninput`
-- React nomme cela `onDoubleClick`, mais le navigateur utilise `ondblclick`
-- REact n'a pas de `onLoad`
+- React ne peut annuler un événement en retournant `false` (on doit utiliser `preventDefault()` ou `stopPropagation()` )
   <hr />
-- Pour utiliser une version de React sans événements synthétiques, [Preact](https://preactjs.com)
+- React utilise `onClick`, alors que le DOM utilise `onclick`
+- React gère le `onChange` pour chaque lettre tapée, mais le DOM utilise plutôt `oninput`
+- React nomme cela `onDoubleClick`, mais le DOM utilise `ondblclick`
+- React n'a pas de `onLoad`
+  <hr />
+- Librairie similaire à React, mais sans événements synthétiques: [Preact](https://preactjs.com)
 
 ---
 
@@ -455,7 +474,9 @@ button {
 
 Cliquer le bouton devrait basculer le fond entre blanc et noir. Ça ne fonctionne pas. Réparez le problème (Ne modifiez pas `handleClick`, son code est correct.)
 
-<Sandpack>
+<Hint>La différence entre passer une fonction, et appeler un fonction</Hint>
+
+<Sandpack s="70">
 
 ```js
 export default function LightSwitch() {
@@ -468,7 +489,7 @@ export default function LightSwitch() {
     }
   }
 
-  return <button onClick={handleClick()}>Interrupteur de lumière</button>;
+  return <button onClick={handleClick()}>Switch Light</button>;
 }
 ```
 
@@ -478,15 +499,16 @@ export default function LightSwitch() {
 
 ## Défi #2
 
-Le composant `ColorSwitch` génère un bouton qui doit changer la couleur de page. Il faut attacher le gestionnaire d'événements `onChangeColor` à l'événement `onClick` du bouton.
+Objectif: Cliquer le bouton devrait changer la couleur de page
 
-Après le succès, on remarque que le bouton incrémente aussi le compteur de page. Que faudrait-il faire pour que `onChangeColor` ne puisse plus incrémenter le compteur?
+1. L'événement `onClick` devrait être attaché à `onChangeColor`
+2. Le bouton ne devrait pas incrémenter le compteur de page
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js src/ColorSwitch.js active
 export default function ColorSwitch({ onChangeColor }) {
-  return <button>Changer couleur</button>;
+  return <button>Change Color</button>;
 }
 ```
 
@@ -521,7 +543,7 @@ export default function App() {
       <ColorSwitch onChangeColor={handleChangeColor} />
       <br />
       <br />
-      <h2>Nombre de clics sur la page: {clicks}</h2>
+      <h2>Number of clicks on page: {clicks}</h2>
     </div>
   );
 }

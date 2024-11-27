@@ -308,7 +308,7 @@ for (let i = 0; i < 10; i++) {
 <Sandpack s="80" html>
 
 ```js
-import display from './display';
+import { displayJson } from './display';
 
 const obj = { nom: 'Donald', age: 79 };
 
@@ -318,7 +318,7 @@ const obj = { nom: 'Donald', age: 79 };
 //on permet la mutation
 obj.age += 1;
 
-display(JSON.stringify(obj, null, 2));
+displayJson(obj, 2);
 ```
 
 </Sandpack>
@@ -502,6 +502,52 @@ testAdd();
 
 ---
 
+## Syntaxe d'initialisateur d'objet
+
+- On recommande d'utiliser un _object initializer_
+- Si on duplique une propriété, la dernière gagne
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const person1 = { name: 'Donald', age: 77, age: 78, age: 79 };
+
+displayJson(person1); //{ name: 'Donald', age: 79 };
+
+//---------------------
+```
+
+</Sandpack>
+
+---
+
+## Notation raccourcie des initialisateurs d'objets
+
+- Si une variable a le même nom qu'une propriété, on peut raccourcir la syntaxe (_shorthand notation_)
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const name = 'Clark';
+const age = 30;
+
+const person1 = { name: name, age: age };
+const person2 = { name, age }; //shorthand
+
+displayJson(person1);
+displayJson(person2);
+
+//---------------------
+```
+
+</Sandpack>
+
+---
+
 ## Paramètre par défaut
 
 - Initialise avec défaut quand paramètre est vide ou `undefined`
@@ -621,7 +667,6 @@ evaluate('sumReduce(1, ...numbers)');
 
 //sums an array using array.join and eval
 function sumEval(...numbers) {
-  strCall = `sumEval(${JSON.stringify(numbers)})`; // [2,3,4,5,6]
   const addingString = numbers.join('+'); // "2+3+4+5+6"
   const sum = eval(addingString); // 20
   return sum;
@@ -629,7 +674,6 @@ function sumEval(...numbers) {
 
 // uses "for"  loop
 function sumFor(...numbers) {
-  strCall = `sumFor(${JSON.stringify(numbers)})`;
   let sum = 0;
   for (let i = 0; i < numbers.length; i++) {
     sum += numbers[i];
@@ -639,7 +683,6 @@ function sumFor(...numbers) {
 
 // uses "for ... in" loop
 function sumForIn(...numbers) {
-  strCall = `sumForIn(${JSON.stringify(numbers)})`;
   let sum = 0;
   for (i in numbers) {
     sum += numbers[i];
@@ -649,7 +692,6 @@ function sumForIn(...numbers) {
 
 // uses "for ... of" loop
 function sumForOf(...numbers) {
-  strCall = `sumForOf(${JSON.stringify(numbers)})`;
   let sum = 0;
   for (nb of numbers) {
     sum += nb;
@@ -659,7 +701,6 @@ function sumForOf(...numbers) {
 
 // uses array.forEach()
 function sumForEach(...numbers) {
-  strCall = `sumForEach(${JSON.stringify(numbers)})`;
   let sum = 0;
   numbers.forEach((nb) => (sum += nb));
   return sum;
@@ -667,17 +708,25 @@ function sumForEach(...numbers) {
 
 // uses array.reduce
 function sumReduce(...numbers) {
-  strCall = `sumReduce(${JSON.stringify(numbers)})`;
   let sum = numbers.reduce((total, nb) => total + nb, 0);
   return sum;
 }
 
+function withDisplayCall(fn) {
+  return function (...numbers) {
+    strCall = `${fn.name}(${numbers.join()})`;
+    return fn(...numbers);
+  };
+}
+
 function evaluate(str) {
   // Display result on the page
-  result = eval(str);
-  display(str);
-  display(strCall.padEnd(23) + ' ==> ' + result);
-  display('---------------------------------------');
+  const [, fnName, paramStr] = /(.+)\((.*)\)/g.exec(str);
+  result = eval(`withDisplayCall(${fnName})(${paramStr})`);
+
+  display(str); //original fn call
+  display(strCall.padEnd(23) + ' ==> ' + result); //params and result
+  display('---------------------------------------'); //separator
 }
 ```
 
@@ -692,16 +741,16 @@ function evaluate(str) {
 <Sandpack s="70" html>
 
 ```js
-import display from './display';
+import { displayJson } from './display';
 
 const numbers = [2, 3, 4]; //[2,3,4]
 const moreNumbers = [1, ...numbers, 5]; //[1,2,3,4,5]
 const repeatedNumbers = [...numbers, ...numbers]; //[2,3,4,2,3,4]
 const clonedNumbers = [...numbers]; //[2,3,4]
 
-display(JSON.stringify(moreNumbers));
-display(JSON.stringify(repeatedNumbers));
-display(JSON.stringify(clonedNumbers));
+displayJson(moreNumbers);
+displayJson(repeatedNumbers);
+displayJson(clonedNumbers);
 ```
 
 </Sandpack>
@@ -715,7 +764,7 @@ display(JSON.stringify(clonedNumbers));
 <Sandpack s="70" html>
 
 ```js
-import display from './display';
+import { displayJson } from './display';
 
 const person1 = { name: 'Donald', age: 79 }; // { name: 'Donald', age: 79 }
 const clonedPerson = { ...person1 }; // { name: 'Donald', age: 79 }
@@ -723,11 +772,11 @@ const person2 = { city: 'NY', ...person1 }; // { city: 'NY', name: 'Donald', age
 const person3 = { city: 'NY', ...person1, city: 'DC' }; // { city: 'DC', name: 'Donald', age: 79 }
 const person4 = { ...person2, ...person3 }; //{ city: 'DC', name: 'Donald', age: 79 }
 
-display(JSON.stringify(person1));
-display(JSON.stringify(clonedPerson));
-display(JSON.stringify(person2));
-display(JSON.stringify(person3));
-display(JSON.stringify(person4));
+displayJson(person1);
+displayJson(clonedPerson);
+displayJson(person2);
+displayJson(person3);
+displayJson(person4);
 ```
 
 </Sandpack>
@@ -883,6 +932,182 @@ root.appendChild(button);
 const txtNode = document.createTextNode('Increment()');
 button.appendChild(txtNode);
 button.addEventListener('click', () => display(counter()));
+```
+
+</Sandpack>
+
+---
+
+## Tableaux
+
+- Il y a deux façons de manipuler les objets et tableaux: avec mutations ou immuables
+- Une mutation modifie le contenu de l'objet
+- Méthodes immuables (sans mutations) retournent un nouvel objet modifié
+- La mode des librairies modernes, c'est d'éviter les mutations
+- Ex: React, Redux, Solidjs, Vuex, etc
+
+---
+
+## Clonage superficiel
+
+- Deux types de clonage: superficiel ou en profondeur (shallow or deep)
+- Clonage superficiel ne copie que le premier niveau
+- Si l'objet contient des références à d'autres objets ou tableaux imbriqués, on utilise ces références. On ne clone pas pas les objets imbriqués.
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const arr1 = [2, 3, 4];
+
+const arr2 = Array.from(arr1);
+const arr3 = Object.assign([], arr1);
+const arr4 = [...arr1];
+
+displayJson(arr2);
+displayJson(arr3);
+displayJson(arr4);
+
+//---------------------
+
+const obj1 = { name: 'Donald', address: { city: 'Washington', state: 'DC' } };
+
+const obj2 = Object.assign({}, obj1);
+const obj3 = { ...obj1 };
+
+displayJson(obj2, 2);
+displayJson(obj3, 2);
+
+displayJson(Object.is(obj1, obj2));
+displayJson(Object.is(obj1.address, obj2.address));
+```
+
+</Sandpack>
+
+---
+
+## Clonage profond
+
+- Programmer un algorithme récursif pour cloner
+- Utiliser la décomposition imbriquée pour les objets dont on connait la structure
+- Utiliser la serialisation JSON pour convertir un objet en JSON, et reconvertir en objet
+- Utiliser `window.structuredClone()`
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const arr1 = [
+  [2, 3],
+  [5, 6],
+];
+
+const arr2 = JSON.parse(JSON.stringify(arr1));
+const arr3 = structuredClone(arr1);
+
+displayJson(arr2);
+displayJson(arr3);
+
+//---------------------
+
+const obj1 = { name: 'Donald', address: { city: 'Washington', state: 'DC' } };
+
+const obj2 = { ...obj1, address: { ...obj1.address } };
+const obj3 = structuredClone(obj1);
+
+displayJson(obj2, 2);
+displayJson(obj3, 2);
+
+displayJson(obj1 === obj2);
+displayJson(obj1.address === obj2.address);
+```
+
+</Sandpack>
+
+---
+
+## Mutation sur clone d'objet
+
+- Les règles d'immuabilités sont respectés quand on mute le clone qu'on vient de créer
+  - C'est muter l'original qui n'est pas permis
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const arr1 = [2, 3, 4];
+const arr2 = [...arr1]; //clone
+arr2[0] = 0; // mutation on clone is okay
+
+displayJson(arr2);
+
+//---------------------
+
+const obj1 = { name: 'Donald', age: 79 };
+
+const obj2 = { ...obj1 }; //clone
+
+obj2.age = 80; // modify age property
+obj2['age'] = 81; // use bracket notation
+Object.assign(obj2, { age: 82 }); // Mutates the obj2 object
+obj2.vip = true; // add a new property
+delete obj2.vip; // removes a property
+
+displayJson(obj2, 2);
+```
+
+</Sandpack>
+
+---
+
+## Mutation sur un clone d'une liste
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const arr1 = [2, 3, 4];
+const arr2 = [...arr1]; //clone
+arr2[0] = 0; // [0,3,4]
+arr2[0] = 2; // [2,3,4]
+arr2.push(5); // [2,3,4,5]
+arr2.pop(); // [2,3,4]
+arr2.unshift(1); // [1,2,3,4]
+arr2.shift(); // [2,3,4]
+arr2.splice(1, 0, 'a', 'b'); // [2,'a','b',3,4]
+arr2.splice(1, 2); // [2,3,4]
+arr2.reverse(); // [4,3,2]
+arr2.sort(); // [2,3,4]
+arr2.fill('a', 1, 3); //  [2,'a','a']
+arr2.copyWithin(0, 2, 3);
+
+displayJson(arr2);
+
+//---------------------
+```
+
+</Sandpack>
+
+---
+
+## Créer d'un objet existant
+
+<Sandpack html s='75'>
+
+```js
+import { displayJson } from './display';
+
+const obj1 = { name: 'Donald', age: 79 };
+
+const addProp = { ...obj1 }; //clone
+
+displayJson(arr2);
+
+//---------------------
 ```
 
 </Sandpack>

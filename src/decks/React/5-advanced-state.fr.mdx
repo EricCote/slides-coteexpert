@@ -9,7 +9,7 @@ description: other
 
 ## Réagir aux saisies avec l'état
 
-- React utilise une approche **déclarative** pour manipuler l'interface.
+- React utilise une approche **déclarative** pour manipuler l'interface
 - On évite de manipuler directement l'interface
 - On décrit les différents états du composant
 - On spécifie les interactions pour basculer entre ces états
@@ -18,8 +18,7 @@ description: other
 
 ## Approche impérative
 
-Quand on imagine des interactions, on pense à comment l'interface _change_ en réaction aux actions de l'utilisateur
-
+- Quand on imagine des interactions, on pense à comment l'interface _change_ en réaction aux actions de l'utilisateur
 - Imaginons un fomulaire avec lequel l'usager envoie une réponse:
 
 <hr />
@@ -35,9 +34,11 @@ Quand on imagine des interactions, on pense à comment l'interface _change_ en r
 - Il faut traduire ces verbes en instructions et séquences dans un langage de programmation.
 
 <Alert>
-  Ça se nomme **programmation _impérative_** car il faut donner une "commande"
-  pour chaque élément du résultat. Du plateau rotatif au bouton, il faut
-  expliquer _comment_ modifier l'interface.
+
+- On nomme **programmation _impérative_** car il faut donner des "commandes", des "ordres",
+  pour générer le résultat
+- Du plateau rotatif au bouton, il faut expliquer _comment_ modifier l'interface
+
 </Alert>
 
 ---
@@ -46,7 +47,7 @@ Quand on imagine des interactions, on pense à comment l'interface _change_ en r
 
 Voici un exemple de formulaire impératif **sans** React. On utilise le [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model):
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js src/index.js active
 async function handleFormSubmit(e) {
@@ -152,23 +153,23 @@ textarea.oninput = handleTextareaChange;
 
 </Sandpack>
 
-C'est beaucoup de manipulation de toucher à l'interface: désactiver, réactiver, afficher, cacher...
-
-Ça fonctionne pour de petits exemples. Mais ça devient compliqué pour des plus gros.
+- C'est beaucoup de manipulation de toucher à l'interface: désactiver, réactiver, afficher, cacher...
+- Ça fonctionne pour de petits exemples. Mais ça devient compliqué pour des plus gros.
 
 ---
 
 ## Approche Déclarative
 
-Ce qu'on fait en React, on **déclare ce que l'on veut montrer** et React détermine comment mettre à jour l'interface.
-
-C'est comme entrer dans un taxi, donner la destination, et laisser le chauffeur (React) déterminer le meilleur chemin. Il est fort possible que le chauffeur connaisse des raccourcis.
+- Avec React, on **déclare ce que l'on veut montrer**
+- React détermine comment mettre à jour l'interface
+- C'est comme entrer dans un taxi, donner la destination, et laisser le chauffeur (React) déterminer le meilleur chemin.
+- Il est fort possible que le chauffeur connaisse des raccourcis.
 
 ---
 
 ## Penser déclarativment
 
-Prenons l'exemple impératif et convertissons-le en React. Voici les étapes:
+Prenons l'exemple impératif et convertissons-le en React déclaratif. Voici les étapes:
 
 1. **Identifier** les différents états visuels du composant
 2. **Déterminer** ce qui provoque ces changements
@@ -178,14 +179,19 @@ Prenons l'exemple impératif et convertissons-le en React. Voici les étapes:
 
 ---
 
-## Étape 1: Identifier les différents états visuels du composant {/* step-1-identify-your-components-different-visual-states */}
+## Étape 1: Identifier les différents états visuels du composant
 
-En informatique, il existe le concept de ["state machine"](https://en.wikipedia.org/wiki/Finite-state_machine) qui sont dans un “état” particulier. En graphisme, il y a les maquettes des "visual states". React se situe entre ces deux mondes.
+- En informatique, il existe le concept de ["state machine"](https://en.wikipedia.org/wiki/Finite-state_machine)
+- Gère une suite d'états particuliers.
+- En graphisme, il y a les maquettes des "visual states"
+- React se situe entre ces deux mondes
+
+<hr />
 
 Visualisons les états de l'interface usager:
 
-- **Vide**: Bouton "Envoyé" est désactivé.
-- **Tape**: Bouton "Envoyé" est activé.
+- **Vide**: Bouton "Envoyé" est désactivé
+- **Tape**: Bouton "Envoyé" est activé
 - **Envoyer**: On désactive le formulaire. Un icône d'attente est affiché
 - **Succès**: "Merci" est affiché plutôt que le formulaire
 - **Erreur**: Similaire à l'état tape, mais avec un message d'erreur visible
@@ -194,9 +200,10 @@ Visualisons les états de l'interface usager:
 
 ## Maquette des états (V1)
 
-Comme un graphiste, on veut créer une maquette (mock) des états. Ici, on gère l'état via une prop `status` (initialement au mode vide)
+- Comme un graphiste, on veut créer une maquette (mock) des états
+- Ici, on gère l'état via une prop `status` (initialement au mode vide)
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 export default function Form({ status = 'vide' }) {
@@ -219,13 +226,13 @@ export default function Form({ status = 'vide' }) {
 
 </Sandpack>
 
-On peut modifier la valeur de la prop (Essayez de modifier `status = 'vide'` en `status = 'succès'`)
+- On peut modifier la valeur de la prop (Essayez de modifier `status = 'vide'` en `status = 'succès'`)
 
 ---
 
 ## Exemple plus complet (v2)
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 export default function Form({
@@ -268,7 +275,7 @@ export default function Form({
 
 ## Afficher de multiples états visuels
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js src/App.js active
 import Form from './Form.js';
@@ -430,7 +437,7 @@ Nous voyons les réducteurs dans le cours avancé
 
 Finalement, on créé des gestionnaires d'événement qui modifient l'état.
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -519,7 +526,7 @@ Quand on clique sur l'image, on devrait enlever la classe `background--active` d
 
 Visuellement, cliquer sur l'image devrait enlever le fond mauve et encadrer l'image. Cliquer le fond l'inverse.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 export default function Picture() {
@@ -578,7 +585,7 @@ body {
 
 Voici un formulaire écrite en JS et DOM. Jouez avec pour comprendre le fonctionnement.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/index.js active
 function handleFormSubmit(e) {
@@ -680,7 +687,7 @@ Réécrivez le code en React. On a déjà converti le HTML en JSX.
 
 Il faut émuler tous les autres comportements.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 export default function EditProfile() {
@@ -720,7 +727,7 @@ label {
 
 Voici le code sans React
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/index.js active
 function handleFormSubmit(e) {
@@ -822,7 +829,7 @@ Si React n'existait pas, pourrait-on réécrire le code pour que cela ressemble 
 
 Commencez par la méthode updateDOM
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/index.js active
 let firstName = 'Jane';
@@ -985,7 +992,7 @@ Les deux approches sont valables. Mais si des variables sont **toujours modifié
 
 ## Exemple d'état unifié
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1069,7 +1076,7 @@ setX(100);
 
 Voici un formulaire de la satisfaction d'un séjour. `isSending` et `isSent` sont les variables d'état:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1128,7 +1135,7 @@ Plus le composant est complexe, plus c'est difficile à prévenir.
 
 Puisque `isSending` et `isSent` ne doivent jamais être simultanément à `true`, on devrait remplacer l'état par un `status` ayant l'un des 3 états valables : `'typing'` (initial), `'sending'`, et `'sent'`:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1197,7 +1204,7 @@ Si on peut calculer une info à partir de **props** ou de **l'état**, cette inf
 
 Le formulaire suivant fonctionne, mais possède un état redondant.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1251,7 +1258,7 @@ Ce fomulaire a 3 variable d'états: `firstName`, `lastName`, et `fullName`. Mais
 
 Le fomulaire précédent a 3 variable d'états: `firstName`, `lastName`, et `fullName`. Mais `fullName` est redondant. On peut obtenir `fullName` en **combinant** `firstName` et `lastName` pendant le rendu.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1365,7 +1372,7 @@ function Message({ initialColor }) {
 
 Cette liste de collations permet de choisir un item de cette collection.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1419,7 +1426,7 @@ Présentement, on stocke la sélection en tant qu'objet dans la variable d'état
 
 Pourquoi est-ce un problème? C'est clair en ajoutant l'édition :
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1495,7 +1502,7 @@ On pourrait mettre à jour `selectedItem`, mais c'est mieux d'éliminer la dupli
 
 Dans cet exemple, plutôt que de stocker un objet `selectedItem` (qui duplique un objet de la liste), nous stockons un `selectedId` dans l'état. Nous obtenons le `selectedItem` en utilisant la méthode `.find()` pour trouver le bon item de la liste.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1591,7 +1598,7 @@ Inutile de stocker l'objet sélectionné quand **seul l'id sélectionné suffit*
 
 Imaginez une planification de voyage constitué de planètes, continents et pays. On pourrait structurer l'état en utilisant des objets et tableaux imbriqués multi-niveaux:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1900,7 +1907,7 @@ Plutôt qu'une structure d'arborescence où chaque place a un tableau de _places
 
 Ce genre de structure sans imbrication (plate) fait penser à une base de données relationnelle.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2203,7 +2210,7 @@ Maitenant, pour enlever une place, on n'a besoin que de mettre à jour deux chos
 - Nous créons un clone du _parent_ qui exclut l'ID à éliminer du tableau `childIds`
 - On créé un clone de l'objet racine qui intègre le clone du parent ci-haut
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2547,7 +2554,7 @@ Idéalement, on élimine les items effacés (et leurs enfants!) de la "table" po
 
 On utilise Immer pour simplifier les mises à jour.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useImmer } from 'use-immer';
@@ -2907,7 +2914,7 @@ On peut aussi réduire l'imbrication profonde en déplaçant des morceaux de l'�
 
 La composante `Clock` deçoit deux props: `color` et `time`. Quand on sélectionne une nouvelle couleur, la composante `Clock` reçoit une nouvelle prop `color`. Mais la nouvelle couleur ne s'affiche pas. Pourquoi? Réparez.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/Clock.js active
 import { useState } from 'react';
@@ -2964,7 +2971,7 @@ Il y a un bogue: Si on marque un item "packed" et qu'on le "delete" après, le c
 
 Y aurait-il un état redondant?
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -3112,7 +3119,7 @@ L'état contient une liste de `letters`. Quand on flotte ou focus sur une lettre
 
 Le code fonctionne, mais avec un un petit problème: si on clique sur "Star" ou "Unstar", le surlignage disparait un moment. Il réapparaît dès qu'on déplace le curseur ou qu'on déplace le focus avec le clavier. Pourquoi?? Réparez pour que le surlignage ne disparaisse plus.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -3239,7 +3246,7 @@ Changez la structure de l'état pour permettre la sélection multiple. (Quelle s
   dans l'état.
 </Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -3364,7 +3371,7 @@ Voici un exemple d'un composant `Accordion` parent qui affiche deux `Panel`s:
 
 Chaque composant `Panel` possède un état booléen `isActive` qui détermine la visibilité.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3490,7 +3497,7 @@ Dans cet exemple, c'est la composante `Accordion`.
 
 On peut passer, du composant `Accordion`, des données statiques pour `isActive` (par exemple: `true`) vers les 2 `Panels`:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3578,7 +3585,7 @@ Cliquer le bouton "Show" dans un `Panel` modifie l'index actif d'`Accordion`. Un
 
 Le `<button>` dans le `Panel` utilise la prop `onShow` pour gérer le click:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3725,7 +3732,7 @@ Ces deux champs de saisis (inputs) sont indépendants. Il faudrait qu'ils soient
 
 <Hint> Il faudra remonter l'état dans le parent. </Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3778,7 +3785,7 @@ Avec la fonction `filterItems(foods, query)`, filtrez la liste d'après la requ�
   correctement écrit.
 </Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3904,7 +3911,7 @@ React associe chaque état avec son composant dans l'arborescence, dépendant de
 
 Dans cet exemple, il n'y a qu'une seule balise JSX `<Counter />`, mais la composante est rendue dans deux endroits différents de l'arborescence. Il y a donc deux états stockés.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3986,7 +3993,7 @@ Chaque composant conserve son propre état isolé. Par exemple, chaque `Counter`
 
 Cliquez les deux compteurs, ils ne s'affectent pas l'un l'autre.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4058,7 +4065,7 @@ React conserve l'état tant que la composante est générée à la même positio
 
 ## Perdre l'état en enlevant le composant
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4163,7 +4170,7 @@ Quand on coche "Render the second counter", un nouveau `Counter` est créé, et 
 
 Dans cet exemple, il y a deux balises `Counter`:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4260,7 +4267,7 @@ C'est le même composant à la même position. Du point de vue de React, c'est d
 
 C'est la position dans l'arborescence qui importe pour React, pas la position dans le JSX. Ce composant a deux `return` avec des `<Counter>` différents.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4362,7 +4369,7 @@ Parce que les deux `<Counter>` sont rendus à la même position, react conserve 
 
 Dans cet exemple, cliquer la boîte d'option remplace le `<Counter>` par un `<p>`:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4455,7 +4462,7 @@ When switching back, the `p` is deleted and the `Counter` is added
 
 Quand on génère le rendu d'un composant différent à la même position, cela réinitialise aussi tous les enfants de la sous-arborescence
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4574,7 +4581,7 @@ En général, **pour conserver les états entre les re-rendus, la structure de l
 
 Ici, le composant `MyTextField` est défini _dans_ `MyComponent`:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4616,7 +4623,7 @@ Pour éviter ce problème, **déclarez vos composants au top niveau, sans imbriq
 React conserve l'état d'un composant lorsqu'il reste à la même position. Que faire si on veut réinitaliser l'état?
 Considérons une app qui conserve le pointage:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4701,7 +4708,7 @@ Il y a deux approches pour réinitialiser l'état entre les deux joueurs:
 
 Si on désire que les 2 `Counter` soient indépendants, on pourrait faire le rendu dans deux position différentes:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4823,7 +4830,7 @@ Counter de la première position et de la seconde position, on peut maintenant s
 
 Dans cet exemple, les deux `<Counter />` ne partagent pas d'état, même s'ils ont la même position:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -4921,7 +4928,7 @@ Réinitialiser l'état avec un clé est très pratique avec les formulaire
 
 Dans cette application, le composant `<Chat>` contient un champ de saisie controllé par l'état:
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -5026,7 +5033,7 @@ Mais il y a un bogue: si on change de destinataire, la valeur dans le formulaire
 
 Ceci réinitialise l'état du `<Chat>`. Le re-rendu génère le composant `<Chat>` et toute l'arborescence en dessous.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -5144,7 +5151,7 @@ Comment conserver l'état pour une composante qui n'est plus visible?
 
 Cet exemple affiche un message quand on clique le bouton. Mais, cela réinitialise aussi le champ de saisie. Réparez pour que le bouton ne réinitialise pas le champ de saisie.
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -5205,7 +5212,7 @@ On peut inverser l'affichage. Mais il y a un bogue. Le contenu de `<Field>` ne c
 
 <Hint>On doit utiliser `key`</Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -5276,7 +5283,7 @@ Bogue: Quand on sélectionne un contact différent, l'état change mais le formu
 
 <Hint>On doit utiliser `key`</Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -5423,7 +5430,7 @@ On clique "Next", le navigateur démarre le chargement. Mais pendant le chargeme
 
 <Hint>On veut que React remplace le DOM plutôt que de le réutiliser</Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -5504,7 +5511,7 @@ Chaque `Contact` a un état qui indique si on a fait "Show email". Mais si on re
   La clé est basée sur l'index (la position). Mais on peut faire mieux.
 </Hint>
 
-<Sandpack>
+ <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';

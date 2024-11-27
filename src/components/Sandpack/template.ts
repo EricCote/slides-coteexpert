@@ -100,6 +100,12 @@ export default function display(txt) {
   const txtNode = document.createTextNode(txt + '\\n');
   pre.appendChild(txtNode);
 }
+
+export function displayJson(obj, indent) {
+  const txtNode = document.createTextNode(JSON.stringify(obj, null, indent) + '\\n');
+  pre.appendChild(txtNode);
+}
+
 `,
   },
 };

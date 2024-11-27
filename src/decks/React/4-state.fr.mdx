@@ -24,7 +24,7 @@ import myFile from './4-state/datafile.js';
 
 <Sandpack  files={{
     "src/data.js": myFile
-  }}  >
+  }} s="60" >
 
 ```js
 import { sculptureList } from './data.js';
@@ -133,7 +133,7 @@ On modifie le state dans `handleClick`.
 
 <Sandpack    files={{
     "src/data.js": myFile
-  }}  >
+  }} s="60" >
 
 ```js
 import { useState } from 'react';
@@ -191,10 +191,11 @@ button {
 
 ## useState, le premier Hook
 
-- `useState` n'est pas le seul _hook_. Toute fonction démarrant par "`use`" est un _hook_.
-- Les _hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://reactjs.org/learn/render-and-commit#step-1-trigger-a-render).
-- Les _hooks_ permettent de se connecter ("hook into") dans les fonctionnalités de React.
-- L'état (State) est une fonctionnalité, mais on en verra d'autres.
+- `useState` n'est pas le seul _hook_
+- Toute fonction démarrant par "`use`" est un _hook_
+- Les _hooks_ sont des fonctions spéciales, disponibles seulement pendant que React fait un [rendu](https://reactjs.org/learn/render-and-commit#step-1-trigger-a-render)
+- Les _hooks_ permettent de se connecter (_"hook into"_) dans les fonctionnalités de React
+- L'état (_State_) est une fonctionnalité, mais on en verra d'autres (effect, context, memo)
 
 ---
 
@@ -211,7 +212,11 @@ On ne peut **PAS** appeler un hook dans:
 - une boucle
 - une fonction imbriquée (gestionnaire d'événements).
 
-Même si les hooks sont des fonctions, vaut mieux considérer ceux-ci comme des déclarations des besoins de votre composant. On utilise les fonctionnalités React au "top niveau" d'un composant, de la même façon qu'on importe les modules au début des fichiers.
+<hr />
+
+- Même si les hooks sont des fonctions, considérez les comme des déclarations des besoins du composant
+- On utilise les fonctionnalités React au "top niveau" du composant
+- Similaire aux modules importés au début des fichiers
 
 ---
 
@@ -241,10 +246,14 @@ L'argument de `useState` est la **valeur initiale** de l'état. (Ici, la valeur 
 
 ```js
 const [index, setIndex] = useState(0);
+
+function handleNextClick() {
+  setIndex(index + 1);
+}
 ```
 
-1. **Au premier rendu**, on passe `0` à `useState`, le hook retourne `[0, setIndex]`. React stocke `0` dans l'état.
-2. **On met à jour le state** quand l'usager clique, l'événement appelle `setIndex(index + 1)`. Puisqu'`index` est `0`, cela appelle `setIndex(1)`. React stocke `1` et génère un nouveau rendu.
+1. **Au premier rendu**, on passe `0` à `useState`, React stocke `0` dans l'état, le hook retourne `[0, setIndex]`.
+2. **On clique et met à jour l'état** l'événement appelle `setIndex(index + 1)`. Avec `index` de `0`, cela appelle `setIndex(1)`. React stocke `1` et génère un nouveau rendu.
 3. **Au second rendu** React appelle `useState(0)`, mais React a déjà stocké `1` dans `index`. Donc React retourne `[1, setIndex]`.
 4. Ainsi de suite...
 
@@ -252,13 +261,14 @@ const [index, setIndex] = useState(0);
 
 ## Composants avec des états multiples
 
-Un composant peut avoir de multiples variables d'états.
-
-L'exemple suivant possède deux variables d'état: un nombre `index` et un booléen `showMore` qui bascule quand on clique "Afficher Détails" .
+- Un composant peut avoir de multiples variables d'états
+- L'exemple suivant possède deux variables d'état:
+  - un nombre `index` (no de page)
+  - un booléen `showMore` (bascule quand on clique "Afficher Détails")
 
 <Sandpack    files={{
     "src/data.js": myFile
-  }}  >
+  }} s="60" >
 
 ```js
 import { useState } from 'react';
@@ -279,16 +289,16 @@ export default function Gallery() {
   let sculpture = sculptureList[index];
   return (
     <>
-      <button onClick={handleNextClick}>Suivant</button>
+      <button onClick={handleNextClick}>Next</button>
       <h2>
         <i>{sculpture.name} </i>
-        par {sculpture.artist}
+        by {sculpture.artist}
       </h2>
       <h3>
-        ({index + 1} de {sculptureList.length})
+        ({index + 1} of {sculptureList.length})
       </h3>
       <button onClick={handleMoreClick}>
-        {showMore ? 'Cacher' : 'Afficher'} détails
+        {showMore ? 'Hide' : 'Show'} details
       </button>
       {showMore && <p>{sculpture.description}</p>}
       <img src={sculpture.url} alt={sculpture.alt} />
@@ -326,19 +336,21 @@ Si les valeurs sont liées ou modifiées ensemble, on préfère les combiner dan
 
 ---
 
-## Comment React sait quoi retourner?
+## Avancé: comment ça marche
 
-Il n'y a pas d'identifiant passé en arguments à `useState`. Comment sait-il quelle valeur retourner?
-
-Les hooks se fient sur **un ordre d'appel, qui reste stable** dans un composant donné. C'est grâce à la règle des hooks: il faut les placer au "top niveau" d'un composant. (Il y a même un [linter](https://www.npmjs.com/package/eslint-plugin-react-hooks) qui permet de détecter les erreurs.)
-
-React utilise un tableau de paires pour chaque composant. Il maintient un index sur l'usage des hooks et l'incrémente à chaque appel de useState. Voir: [React Hooks: Not Magic, Just Arrays.](https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e)
-
-L'exemple suivant n'utilise **PAS** React. Mais il démontre comment fonctionne les hooks.
+- Il n'y a pas d'identifiant passé en arguments à `useState`
+- Comment React sait quelle valeur retourner?
+- Les hooks se fient sur **un ordre d'appel, qui reste stable** dans un composant donné.
+- C'est grâce à la règle des hooks: il faut les placer au "top niveau" d'un composant. (Il y a même un [linter](https://www.npmjs.com/package/eslint-plugin-react-hooks) qui permet de détecter les erreurs.)
+- React utilise un tableau de paires pour chaque composant.
+- Il maintient un index sur l'usage des hooks et l'incrémente à chaque appel de useState. Voir: [React Hooks: Not Magic, Just Arrays.](https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e)
+  <hr />
+  L'exemple suivant n'utilise **PAS** React. Mais il démontre comment fonctionne
+  les hooks:
 
 <Sandpack    files={{
     "src/data.js": myFile
-  }}  >
+  }}  s="60" >
 
 ```js src/index.js active
 import { sculptureList } from './data.js';
@@ -471,13 +483,13 @@ button {
 
 ## L'état est isolé et privé
 
-L'état est local à l'instance du composant. **Si vous affichez deux fois le même composant, chacun d'eux aura son propre état isolé.** Changer l'un n'affecte pas l'autre.
-
-Dans l'exemple suivant, le composant `Gallery` est rendu deux fois. Les états sont indépendants.
+- L'état est local à l'instance du composant.
+- **Si on affiche deux fois le même composant, chacun d'eux a son propre état isolé.**
+- Changer l'un n'affecte pas l'autre.
 
 <Sandpack    files={{
     "src/data.js": myFile
-  }}  >
+  }} s="60" >
 
 ```js
 import Gallery from './Gallery.js';
@@ -565,23 +577,34 @@ button {
 
 ## L'état est isolé
 
-L'état n'est lié ni à une fonction, ni à un module. Il est lié à l'instance d'un composant qui affiche sur la page. Quand on affiche deux composants `Gallery`, React gère donc deux states.
-
-Le composant `Page` ne connait rien de l'état de `Gallery`. L'état est complètement privé au composant qui le déclare. Le parent ne peut le changer. On peut ajouter ou enlever de l'état sans affecter le reste des composants.
-
-Si on veut que les deux galleries partagent leurs états? La bonne pratique en React, c'est d'enlever l'état aux composants enfants pour le rajouter à leur parent partagé. (On couvre cela plus tard.)
+- L'état n'est lié ni à une fonction, ni à un module
+- Il est lié à l'instance d'un composant qui affiche sur la page
+- Quand on affiche deux composants `Gallery`, React gère donc deux states
+  <hr />
+- Le composant `Page` ne connait rien de l'état de `Gallery`
+- L'état est complètement privé au composant qui le déclare
+- Le parent ne peut le changer
+- On peut ajouter ou enlever de l'état sans affecter le reste des composants
+  <hr />
+- Si on veut que les deux galleries partagent leurs états?
+- La bonne pratique en React:
+  - Enlever l'état aux composants enfants pour le rajouter à leur parent partagé
+  - On couvre cela plus tard
 
 ---
 
 ## Défi 1
 
-Quand on clique "Next" à la dernière image, le code plante. Réparons le code. 2 approches: On ajoute de la logique au gestionnaire d'événments, ou on désactive le bouton quand l'action n'est pas possible.
+- Quand on clique "Next" à la dernière image, le code plante
+- 2 approches pour réparer (faites les 2):
+  1. On ajoute de la logique au gestionnaire d'événments
+  1. On désactive le bouton quand l'action n'est pas possible.
 
-Après avoir réparé le code, ajoutez un bouton "previous" pour revenir en arrière. Empêchez que ça plante à la première image.
+**Boni:** ajoutez un bouton "previous" pour revenir en arrière. Empêchez que ça plante à la première image.
 
 <Sandpack    files={{
     "src/data.js": myFile
-  }}  >
+  }} s="60" >
 
 ```js
 import { useState } from 'react';
@@ -651,9 +674,9 @@ img {
 
 ## Défi 2
 
-Quand on tape dans les champs de saisie, rien n'apparait. Le valeurs sont "bloquées" avec des strings vides. La valeur `value` du premier `<input>` est liée à `firstName`. La valeur du second `<input>` est liée à `lastName`. Les deux entrées ont le gestionnaire d'événements `onChange`, qui modifie les variables d'après le champ de saisie (`e.target.value`). Par contre, les variables ne se rappellent pas de leur valeurs entre les rendus. Il faudrait reprogrammer en utilisant des variables d'état.
+Ça ne fonctionne pas. Il faudrait reprogrammer en utilisant de l'état.
 
-<Sandpack>
+<Sandpack s="60">
 
 ```js
 export default function Form() {
@@ -708,9 +731,9 @@ h1 {
 
 Ce formulaire permet aux usagers de laisser du feedback. Quand on soumet du feedback, on devrait afficher "Merci". Mais cela plante avec le message d'erreur: "Rendered fewer hooks than expected". Il faut réparer l'erreur
 
-**Indice:** D'où peut-on appeler un hook? Ce composant brise-t-il une règle? Y a-t-il un commentaire qui désactive les validations du linter?
+<Hint>D'où peut-on appeler un hook? Ce composant brise-t-il une règle?</Hint>
 
-<Sandpack>
+<Sandpack s="60">
 
 ```js
 import { useState } from 'react';
@@ -768,9 +791,9 @@ Il y a deux raisons pour qu'un composant soit rendu.
 
 ## Rendu initial
 
-Quand l'application démarre, il faut déclencher le rendu initial. Certaines boîtes à outils cachent ce code. Quand ce code n'est pas caché, on appelle `createRoot` sur l'élément du DOM, et on appelle la méthode `render`.
+- On appelle `createRoot` sur l'élément du DOM, et on appelle la méthode `render`.
 
-<Sandpack>
+<Sandpack s="60">
 
 ```js src/index.js active
 import Image from './Image.js';
@@ -795,12 +818,14 @@ export default function Image() {
 
 **NOTE:** Commentez `root.render()` et le composant disparait.
 
+- Certaines boîtes à outils cachent ce code.
+
 ---
 
 ## Re-rendus déclenchés par une modification de l'état
 
-- Après le rendu initial, on peut déclencher des rendus additionnels en modifiant l'état avec `setState`.
-- Modifier l'état va placer un re-rendu dans la file.
+- Après le rendu initial, on déclenche des rendus additionnels en modifiant l'état avec `setState`.
+- Modifier l'état ajoute un re-rendu dans la file.
 - On peut ajouter plusieurs rendus additionnels dans la file.
 - React regroupe les éléments de la file dans **un seul rendu** (Automatic batching of renders)
 
@@ -808,20 +833,28 @@ export default function Image() {
 
 ## Étape 2: On génère un Rendu du composant
 
-- Après le déclenchement du rendu, React appelle vos composants pour déterminer l'affichage.
+- Après le déclenchement du rendu, React appelle les composants pour générer l'affichage.
 
-**"Faire un rendu", c'est React qui appelle vos composants.**
+**"Faire un rendu", c'est React qui appelle les composants.**
 
 - **Au rendu initial** React appelle le composant racine.
 - **Pour les rendus suivants** React appelle le composant ayant l'état modifié.
 
-C'est un processus récursif. Si le composant retourne d'autres composants, ils seront aussi appelés, ainsi que leurs enfants, et ainsi de suite. Le processus continue jusqu'à ce que tous les sous-composants soient rendus, et que React sache exactement quoi afficher.
+<hr />
+
+- C'est un processus **récursif**.
+- Si le composant utilise d'autres composants, ils seront aussi appelés
+  - Ainsi que leurs enfants
+    - Ainsi que les petits-enfants
+      - Ainsi de suite
+- Le processus continue jusqu'à ce que tous les sous-composants soient rendus
+- React sait alors quoi afficher
 
 ---
 
 ## Générer un rendu
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js src/Gallery.js active
 export default function Gallery() {
@@ -861,8 +894,8 @@ img {
 
 </Sandpack>
 
-- **Pendant le rendu initial** React devra [créer des noeuds (node) du DOM](https://developer.mozilla.org/docs/Web/API/Document/createElement) pour `<section>`, `<h1>`, et trois balises `<img>`.
-- **Pendant le re-rendu,** React déterminera quelles propriétés ont changé, si c'est le cas. On compare avec le rendu précédent. (Cette information sera utile à la prochaine étape.)
+- **Après le rendu initial** React [génère des noeuds (node) du DOM](https://developer.mozilla.org/docs/Web/API/Document/createElement) pour `<section>`, `<h1>`, et trois balises `<img>`.
+- **Après le re-rendu,**, React détermine quelles propriétés ont changé, si c'est le cas, On compare avec le rendu précédent. (Cette information sera utile à la prochaine étape.)
 
 ---
 
@@ -886,8 +919,10 @@ Le rendu doit toujours être une [fonction pure](https://react.dev/learn/keeping
 ## Optimiser la performance
 
 - Par défaut, un changement de state provoque un re-rendu du composant
-- Ainsi que **tous ses sous-composants** (et ainsi de suite). Ça peut être lourd.
-- Il existe des stratégies pour optimiser la performance. Ex: `createMemo()`.
+- Ainsi que **tous ses sous-composants** (et ainsi de suite)
+- C'est lourd
+- Il existe des stratégies pour optimiser la performance. Ex: `createMemo()` et **React Compiler**
+  - On voit cela dans le chapitre sur la performance
 
 ---
 
@@ -902,9 +937,10 @@ Après le rendu (l'appel) des composants, React fait un commit en modifiant le D
 
 ## React ne modifie le DOM que pour les éléments modifiés
 
-Par exemple, dans l'exemple suivant, le composant génère un re-rendu avec de nouvelles props à chaque seconde. On peut ajouter du texte au `<input>`, modifier la `value` du `<input>`, et le texte ne disparait pas au moment du re-rendu:
+- Ce composant génère un re-rendu avec de nouvelles props à chaque seconde.
+- On peut ajouter du texte au `<input>`, et le texte ne disparait pas au moment du re-rendu:
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js src/Clock.js active
 export default function Clock({ time }) {
@@ -940,7 +976,9 @@ export default function App() {
 
 </Sandpack>
 
-Durant la dernière étape, React ne modifie que le contenu `<h1>` avec la nouvelle heure. `<input>` apparait à chaque nouveau re-rendu, mais sans modification. Donc React ne touche pas à `<input>`.
+- Au commit, React modifie le contenu `<h1>`
+- `<input>` est aussi généré, mais sans modifications
+- React ne touche donc pas au `value` du `<input>`
 
 ---
 
@@ -953,8 +991,8 @@ Rappel des différentes étapes:
 3. **Écrire le commit** en modifiant le DOM
 
 - Après le commit, les modifications sont affichées.
-  - Le navigateur appelle cela "_browser rendering_"
-  - La documentation React appelle cela "**browser painting**"
+  - La documentation du navigateur appelle cela "_browser rendering_"
+  - La documentation React se distingue en appelant cela "**browser painting**"
 
 ---
 
@@ -973,7 +1011,7 @@ Rappel des différentes étapes:
 
 Dans plusieurs environnements, on considère que la modification d'une interface usager est le résultat d'un événement, tel que le clic d'un bouton.
 
-Dans React, c'est différent.
+Dans React, c'est l'inverse.
 
 Il faut **modifier l'état** pour que l'interface usager soit affectée.
 
@@ -981,9 +1019,9 @@ Il faut **modifier l'état** pour que l'interface usager soit affectée.
 
 ## Exemple
 
-Dans l'exemple suivant, quand on presse "send", le `setIsSent(true)` modifie l'état et génère un re-rendu.
+Quand on presse "send", `setIsSent(true)` modifie l'état, et génère un re-rendu.
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1027,30 +1065,32 @@ textarea {
 
 </Sandpack>
 
+<Hint>
 Quand on clique le bouton
 
 1. Le gestionnaire d'événements `onSubmit` exécute.
 2. `setIsSent(true)` modifie `isSent` à `true` place le rendu dans la file.
 3. React génère le re-rendu en utilisant la nouvelle valeur de `isSent`.
 
+</Hint>
+
 ---
 
 ## Rendu génère un Snapshot dans le temps
 
-Générer un "rendu" signifie que React appelle votre Composant (i.e. la fonction de votre composant).
-
-Le JSX retourné est comme une photo instantanée (un snapshot) de l'interface usager, à ce moment précis dans le temps.
-
-Les props, gestionnnaires d'événements et variables locales ont été générées **à partir de l'état au moment du rendu.**
-
-Ce snapshot du UI inclut de la logique comme des gesionnaires d'événements qui spécifient ce qui ce passe quand un usager interagit. React modifie l'écran pour synchroniser ce qui est affiché et ce qui a été généré (incluant la connection à des event handlers.)
+- Générer un "rendu" signifie que React appelle le composant (i.e. une fonction).
+- Le JSX retourné est une photo instantanée (un snapshot) de l'IU, à ce moment précis dans le temps
+- Les props, gestionnnaires d'événements et variables locales sont générées **à partir de l'état, au moment du rendu.**
+- Ce snapshot de l'IU inclut des gesionnaires d'événements
+  - Spécifiant le comportement quand un usager interagit
+  - React modifie l'écran pour synchroniser ce qui est affiché (DOM) avec ce qui a été généré (incluant la connection à des event handlers.)
 
 <Alert >
 Quand React fait un re-rendu d'un composant:
 
-1. React appelle votre fonction.
-2. Cette fonction retourne un snapshot JSX.
-3. React modifie l'écran pour synchroniser avec le snapshot.
+1. React appelle votre fonction
+2. Cette fonction retourne un snapshot JSX
+3. React modifie l'écran pour synchroniser avec le snapshot
 
 </Alert>
 
@@ -1058,19 +1098,20 @@ Quand React fait un re-rendu d'un composant:
 
 ## L'état est géré par React
 
-Contrairement aux variables locales qui disparaissent quand la fonction est complétée (quand le JSX est retourné), l'état est conservé entre les appels.
-
-L'état est conservé par React, à l'extérieur de la fonction. Quand React appelle un composant, il offre un snapshot de l'état pour ce rendu particulier. Le composant retourne alors un snapshot du UI avec de nouveaux props et gestionnaires d'événements, générés à partir des valeurs d'états de ce rendu.
+- L'état est conservé entre les appels
+- Différent des variables locales
+  - Disparaissent quand la fonction est complétée (quand le JSX est retourné)
+- L'état est conservé par React, à l'extérieur de la fonction.
+- Quand React appelle un composant, il offre un snapshot de l'état pour ce rendu particulier
+- Le composant retourne alors un snapshot du IU avec ces nouveaux props et gestionnaires d'événements, générés à partir des valeurs d'états de ce rendu
 
 ---
 
-## L'état nest pas géré comme le reste
+## L'état n'est pas modifié immédiatement
 
-Dans cet exemple, on pourrait s'attendre à ce que cliquer le bouton +3 incrémente de le compteur 3 fois car il appelle `setNumber(number + 1)` trois fois.
+On pourrait s'attendre à ce que cliquer le bouton "+3" incrémente de le compteur de 3. Mais ce n'est pas le cas.
 
-Mais ce n'est pas le cas.
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1119,7 +1160,9 @@ On n'incrémente qu'une seule fois.
 
 Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d'événement `onClick` considère que la valeur de `number` demeure `0` même après l'appel à `setNumber(number + 1)`:
 
-<TwoColumns style={{gridTemplateColumns:'15em auto'}}>
+Voici ce qui est exécuté:
+
+<TwoColumns style={{gridTemplateColumns:'15em auto'}} top>
 
 ```js
 <button
@@ -1134,20 +1177,20 @@ Pendant le premier rendu, `number` était `0`. C'est pourquoi, le gestionnaire d
 ```
 
 <div>
-Voici ce qui est exécuté:
 
-1. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React ne modifiera `number` à `1` qu'au prochain rendu.
-2. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React ne modifiera `number` à `1` qu'au prochain rendu.
-3. `setNumber(number + 1)`: `number` est `0` donc `setNumber(0 + 1)`.
-   - React ne modifiera `number` à `1` qu'au prochain rendu.
+1. `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
+2. `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
+3. `number` est `0` donc `setNumber(0 + 1)`.
+   - React modifiera `number` à `1` au prochain rendu.
 
 </div>
 </TwoColumns>
 
-Même en appelant `setNumber(number + 1)` trois fois, dans le gestionnaire d'événements de _ce rendu_, le `number` demeure `0`.
-On modifie la valeur vers `1` trois fois. Le résultat final affiche `1` plutôt que `3`.
+- `number` demeure `0`
+- On modifie l'état vers `1` trois fois
+- Le résultat final affiche `1` (plutôt que `3`)
 
 ---
 
@@ -1155,7 +1198,7 @@ On modifie la valeur vers `1` trois fois. Le résultat final affiche `1` plutôt
 
 <TwoColumns>
 <div>
-Une autre façon de visualiser, c'est de substituer les états avec leur valeur dans votre code.
+Une autre façon de visualiser, c'est de substituer les états avec leur valeur. Au premier rendu:
 
 ```js
 <button
@@ -1171,7 +1214,7 @@ Une autre façon de visualiser, c'est de substituer les états avec leur valeur 
 
 </div>
 <div>
-Au prochain rendu, `number` sera `1`, Donc pour _ce rendu_ le gestionnaire d'événements sera
+Au rendu suivant, `number` est `1`. Donc pour _ce rendu_, le gestionnaire d'événements est alors:
 
 ```js
 <button
@@ -1188,7 +1231,7 @@ Au prochain rendu, `number` sera `1`, Donc pour _ce rendu_ le gestionnaire d'év
 </div>
 </TwoColumns >
 
-C'est pourquoi que la progression sera `1`, `2`, `3`, `4` et ainsi de suite.
+C'est pourquoi la progression est `1`, `2`, `3`, `4` et ainsi de suite.
 
 ---
 
@@ -1196,7 +1239,7 @@ C'est pourquoi que la progression sera `1`, `2`, `3`, `4` et ainsi de suite.
 
 Quel sera le résultat de cette alerte?
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1236,20 +1279,23 @@ h1 {
 
 </Sandpack>
 
-Si vous substituez, vous pouvez deviner que ce sera zéro.
+<Hint>
+Si vous substituez, vous pouvez deviner que c'est zéro:
 
 ```js
 setNumber(0 + 5);
 alert(0);
 ```
 
+</Hint>
+
 ---
 
 ## Question
 
-Et si on met un minuteur sur cette alerte, pour qu'elle soit lancée seulement après que le re-rendu soit complété? Ce serait "0" ou "5"? (Devinez!)
+Si on met un minuteur sur cette alerte, pour qu'elle soit lancée seulement après que le re-rendu soit complété? Ce serait "0" ou "5"? (Devinez!)
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1291,6 +1337,8 @@ h1 {
 
 </Sandpack>
 
+<Hint>
+
 Si vous utilisez la méthode de substitution, on voit clairement l'état passé à l'alerte.
 
 <TwoColumns>
@@ -1302,34 +1350,35 @@ setTimeout(() => {
 }, 3000);
 ```
 
-L'état stocké dans React est changé au moment où l'alerte éxécute, mais il a été planifié au moment où la valeur n'avait pas changé. C'est le moment du snapshot.
+L'état stocké dans React est changé au moment où l'alerte éxécute, mais c'est planifié au moment où la valeur n'a pas encore changé. C'est le moment du snapshot.
 
 </TwoColumns>
+
+</Hint>
 
 ---
 
 ## L'état n'est jamais modifié pendant le rendu
 
-La variable d'état n'est pas modifiée durant le rendu, même si le code est asynchrone (comme un minuteur ou un timer).
-
-Dans le `onClick`, la valeur `number` continue d'être `0` même après que `setNumber(number + 5)` ne soit appelé. Sa valeur s'est fixée quand React a "pris son snapshot" de l'IU.
-
-Ceci permet au code d'être moins fragile aux erreurs de synchonisation et de timing.
+- L'état n'est pas modifié pendant le rendu, même quand le code est asynchrone (ex: minuteur ou _timer_)
+- Dans le `onClick`, la valeur `number` continue d'être `0` même après que `setNumber(number + 5)` ne soit appelé
+- Sa valeur s'est fixée quand React a "pris son snapshot" de l'IU
+- Le code est moins fragile aux erreurs de synchonisation et de timing
 
 <hr />
-
-Imaginons un fomulaire qui envoie un message avec un délai de 5 secondes. Imaginez le scénario:
-
-1. On clique sur "Envoyer" pour dire "Bonjour" à Alice
-2. Avant la fin du délai de 5 secondes, on change la valeur du "destinataire" pour "Bob"
-
-Que devrait afficher `alert`? "Vous dites Bonjour à Alice" ou "Vous dites Bonjour à Bob"? (Consultez le code sur la prochaine diapositive.)
 
 ---
 
 ## L'état est une machine à voyager dans le temps
 
-<Sandpack>
+Imaginons un fomulaire qui envoie un message avec un délai de 3 secondes:
+
+1. On clique sur "Envoyer" pour dire "Bonjour" à Alice
+2. Avant la fin du délai de 3 secondes, on change la valeur du "destinataire" pour "Bob"
+
+Que devrait afficher `alert`? "Bonjour à Alice" ou "Bonjour à Bob"?
+
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1342,7 +1391,7 @@ export default function Form() {
     e.preventDefault();
     setTimeout(() => {
       alert(`Vous dites ${message} à ${to}`);
-    }, 5000);
+    }, 3000);
   }
 
   return (
@@ -1375,21 +1424,23 @@ textarea {
 
 </Sandpack>
 
-**React conserve les valeurs d'états "fixées" dans les gestionnaires d'événements de _ce rendu_.** Ne vous inquiétez pas d'un changement d'état pendant l'exécution de votre code.
-
-Que faire si on doit lire le dernier état avant un re-render? on pourrait utiliser une fonction de modification d'état. On verra cela bientôt.
+- **React conserve les valeurs d'états "fixées" dans les gestionnaires d'événements de _ce rendu_.**
+- Ne pas s'inquiéter d'un changement d'état pendant l'exécution du code
+- Que faire si on doit lire le dernier état avant un re-render?
+  - On pourrait utiliser une fonction de modification d'état. On verra cela bientôt.
 
 ---
 
 ## Défi 4
 
-Voici un feu de circulation pour piétons.
+Voici un feu de circulation pour piétons. Ajoutez une `alert` au gestionnaire du clic:
 
-Ajoutez une `alert` au gestionnaire du clic. Quand la lumière est verte et dit ¨Walk¨, cliquer le bouton devrait afficher "Stop is next". Quand la lumière est rouge et dit "Stop", cliquer le bouton devrait afficher "Walk is next".
+- Quand la lumière est verte et dit ¨Walk¨, cliquer le bouton devrait afficher "Stop is next"
+- Quand la lumière est rouge et dit "Stop", cliquer le bouton devrait afficher "Walk is next"
 
 Est-ce que ça fait une différence lorsqu'on met l'alerte avant ou après l'appel `setWalk`?
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1428,7 +1479,7 @@ h1 {
 
 ## React regroupe les modification d'états en lots (batch)
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1481,32 +1532,45 @@ Chaque rendu est fixé au moment qu'il est généré, donc la valeur `number` de
 
 </TwoColumns>
 
-Il y a aussi une autre raison. **React attend que tous les gestionnaires d'événements aient fini de rouler avant de modifier l'état.**
+Il y a aussi une autre raison: **React attend que tous les gestionnaires d'événements aient fini de rouler avant de modifier l'état.**
 C'est pourquoi le re-rendu ne s'exécute _qu'après_ tous les `setNumber()`;
 
 ---
 
 ## Optimisation: Regrouper les setState en lot (batch)
 
-Similaire à l'expérience au resto: un serveur prend tous les détails de la commande avant de partir à la cuisine.
+- Similaire à l'expérience au resto:
+- Un serveur prend tous les détails de la commande avant de partir à la cuisine
+- S'il n'était pas très futé, il pourrait partir à la cuisine à mesure dès que vous commandez de la soupe, et revenir... Et repartir dès que vous commandez une boisson, et revenir... ainsi de suite... ça ne serait pas très efficace.
+- Cette approche permet de modifier plusieurs variables d'états, provenant de plusieurs composants, dans un seul re-rendu.
+- L'Interface Usager ne sera pas mise à jour tant qu'on n'aura pas complété les gestionnaires d'événements. (mousedown, mouseup, click)
+- C'est ce qu'on appelle le regroupement par lot (batching)
+- Cette optimisation améliore les performances
+- Cela évite les "rendus à moitié", où seulement certaines variables ont été mises-à-jour.
 
-S'il n'était pas très futé, il pourrait partir à la cuisine dès que vous commandez de la soupe, et revenir... Et repartir dès que vous commandez un drink, et revenir... ainsi de suite... ça ne serait pas très efficace.
+<Alert type="warning">
 
-Cette approche permet de modifier plusieurs variables d'états, provenant de plusieurs composants, dans un seul re-rendu. L'Interface Usager ne sera pas mis-à-jour tant qu'on aura pas complété le gestionnaire d'événements. C'est ce qu'on appelle le regroupement par lot (batching). Cette optimisation améliore les performances. Cela évite les "rendus à moitié", où seulement certaines variables ont été mises-à-jour.
+- **React ne regroupe pas à travers de _multiples_ événements intentionnels
+  (ex: multiples clics)**
+- Chaque clic est géré séparément
+- React ne regroupe que là où ça fait du sens (mouseup et click)
+- Cela assure que si le premier clic
+  désactive le fomulaire, le second clic ne soumettra pas le formulaire une
+  seconde fois.
 
-**React ne regroupe pas à travers de _multiples_ événements intentionnels (comme de multiples clics).** Chaque clic est géré séparément. React ne regroupe que là où ça fait du sens. Cela nous assure que si le premier clic désactive le fomulaire, le second clic ne soumettra pas le formulaire une seconde fois.
+</Alert>
 
 ---
 
 ## Modifier l'état de multiples fois dans un lot
 
-C'est un cas rare, mais si on désire modifier l'état plusieurs fois...
+C'est un cas rare, mais si on désire modifier l'état plusieurs fois:
 
-On remplace la valeur `setNumber(number + 1)`, par une fonction `setNumber(n => n + 1)`. Ceci dit à React "d'exécuter le code plus tard".
+- On remplace la valeur `setNumber(number + 1)`, par une fonction `setNumber((n) => n + 1)`
+- Indique à React: "exécute le code plus tard"
+- La fonction updater prend un paramètre (l'état courant) et retourne l'état suivant.
 
-La fonction prend un paramètre (l'état courant) et retourne l'état suivant.
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1551,12 +1615,14 @@ h1 {
 
 ## Explications
 
-Ici, `n => n + 1` est une **fonction d'updater.** Quand on passe cette fonction à un setState():
+Ici, `(n) => n + 1` est une **fonction updater.** Quand on passe cette fonction à un `setState()`:
 
-1. React ajoute cette fonction à la file pour être traité après le gestionnaire d'événements ait terminé.
+1. React ajoute cette fonction à la file pour être traité après que le gestionnaire d'événements ait terminé.
 2. Durant le prochain rendu, React passe à travers la file pour exécuter et retourner l'état modifié.
 
-<TwoColumns>
+Voici comment React gère ces lignes de code dans le gestionnaire d'événements :
+
+<TwoColumns style={{gridTemplateColumns:'15em auto'}} top>
 
 ```js
 setNumber((n) => n + 1);
@@ -1565,11 +1631,10 @@ setNumber((n) => n + 1);
 ```
 
 <div>
-Voici comment React gère ces lignes de code dans le gestionnaire d'événements
 
-1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
-1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
-1. `setNumber(n => n + 1)`: `n => n + 1` est une fonction. React l'ajoute à la file.
+1. `n => n + 1` est une fonction. React l'ajoute à la file.
+2. `n => n + 1` est une fonction. React l'ajoute à la file.
+3. `n => n + 1` est une fonction. React l'ajoute à la file.
 
 </div>
 </TwoColumns >
@@ -1578,15 +1643,18 @@ Voici comment React gère ces lignes de code dans le gestionnaire d'événements
 
 ## Explications
 
-Quand on appelle `useState` au prochain rendu, React passe à travers la file. L'état précédent `number` est `0`, React passe cette valeur à la première fonction updater (par le paramètre `n`).
+- Quand React est prêt à modifier l'état, React passe à travers la file.
+- L'état précédent `number` est `0`, React passe cette valeur à la première fonction updater (par le paramètre `n`).
 
-<div style={{display: 'flex',   flexDirection: 'column'}}  >
+import './table-rows.css';
 
-| file de fonctions | `n` | retourne    |
-| ----------------- | --- | ----------- |
-| `n => n + 1`      | `0` | `0 + 1 = 1` |
-| `n => n + 1`      | `1` | `1 + 1 = 2` |
-| `n => n + 1`      | `2` | `2 + 1 = 3` |
+<div className="my-tbl" >
+
+| file de fonctions | `n` | calcul   | retourne |
+| ----------------- | --- | -------- | -------- |
+| `n => n + 1`      | `0` | `0 + 1 ` | 1        |
+| `n => n + 1`      | `1` | `1 + 1`  | 2        |
+| `n => n + 1`      | `2` | `2 + 1 ` | 3        |
 
 </div>
 
@@ -1607,7 +1675,7 @@ Que penser de ce gestionnaire d'événements.
 }}>
 ```
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1652,23 +1720,23 @@ h1 {
 ## Explications
 
 1. `setNumber(number + 5)`: `number` est `0`, donc `setNumber(0 + 5)`. React ajoute _"replacer avec `5`"_ dans la file.
-2. `setNumber(n => n + 1)`: `n => n + 1` est une fonction updater. React ajoute _cette fonction_ dans la file.
+2. `setNumber((n) => n + 1)`: `(n) => n + 1` est une fonction updater. React ajoute _cette fonction_ dans la file.
 
 Pendant le prochain rendu, React passe par la file d'état:
 
-<div style={{display:'flex', flexDirection: 'column'}}>
+<div className="my-tbl" >
 
 | file               | `n`           | retourne    |
 | ------------------ | ------------- | ----------- |
 | "remplace par `5`" | `0` (inutile) | `5`         |
-| `n => n + 1`       | `5`           | `5 + 1 = 6` |
+| `(n) => n + 1`     | `5`           | `5 + 1 = 6` |
 
 </div>
 <hr/>
 
-React stocke `6` comme résultat final et le retourne via le `useState`
+React stocke `6` comme résultat final pour le prochain rendu.
 
-Remarquez que `setState(x)` fonctionne comme `setState(n => x)`, mais `n` n'est pas utilisé!
+Remarquez que `setState(x)` fonctionne comme `setState((n) => x)`, où `n` n'est pas utilisé!
 
 ---
 
@@ -1684,7 +1752,7 @@ Quelle sera la valeur ici?
 }}>
 ```
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -1735,7 +1803,7 @@ h1 {
 
 Pendant le prochain rendu, React passe à travers la file
 
-<div style={{display:'flex', flexDirection: 'column'}}>
+<div className="my-tbl" >
 
 | file                  | `n`           | retourne    |
 | --------------------- | ------------- | ----------- |
@@ -1747,21 +1815,6 @@ Pendant le prochain rendu, React passe à travers la file
 <hr/>
 
 React stocke `42` comme résultat final et le retourne via le `useState`
-
----
-
-## Explications
-
-Deux façons d'appeler `setNumber`:
-
-1. **Avec une fonction updater n** (i.e. `n => n + 1`) qui se fait ajouter dans la file.
-2. **Avec une valeur** (i.e. nombre `5`) ajoute "remplacer avec `5`" à la file, en ignorant ce qui est déjà présent.
-
-- C'est après la série d'événements, au début du re-rendu, que React appelle la file des **updaters**.
-- Les **updaters** doivent être des fonctions pures
-- Ne pas mettre d'effets de bord, ni de setState.
-- En mode Strict, React exécute chaque fonction **updater** deux fois (mais exclut le second résultat)
-  - Ça aide à trouver les effets de bords indésirables.
 
 ---
 
@@ -1784,15 +1837,30 @@ setEnabled((prevEnabled) => !prevEnabled);
 
 ---
 
-## Défi 1
+## Résumé
 
-Vous travaillez sur une application de marché d'euvres d'art où les usagers peuvent soumettre plusieurs commandes simultanément à une oeuvre. Chaque fois qu'un usager clique le boutton "Acheter", le compteur "achats en attente" doit augmenter de un. Après 3 secondes, le compteur "en attente" doit diminuer et le compteur "achats complétés" doit augmenter.
+Deux façons d'appeler `setNumber`:
 
-Par contre, le compteur "en attente" ne fonctionne pas. Quand on clique "Acheter", il diminue à "-1" (ça ne devrait pas être possible). Et si on clique rapidement, le résultat est bizarre.
+1. **Avec une fonction updater n** (i.e. `(n) => n + 1`) qui se fait ajouter dans la file.
+2. **Avec une valeur** (i.e. nombre `5`) ajoute "remplacer avec `5`" à la file, en ignorant ce qui est déjà présent.
+
+- C'est après la série d'événements, avant le re-rendu, que React appelle la file des **updaters**.
+- Les **updaters** doivent être des fonctions pures
+- Ne pas mettre d'effets de bord, ni de setState.
+- En mode Strict, React exécute chaque fonction **updater** deux fois (mais exclut le second résultat)
+  - Ça aide à trouver les effets de bords indésirables.
+
+---
+
+## Défi 5
+
+On travaille sur une application d'achat. Chaque fois qu'un usager clique le boutton "Acheter", le compteur "achats en attente" doit augmenter de un. Après 3 secondes, le compteur "en attente" doit diminuer et le compteur "achats complétés" doit augmenter.
+
+Mais ce code est brisé. Quand on clique "Acheter", il diminue à "-1" (ça ne devrait pas être possible). Et si on clique rapidement, le résultat est bizarre.
 
 Réparez les compteurs.
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1830,7 +1898,8 @@ function delay(ms) {
 
 ## React et les mutations d'objets
 
-En React, on ne devrait jamais modifier un objet stocké dans l'état. Plutôt que de muter un objet, on devrait créer de nouvelles copies qu'on modifie.
+- En React, on ne devrait jamais modifier un objet stocké dans l'état
+- Plutôt que de muter un objet, on devrait créer de nouvelles copies qu'on modifie
 
 ---
 
@@ -1848,43 +1917,45 @@ Types immuables (qu'on ne peut modifier):
 - chaines de caractères
 - booléens
 
-On ne peut _modifier_ ces types. Mais on peut déclencher un re-rendu pour _remplacer_ une valeur.
+On ne peut _modifier_ ces types. Mais on peut _remplacer_ la valeur.
 
 ```js
 setX(5);
 ```
 
-L'état `x` est modifié de `0` à `5`, (mais le _nombre `0`_ n'a pas muté.)
+L'état `x` de `0` est remplacé par `5`, (`0` n'a pas muté.)
 
 ---
 
-## Types muables
+## Types mutables
 
-Mais considérons un objet dans l'état:
+Considérons un objet dans l'état:
 
 ```js
 const [position, setPosition] = useState({ x: 0, y: 0 });
 ```
 
-Quand on change le contenu de l'objet, **c'est nommé une mutation:**
+Quand on modifie le contenu de l'objet, **c'est nommé une mutation:**
 
 ```js
 position.x = 5;
 ```
 
-- Les objets dans un état React sont, techniquement, muables.
-- **MAIS** On devrait toujours les traiter **comme si** ils étaient immuables. (Tel un nombre, booléen ou chaîne de caractères)
-- Plutôt que de les modifier, on préfère les **remplacer**.
+- Les objets dans un état React sont, techniquement, mutables
+- **MAIS**, on devrait toujours les traiter **comme si** ils étaient immuables
+  - Tel un nombre, booléen ou chaîne de caractères
+- Plutôt que de les muter, on préférera les **remplacer**.
+- On devrait toujours traiter les objets JS dans l'état comme en **lecture seulement.**
 
 ---
 
-## Considérer l'état comme un objet "read-only"
+## React ignore les mutations
 
-On devrait toujours traiter les **objets JS placés dans l'état comme étant en lecture seulement.**
+- L'objet suivant représente la position d'un pointeur
+- Quand on touche ou déplace le curseur, on modifie la position
+- Mais le point rouge reste immobile
 
-Cet objet détient un objet dans l'état pour représenter la position d'un pointeur. Le point rouge devrait se déplacer via l'état quand on touche ou déplace le curseur. Mais le point reste immobile:
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1949,11 +2020,19 @@ onPointerMove={e => {
 }}
 ```
 
-Ce code mute l'objet assigné à `position` du rendu précédent. Mais sans utiliser la fonction `setState`, React n'a pas moyen de savoir que l'objet est modifié. Donc React ne réagit pas.
+- Ce code mute l'objet assigné à `position` du rendu précédent
+- Mais on n'utilise pas la fonction `setState`
+- React n'a pas moyen de savoir que l'objet est modifié
+
+</TwoColumns>
+
+<hr />
+
+<TwoColumns top>
 
 <div style={{textAlign:"right"}}>
 
-Pour déclencher un re-rendu, **il faut créer un nouvel objet dans lequel on place les informations** :
+Pour déclencher un re-rendu, il faut créer un nouvel objet, dans lequel on initialise les propriétés:
 
 </div>
 
@@ -1975,11 +2054,9 @@ onPointerMove={e => {
 Avec `setPosition`, on dit à React de:
 
 - Remplacer `position` avec ce nouvel objet
-- Faire un re-rendu du composant.
+- Faire un re-rendu du composant
 
-Maintenant, le point rouge suit notre curseur.
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2077,21 +2154,20 @@ position.y = e.clientY; //🚫
 
 ## Modifier partiellement un objet
 
-Que faire si on désire inclure les données existantes dans le nouvel objet?
-Exemple: modifier un seul champ d'un formulaire, tout en gardant les autres données existantes?
+- Que faire si on désire inclure les données existantes dans le nouvel objet?
+- Exemple: modifier un seul champ d'un formulaire, tout en gardant les autres données existantes?
+- Les champs de saisie ci-bas ne fonctionnent pas (les `onChange` ne modifient pas l'état)
 
-Les champs de saisie ci-bas ne fonctionnent pas (les `onChange` ne modifient pas l'état)
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
 
 export default function Form() {
   const [person, setPerson] = useState({
-    firstName: 'Barbara',
-    lastName: 'Hepworth',
-    email: 'bhepworth@sculpture.com',
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'jsmith@test.com',
   });
 
   function handleFirstNameChange(e) {
@@ -2144,19 +2220,19 @@ input {
 
 ## Conserver les valeurs existantes
 
-Par exemple, ceci modifie l'objet `person` en modifiant le "firstName" du rendu précédent.
+**Mauvais code:** muter l'objet `person` en modifiant le "firstName" du rendu précédent.
 
 ```js
 person.firstName = e.target.value; // 🚫
 ```
 
-La façon fiable de modifier l'état est de créer un nouvel objet et de le passer à `setPerson`. En plus, il faut aussi **copier les données existantes**.
+**Mieux:** Créer un nouvel objet, **copier les données existantes**, et appeler `setPerson()`.
 
 ```js
 setPerson({
   firstName: e.target.value, // Nouveau prénom
-  lastName: person.lastName,
-  email: person.email,
+  lastName: person.lastName, // Nom existant
+  email: person.email, // courriel existant
 });
 ```
 
@@ -2164,7 +2240,7 @@ setPerson({
 
 ## Décomposition (spread syntax)
 
-On peut utiliser la syntaxe `...` de la [décomposition d'objet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#spread_in_object_literals) pour ne pas avoir besoin de recopier chaque propriété séparément.
+On peut utiliser la syntaxe "`...object`" de la [décomposition d'objet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#spread_in_object_literals) (Spread syntax) pour ne pas avoir besoin de recopier chaque propriété séparément.
 
 ```js
 setPerson({
@@ -2173,24 +2249,37 @@ setPerson({
 });
 ```
 
+<hr />
+
+<Alert type='warning'>
+
+- Notez que "`...`" est
+  superficiel
+- Ne copie qu'à un seul niveau de profondeur
+- Bonne performance
+- Mais, avec des objets imbriqués, il faudra utiliser cette
+  syntaxe à de multiples niveaux.
+
+</Alert>
+
 ---
 
 ## Valider l'usage de la décomposition (spread syntax)
 
-Maintenant, le formulaire fonctionne.
+- Maintenant, le formulaire fonctionne.
+- Pas besoin de déclarer une variable d'état pour chaque champ de saisie.
+- Pour les gros formulaires, garder toutes les données groupées dans un seul objet est très pratique. (En autant qu'il soit modifié correctement.)
 
-Pas besoin de déclarer une variable d'état pour chaque champ de saisie. Pour les gros formulaires, garder toutes les données groupées dans un seul objet est très pratique. (En autant qu'il soit modifié correctement.)
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
 
 export default function Form() {
   const [person, setPerson] = useState({
-    firstName: 'Barbara',
-    lastName: 'Hepworth',
-    email: 'bhepworth@sculpture.com',
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'jsmith@test.com',
   });
 
   function handleFirstNameChange(e) {
@@ -2248,26 +2337,24 @@ input {
 
 </Sandpack>
 
-Notez que `...` (la syntaxe de décomposition, spread syntax) est "superficielle". Elle ne copie qu'à un seul niveau de profondeur. Ça garde de bonnes performances, mais quand on a des objets imbriqués, il faut utiliser cette syntaxe à de multiples niveaux.
-
 ---
 
-## Utiliser qu'un seul gestionnaire d'événements pour plusieurs champs
+## Un seul gestionnaire d'événements pour plusieurs champs
 
-<Alert type="warning">
+- Voici le même exemple, avec un seul gestionnaire d'événement plutôt que trois
+- Les propriétés avec un **nom dynamique** utilisent les accolades carrées "`[` et `]`" plutôt que point "`.`"
+- `e.target.name` réfère à la propriété `name` dans l'élément `<input>` du DOM
 
-Il est possible d'utiliser les accolades carrées `[` et `]` dans votre objet pour spécifier une propriété avec un nom dynamique. Voici le même exemple, avec un seul gestionnaire d'événement plutôt que trois.
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
 
 export default function Form() {
   const [person, setPerson] = useState({
-    firstName: 'Barbara',
-    lastName: 'Hepworth',
-    email: 'bhepworth@sculpture.com',
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'jsmith@test.com',
   });
 
   function handleChange(e) {
@@ -2297,7 +2384,11 @@ export default function Form() {
       </label>
       <label>
         Email:
-        <input name='email' value={person.email} onChange={handleChange} />
+        <input //
+          name='email'
+          value={person.email}
+          onChange={handleChange}
+        />
       </label>
       <p>
         {person.firstName} {person.lastName} ({person.email})
@@ -2319,10 +2410,6 @@ input {
 
 </Sandpack>
 
-Ici, `e.target.name` réfère à la propriété `name` dans l'élément `<input>` du DOM.
-
-</Alert>
-
 ---
 
 ## Mettre à jour un objet imbriqué
@@ -2340,23 +2427,27 @@ const [person, setPerson] = useState({
 });
 ```
 
-Pour modifier `person.artwork.city`, c'est tout simple avec une mutation.
+<hr />
+
+Pour modifier `person.artwork.city`, ça serait simple avec une mutation, mais incorrect:
 
 ```js
-person.artwork.city = 'New Delhi';
+person.artwork.city = 'New Delhi'; // 🚫
 ```
 
 ---
 
 ## Remplacer un objet imbriqué avec la décomposition
 
-Mais en React, on doit approcher l'état de façon immuable.
+On préfère approcher l'état de façon immuable:
 
-<TwoColumns top style={{ gridTemplateColumns:"1fr 3fr"}}>
+<TwoColumns top style={{ gridTemplateColumns:"30fr 70fr"}}>
 
 <div style={{ marginTop: 20 }}>
-  On créé un nouvel objet `artwork` (copiant les données de l'état précédent)
-  ainsi qu'un nouvel objet `person` qui réfère au nouvel `artwork`.
+
+On créé un nouvel objet `artwork` (copiant les données de l'état précédent),
+ainsi qu'un nouvel objet `person` qui réfère au nouvel `artwork`.
+
 </div>
 
 ```js
@@ -2365,15 +2456,14 @@ const nextPerson = { ...person, artwork: nextArtwork };
 setPerson(nextPerson);
 ```
 
-<div style={{marginTop:30}}>
-Alternativement, en une seule commande:
-</div >
+<div style={{ marginTop: 30 }}>Alternativement, en une seule commande:</div>
+
 ```js
 setPerson({
   ...person, // Copier les propriétés
   artwork: {
     // remplacer artwork
-    ...person.artwork, // avec les mêmes données
+    ...person.artwork, // Copier les propriétés
     city: 'New Delhi', // mais à New Delhi!
   },
 });
@@ -2387,7 +2477,7 @@ setPerson({
 
 La syntaxe de décomposition d'objets imbriqués n'est pas toujours facile à écrire, mais ça fonctionne très bien.
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2490,11 +2580,11 @@ img {
 
 ## Les objets sont-il imbriqués?
 
-<TwoColumns top style={{ gridTemplateColumns:"1fr 2fr"}}>
+<TwoColumns top style={{ gridTemplateColumns:"40fr 60fr"}}>
 
 <div style={{marginTop:'1em'}}>
 
-Les objets suivants semblent "imbriqués" dans le code.
+Les objets suivants semblent "imbriqués" dans le code:
 
 </div>
 
@@ -2510,8 +2600,12 @@ let obj = {
 ```
 
 <div style={{ marginTop: '1em' }}>
-  C'est trompeur. Quand le code exécute, la notion d'imbrication n'existe pas.
-  En fait, ce sont deux objets distincts.
+
+- Mais c'est trompeur
+- À l'exécution, la notion d'imbrication
+  n'existe pas
+- En fait, ce sont deux objets distincts
+
 </div>
 
 ```js
@@ -2556,11 +2650,12 @@ let obj3 = {
 ```
 
 <div style={{marginTop:20}}>
-Si on mute `obj3.artwork.city`, cela affecte `obj2.artwork.city` ainsi que `obj1.city`.
 
-C'est que `obj3.artwork`, `obj2.artwork`, ainsi qu'`obj1` réfèrent tous au même objet.
+- `obj3.artwork`, `obj2.artwork`, ainsi qu'`obj1` réfèrent tous au même objet
 
-Ils ne sont donc pas "imbriqués". Il est préférable de les concevoir en tant qu'objets séparés, qui réfèrent ou pointent les uns les autres.
+- Modifier `obj3.artwork.city` affecte `obj2.artwork.city` ainsi que `obj1.city`
+
+- Ces sont des objets séparés, qui réfèrent ou pointent les uns les autres
 
 </div>
 </TwoColumns>
@@ -2569,14 +2664,13 @@ Ils ne sont donc pas "imbriqués". Il est préférable de les concevoir en tant 
 
 ## Réaliser des modifications complexes avec immer
 
-<Alert type="warning">
-
-Quand l'état est complexe, avec plusieurs objets "imbriqués", on pourrait considérer le
-rendre plat (le rendre moins complexe). Mais si on préfère conserver la structure complexe, il existe
-un outil: [Immer](https://github.com/immerjs/use-immer) est
-une bibliothèque populaire qui permet d'utiliser une syntaxe de changements mutatifs,
-mais qui produit un résultat en copie d'objet. On pourrait croire que le code suivant brise
-la règle d'immuabilité du state. Mais avec Immer, ce n'est pas le cas.
+- Quand l'état est complexe, avec plusieurs objets "imbriqués", on pourrait simplifier
+- On pourrait rendre l'état plat (sans imbrication)
+  <hr />
+- Si on préfère conserver la structure complexe, il existe des outils pour aider
+- Le plus populaire se nomme [Immer](https://github.com/immerjs/use-immer)
+- Permet d'utiliser des changements mutatifs, mais produit un résultat en copie d'objet.
+- Ex: dans le code mutatif suivant, il n'y a pas de mutation, et Immer génère un nouvel objet
 
 ```js
 updatePerson((draft) => {
@@ -2586,8 +2680,6 @@ updatePerson((draft) => {
 
 Contrairement aux mutations régulières, **immer** n'écrase pas les états précédents.
 
-</Alert>
-
 ---
 
 ## Comment fonctionne Immer?
@@ -2595,10 +2687,20 @@ Contrairement aux mutations régulières, **immer** n'écrase pas les états pr�
 Pour utiliser Immer
 
 1. `npm install use-immer` pour ajouter Immer en tant que dépendance.
-2. Remplacez `import { useState } from 'react'` par `import { useImmer } from 'use-immer'`
+2. Remplacez :
+
+`import { useState } from 'react'`
+
+avec
+
+`import { useImmer } from 'use-immer'`
 
 <Alert type="warning">
-Le `draft` (brouillon) fourni par Immer est un objet spécial, nommé [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), qui enregistre toutes les mutations qui affectent l'objet. C'est pour cela qu'il est possible de muter l'objet autant qu'on le désire. Dans les coulisses, Immer détermine les modifications à `draft` et produit un nouvel objet avec toutes vos modifications.
+- Le `draft` (brouillon) fourni par Immer est un objet spécial, nommé [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) 
+- Ce proxy enregistre toutes les mutations qui affectent l'objet
+- C'est pour cela qu'il est possible de muter l'objet autant qu'on le désire
+- Dans les coulisses, Immer détermine les modifications à `draft`
+- Immer produit ensuite un nouvel objet avec toutes les modifications
 
 </Alert>
 
@@ -2606,7 +2708,7 @@ Le `draft` (brouillon) fourni par Immer est un objet spécial, nommé [Proxy](ht
 
 ## Exemple qui utilise Immer
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useImmer } from 'use-immer';
@@ -2710,11 +2812,9 @@ img {
 
 </Sandpack>
 
-Les gestionnaires d'événements ci-haut sont simples et concis.
-
-Il serait possible d'utiliser le `useState` et le `useImmer` dans le même composant.
-
-Immer est une façon de garder le code simple et concis, surtout avec des objets imbriqués, où la copie d'objet génère du code complexe.
+- Il est possible d'utiliser `useState` et `useImmer` dans le même composant
+- Immer garde le code simple et concis, surtout avec des objets imbriqués
+- Sans Immer, la copie d'objets imbriqués génère du code complexe
 
 ---
 
@@ -2722,69 +2822,73 @@ Immer est une façon de garder le code simple et concis, surtout avec des objets
 
 Voici les raisons:
 
-- **Débogage:** Si vous utilisez `console.log` et ne mutez pas le state, vos logs précédents ne seront pas écrasés par vos logs plus récents. C'est plus simple et clair de suivre l'historique des changements.
-- **Optimisations:** Plusieurs stratégies d'optimisation de React (memo) vont 'sauter' le rendu quand les props ou le state n'a pas été modifié. Quand on ne mute jamais l'état, c'est très simple de valider s'il y a des changements avec une simple comparaison `prevObj ===  obj`
-- **Nouvelles fonctionnalités:** L'équipe React prépare de nouvelles fonctionnalités qui se fient que l'état n'est jamais muté. Ces nouvelles fonctionnalités pourraient échouer si votre projet utilise de la mutation.
+- **Débogage:** Si vous utilisez `console.log` et ne mutez pas le state, les objets affichés ne seront pas écrasés par des mutations récentes. C'est alors plus simple et clair de suivre l'historique des changements.
+- **Optimisations:** Plusieurs stratégies d'optimisation de React (ex: memo) sautent le rendu quand les props ou le state n'ont pas été modifiés. Quand on ne mute jamais l'état, React valide les changements avec une simple comparaison `prevObj ===  obj`
+- **Nouvelles fonctionnalités:** L'équipe React prépare de nouvelles fonctionnalités qui se fient que l'état n'est jamais muté. Le code qui utilise la mutation pourrait échouer dans une future version de React.
 
 ---
 
 ## Pourquoi éviter la mutation d'état en React (2/2)
 
-- **Ajout de besoins:** Certaines fonctionnalités, tel qu'implanter annuler/rétablir, afficher un historique de changements, permettre de réinitialiser un formulaire aux valeurs précédentes, sont des actions simples à réaliser quand rien n'est muté. C'est plus simple de garder des copies des états précédents, et de les ramener au besoin. C'est plus compliqué à implanter quand il y a des mutations.
-- **Simplicité:** Quand React ne fait aucune mutation, il n'y a alors rien de spécial à coder. Pas besoin de proxy, ni de propriétés capturées, ni d'objets réactifs à initialiser. C'est pourquoi React nous permet d'ajouter n'importe quel objet dans l'état, sans aucun impact sur la performance.
+- **Ajout de besoins:** Certaines fonctionnalités (annuler/rétablir, undo/redo, afficher un historique de changements, réinitialiser un formulaire aux valeurs précédentes) sont des actions simples à réaliser quand rien n'est muté. Il suffit de garder des copies des états précédents. C'est plus compliqué à implanter quand il y a des mutations.
+- **Simplicité:** Quand React utilise un état immuable, il n'y a alors rien de spécial à coder. Pas besoin de proxy, ni de propriétés capturées, ni d'objets réactifs à initialiser. React permet d'ajouter n'importe quel objet dans l'état, sans aucun impact sur la performance.
 
-Il est souvent possible de muter l'état en React sans ressentir d'impact négatif. Mais à mesure que des nouvelles fonctionnalités sont ajoutées à React, celles-ci s'attendent à ce que les objets soient immuables. Donc, pour que votre code soit compatible avec une future version de React, assurez-vous d'écrire du code avec un état immuable.
+<Alert type="warning">
+
+Il est parfois possible de muter l'état en React sans ressentir d'impact négatif. Mais à mesure que des nouvelles fonctionnalités sont ajoutées à React, celles-ci s'attendent à ce que les objets soient immuables. Donc, pour que votre code soit compatible avec les futures versions de React, assurez-vous d'écrire du code avec un état immuable.
+
+</Alert>
 
 ---
 
-## Défi 1
+## Défi 6
 
-Ce formulaire a quelques bogues. Cliquez le bouton pour ajouter du pointage quelques fois. Rien ne change... Modifiez le prénom, et soudainement le pointage est corrigé. Modifiez le nom, et tout disparait.
+Si on clique le bouton pour ajouter du pointage, rien ne change... Modifiez ensuite le prénom, et le pointage est corrigé. Modifiez ensuite le nom, et tout disparait.
 
-Trouvez les bogues et réparez-les...
+Réparez le code.
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
 
 export default function Scoreboard() {
-  const [joueur, setJoueur] = useState({
-    prenom: 'Ranjani',
-    nom: 'Shettar',
-    pointage: 10,
+  const [player, setPlayer] = useState({
+    firstName: 'John',
+    lastName: 'Smith',
+    score: 5,
   });
 
   function handlePlusClick() {
-    joueur.pointage++;
+    player.score++;
   }
 
-  function handlePrenomChange(e) {
-    setJoueur({
-      ...joueur,
-      prenom: e.target.value,
+  function handleFirstNameChange(e) {
+    setPlayer({
+      ...player,
+      firstName: e.target.value,
     });
   }
 
-  function handleNomChange(e) {
-    setJoueur({
-      nom: e.target.value,
+  function handleLastNameChange(e) {
+    setPlayer({
+      lastName: e.target.value,
     });
   }
 
   return (
     <>
       <label>
-        Pointages: <b>{joueur.pointage}</b>{' '}
+        Score: <b>{player.score}</b>{' '}
         <button onClick={handlePlusClick}>+1</button>
       </label>
       <label>
-        Prénom:
-        <input value={joueur.prenom} onChange={handlePrenomChange} />
+        First Name:
+        <input value={player.firstName} onChange={handleFirstNameChange} />
       </label>
       <label>
-        Nom:
-        <input value={joueur.nom} onChange={handleNomChange} />
+        Last Name:
+        <input value={player.lastName} onChange={handleLastNameChange} />
       </label>
     </>
   );
@@ -2806,17 +2910,15 @@ input {
 
 ---
 
-## Défi 2
+## Défi 7
 
 Voci un boîte que l'on peut déplacer. On peut changer sa couleur avec le champ de saisie.
 
-Mais il y a un bogue. Si vous déplacez la boîte d'abord, et ensuite changez sa couleur, le fond va sauter à une nouvelle position. Ce n'est pas normal.
+Mais il y a un bogue: Si vous déplacez la boîte d'abord, et ensuite changez sa couleur, le fond va sauter à une nouvelle position. Ce n'est pas le comportement désiré.
 
-Réparez le bogue.
+Il y a des mutations indésirables. Réparez le bogue.
 
-Il y a un changement innatendu via mutation.
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -2951,11 +3053,11 @@ select {
 
 ---
 
-## Défi 3
+## Défi 8
 
 Voici le même exemple que dans le défi précédent. Cette fois-ci, il faut réparer la mutation via Immer. Pour vous aider, `useImmer` est déjà importé. Il ne reste qu'à changer la variable shape.
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -3111,26 +3213,29 @@ select {
 
 ## Modifier les tableaux
 
-En JavaScript, il est permis de muter les tableaux. Mais pour l'état React, on doit les traiter de façon immuable. Comme les objets, quand on veut modifier un tableau, il faut en créer un nouveau ou le cloner.
+- En JavaScript, il est permis de muter les tableaux, (comme les objets)
+- En React, l'état doit être traité de façon immuable
+- Quand on veut modifier un tableau, il faut en créer un nouveau ou le cloner
+- Considérez les tableaux dans l'état comme s'ils sont en lecture seule
+- Évitez la réassignation: `arr[0] = 'non'`
+- Évitez les méthodes qui mutent le tableau (ex: `push()` et `pop()`).
 
 ---
 
 ## Modifier les tableaux sans mutation
 
-En JS, les tableaux sont un type d'objet. Et de la même façon qu'on gère les objets en React, on doit gérer les tableaux dans l'état React comme s'ils sont en lecture seule. Il faut éviter la réassignation: `arr[0] = 'non'` ainsi que les méthodes qui mutent le tableau (ex: `push()` et `pop()`).
+- Pour modifier le tableau dans l'état, il faut passer un nouveau tableau au `setState`
+- Voici une table de référence des opérations de tableau communes
+- Évitez les méthodes de la colonne de gauche. Préférez les méthodes de la colonne de droite.
 
-Chaque fois qu'on veut modifier le tableau, il faut passer un nouveau tableau au setState. On peut utiliser les méthodes `filter()` et `map()`. On peut écrire l'état avec le nouveau tableau.
+<div className="my-tbl" >
 
-Voici une table de référence des opérations de tableau communes. Evitez les méthodes de la colonne de gauche. Préférez les méthodes de la colonne de droite.
-
-<div style={{display: "flex", flexDirection: "column"}}>
-
-|              | Mutation du tableau 🚫               | Nouveau Tableau ✅                           |
-| ------------ | ------------------------------------ | -------------------------------------------- |
-| Ajout        | `push()`, `unshift()`                | `concat()`, `[...arr]` syntaxe décomposition |
-| Suppression  | `pop()`, `shift()`, `splice()`       | `filter()`, `slice()`, `toSpliced()` 🆕      |
-| Remplacement | `splice()`, `arr[i] = x` assignation | `map()`, `.with()` 🆕                        |
-| Tri          | `sort()`, `reverse()`,               | `toSorted()` 🆕, `toReversed()` 🆕           |
+| Action       | Tableau muté 🚫                               | Nouveau tableau ✅                                    |
+| ------------ | --------------------------------------------- | ----------------------------------------------------- |
+| Ajout        | `push()`, <br /> `unshift()`                  | `concat()`, <br /> `[...arr]` (spread syntax)         |
+| Suppression  | `pop()`, <br /> `shift()`, <br /> `splice()`  | `filter()`, <br /> `slice()`, <br /> `toSpliced()` 🆕 |
+| Remplacement | `splice()`, <br /> `arr[i] = x` (assignation) | `map()`, <br /> `.with()` 🆕                          |
+| Tri          | `sort()`, <br /> `reverse()`,                 | `toSorted()` 🆕, <br /> `toReversed()` 🆕             |
 
 </div>
 <hr />
@@ -3144,7 +3249,7 @@ Alternativement, on peut utiliser Immer qui permet l'usage des mutations.
 
 `push()` mute un tableau en ajoutant un item. (À éviter) 🚫
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3157,7 +3262,7 @@ export default function List() {
 
   return (
     <>
-      <h1>Sculpteurs:</h1>
+      <h1>Artists:</h1>
       <input value={name} onChange={(e) => setName(e.target.value)} />
       <button
         onClick={() => {
@@ -3192,24 +3297,36 @@ button {
 
 ## Ajouter à un tableau avec décomposition
 
-Préférez plutôt la création d'un _nouveau_ tableau contenant les items existants et un nouvel item à la fin. Il y a plusieurs approches possibles, mais le plus simple est d'utiliser la syntaxe de décomposition de tableau: `...`
+- On préfère plutôt la création d'un _nouveau_ tableau
+- Qui contient les items existants et un nouvel item à la fin
+- Plusieurs approches possibles, mais le plus simple est d'utiliser la syntaxe de décomposition: "`...`"
 
 ```js
 setArtists(
-  // Remplacer l'état
+  // Remplacer l'état avec un nouveau tableau
   [
-    // avec un nouveau tableau
-    ...artists, // contenant les anciens items
+    ...artists, //                   contenant les anciens items
     { id: nextId++, name: name }, // et un item additionnel à la fin.
   ]
 );
 ```
 
+- Si on doit ajouter au début, on inverse l'ordre:
+
+```js
+setArtists([
+  { id: nextId++, name: name }, // ici, on insère item au début du tableau
+  ...artists, //                   on ajoute le contenu existant par la suite
+]);
+```
+
+- Permet d'ajouter à la fin (comme `push()`) ou au début (comme `unshift()`).
+
 ---
 
-## Exemple de tableau avec décomposition
+## Exemple d'ajout au tableau avec décomposition
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3222,7 +3339,7 @@ export default function List() {
 
   return (
     <>
-      <h1>Sculpteurs:</h1>
+      <h1>Artists:</h1>
       <input value={name} onChange={(e) => setName(e.target.value)} />
       <button
         onClick={() => {
@@ -3230,7 +3347,7 @@ export default function List() {
           setArtists([...artists, { id: nextId++, name: name }]);
         }}
       >
-        Ajouter
+        Add
       </button>
       <ul>
         {artists.map((artist) => (
@@ -3250,22 +3367,17 @@ button {
 
 </Sandpack>
 
-La décomposition permet d'ajouter à la fin (comme `push()`) ou au début (comme `unshift()`).
-
-```js
-setArtists([
-  { id: nextId++, name: name }, //  ici, on insère au début du tableau
-  ...artists, //            on ajoute le contenu existant par la suite
-]);
-```
-
 ---
 
 ## Enlever à un Tableau
 
-Pour enlever un item, il suffit de le _filtrer_ avec `filter`.
+```js
+setArtists(artists.filter((a) => a.id !== artist.id));
+```
 
-<Sandpack>
+- `filter()` génère un nouveau tableau d'`artists` avec des items en moins.
+
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3281,7 +3393,7 @@ export default function List() {
 
   return (
     <>
-      <h1>Sculpteurs:</h1>
+      <h1>Artists:</h1>
       <ul>
         {artists.map((artist) => (
           <li key={artist.id}>
@@ -3291,7 +3403,7 @@ export default function List() {
                 setArtists(artists.filter((a) => a.id !== artist.id));
               }}
             >
-              Enlever
+              Remove
             </button>
           </li>
         ))}
@@ -3303,21 +3415,16 @@ export default function List() {
 
 </Sandpack>
 
-```js
-setArtists(artists.filter((a) => a.id !== artist.id));
-```
-
-`filter()` génère un nouveau tableau d'`artists`.
-
 ---
 
 ## Transformer un tableau avec `map`
 
-`map()` génère un nouveau tableau. La fonction passée à `map` détermine quoi faire avec chaque item, basé sur son contenu ou son index (ou les deux).
+- `map()` génère un nouveau tableau
+- La fonction passée à `map` détermine comment traiter chaque item, basé sur le contenu
+- Dans cet exemple, un tableau détient les coordonnées de deux cercles et un carré
+- Quand on clique le bouton, on déplace les cercles de 50 pixels vers le bas
 
-Dans cet exemple, un tableau détient les coordonnées de deux cercles et un carré. Quand on clique le bouton, on déplace les cercles de 50 pixels vers le bas. `map()` va créer ce nouveau tableau.
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3382,11 +3489,10 @@ body {
 
 ## Remplacer les items d'un tableau
 
-Les asignations du genre `arr[0] = x` mutent l'objet. On préfère utiliser `map` pour générer un nouveau tableau.
+- On évite les asignations du genre `arr[0] = x` qui mutent l'objet
+- On préfère utiliser `map()` pour générer un nouveau tableau, basé sur le contenu et l'index
 
-`map`, reçoit l'item et l'index comme arguments. On peut utiliser l'index (la position) pour décider si on retourne l'item original, ou autre chose.
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -3440,11 +3546,10 @@ button {
 
 ## Insérer au milieu d'un tableau
 
-Pour insérer un item, il faut créer un tableau qui décompose la portion avant le point d'insértion, par la suite ajouter le nouvel item, et ensuite décomposer le reste du tableau.
+- Pour insérer un item, il faut créer un tableau qui décompose la portion avant le point d'insértion, par la suite ajouter le nouvel item, et ensuite décomposer le reste du tableau.
+- Pour cela, on peut utiliser la méthode `slice(start, end)` avec la syntaxe de décomposition de tableau "`...`". (Dans cet exemple, "Insérer" insère à la position 1.)
 
-Pour cela, on peut utiliser la méthode `slice()` avec la syntaxe de décomposition de tableau `...`. (Dans cet exemple, "Insérer" tente d'insérer à la position 1.)
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -3476,9 +3581,9 @@ export default function List() {
 
   return (
     <>
-      <h1>Sculpteurs:</h1>
+      <h1>Artists:</h1>
       <input value={name} onChange={(e) => setName(e.target.value)} />
-      <button onClick={handleClick}>Insérer</button>
+      <button onClick={handleClick}>Insert</button>
       <ul>
         {artists.map((artist) => (
           <li key={artist.id}>{artist.name}</li>
@@ -3501,13 +3606,12 @@ button {
 
 ## Faire des changements avancés
 
-On pourrait vouloir renverser un tableau, ou le trier. Mais les méthodes `reverse()` et `sort()` mutent le tableau orginal. Que faire si nous sommes avant 2023?
+- Les méthodes `reverse()` et `sort()` mutent le tableau orginal
+- Que faire si nous sommes avant 2023?
+- Faites une **copie** du tableau d'abord, et faites des changements **mutatifs** ensuite
+- La syntaxe de décomposition `[...list]` peut créer un clone du tableau original
 
-**Faites une copie du tableau d'abord, et faites des changements mutatifs ensuite**
-
-On utilise la syntaxe de décomposition `[...list]` pour créer une copie du tableau original.
-
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3530,7 +3634,7 @@ export default function List() {
 
   return (
     <>
-      <button onClick={handleClick}>Inverser</button>
+      <button onClick={handleClick}>Inverse</button>
       <ul>
         {list.map((artwork) => (
           <li key={artwork.id}>{artwork.title}</li>
@@ -3547,9 +3651,7 @@ export default function List() {
 
 ## Tableau référant des objets
 
-Par contre, même si on copie un tableau, on ne peut muter les objets du tableau. La copie est superficielle (shallow), et ce nouveau tableau contient les mêmes objets que l'original. Si on modifie un objet dans le tableau copié, on mute l'état.
-
-Le code suivant est problématique:
+- Imaginons `nextList` qui clone `list`. Le code suivant est problématique:
 
 ```js
 const nextList = [...list];
@@ -3557,9 +3659,15 @@ nextList[0].seen = true; // Problème: mutation  🚫
 setList(nextList);
 ```
 
-Même si `nextList` et `list` sont deux tableaux distincts, **`nextList[0]` et `list[0]` pointent vers le même objet** En modifiant `nextList[0].seen`, on modifie aussi `list[0].seen`. C'est donc une mutation d'état. 🚫
+- `nextList` et `list` sont deux tableaux distincts
+- **Mais** `nextList[0]` et `list[0]` pointent vers le même objet
+- En modifiant `nextList[0].seen`, on modifie aussi `list[0].seen`
+- C'est donc une mutation d'état. 🚫
 
-On résout ce problème de la même façon qu'avec les objets JS imbriqués: en clonant plutôt que de muter.
+<hr />
+
+- On résout ce problème de la même façon qu'avec les objets JS imbriqués
+- On génère un nouvel objet plutôt que de le muter
 
 <div style={{fontSize:"2rem"}}>
 ```js
@@ -3571,11 +3679,11 @@ nextList[0] = {...nextList[0], seen: true }; ✅
 
 ## Modifier des objets dans des tableaux
 
-Les objets ne sont pas réellement dans les tableaux. Même si on dirait qu'ils sont imbriqués, chaque objet est une valeur séparée, vers lequel le tableau pointe. **Lorsqu'on met à jour des états imbriqués, il faut créer des copies des objets à modifier, jusqu'au top niveau.**
+- Lorsqu'on met à jour des états imbriqués, il faut créer des copies des objets à modifier, **jusqu'au top niveau.**
+- Dans cet exemple, deux listes d'oeuvres d'art partagent le même état initial
+- À cause d'une valeur mutée, leur état est accidentellement partagé
 
-Dans cet exemple, deux listes d'oeuvres d'art partagent le même état initial. À cause d'une valeur mutée, leur état est accidentellement partagé. Cocher la boite d'une liste affecte l'autre liste.
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -3607,7 +3715,7 @@ export default function BucketList() {
 
   return (
     <>
-      <h1>Oeuvres d'art</h1>
+      <h1>Oeuvres d'art (Artwork)</h1>
       <h2>Ma liste d'art:</h2>
       <ItemList artworks={myList} onToggle={handleToggleMyList} />
       <h2>Ta liste d'art:</h2>
@@ -3642,20 +3750,23 @@ function ItemList({ artworks, onToggle }) {
 
 ---
 
-## le problème
+## Décrire le problème
 
 Le problème est ici:
 
 ```js
-const myNextList = [...myList];
-const artwork = myNextList.find((a) => a.id === artworkId);
-artwork.seen = nextSeen; // Problème: on mute un item existant 🚫
+const myNextList = [...myList]; // On clone
+const artwork = myNextList.find((a) => a.id === artworkId); // On trouve l'item
+artwork.seen = nextSeen; // Problème: on mute l'item  🚫
 setMyList(myNextList);
 ```
 
-Même si le tableau `myNextList` est nouveau, les _items_ sont les mêmes que dans le tableau original `myList`. Changer `artwork.seen` modifie donc l'objet _original_. Cet objet se trouve aussi dans `yourArtworks`, causant le bogue. Ce bogue est difficile à trouver, mais il disparait dès qu'on arrête de muter.
-
-**On peut utiliser `map` pour substituer un vieil objet avec une nouvelle version, sans mutation**
+- Le tableau `myNextList` est nouveau
+- MAIS les _items_ sont les mêmes que dans le tableau original `myList`
+- Changer `artwork.seen` modifie donc l'objet _original_
+- Cet objet se trouve aussi dans `yourArtworks`, causant le bogue
+- Ce bogue est difficile à trouver, mais il disparait dès qu'on arrête de muter.
+- **Solution:** utiliser `map` pour substituer un vieil objet avec une nouvelle version, sans mutation:
 
 ```js
 setMyList(myList.map(artwork => {
@@ -3671,11 +3782,12 @@ setMyList(myList.map(artwork => {
 
 ---
 
-## Décomposer les items des tableaux
+## Dolution en décomposant les items des tableaux
 
-Ici, `...` est la syntaxe de décomposition pour créer la copie d'un objet. Aucun des items d'état n'est muté, et le bogue est réglé.
+- Ici, "`...`" est la syntaxe de décomposition pour créer la copie d'un objet
+- Il n'y a plus de mutations, le bogue est réglé.
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -3754,19 +3866,21 @@ function ItemList({ artworks, onToggle }) {
 
 </Sandpack>
 
-En général, **le seul objet d'état que l'on peut muter, c'est celui qui vient tout juste d'être créé.** Si on insère une nouvelle oeuvre d'art, c'est correct de la muter. Mais si on modifie un objet provenant de l'état, il faut faire une copie.
+- En général, **il est permis de muter un objet qui vient tout juste d'être créé.**
+- Si on insère une nouvelle oeuvre d'art, c'est donc correct de la muter
+- Si on modifie un objet provenant de l'état, il faut faire un clone avant de muter
 
 ---
 
 ## Écrire une logique concise avec Immer
 
-Modifier des tableaux imbriqués, sans mutation, est répétitif et complexe.
+- En général, on ne devrait pas modifier les données profondément imbriquées
+- Modifier des tableaux imbriqués, sans mutation, est répétitif et complexe
+- Alternative 1: réécrire la structure pour la rendre moins profonde (aplatir)
+- Alternative 2: utiliser [Immer](https://github.com/immerjs/use-immer)
+- On peut alors utiliser la mutation (car Immer génère une copie de ces mutations)
 
-- En général, on ne devrait pas modifier les données profondément imbriquées.
-- On pourrait réécrire la structure pour avoir une structure moins profonde (aplatir la structure)
-- Aleternative, on pourrait utiliser [Immer](https://github.com/immerjs/use-immer). On peut alors utiliser la mutation (car Immer fait une copie des mutations)
-
-<Sandpack>
+<Sandpack  s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -3854,7 +3968,7 @@ function ItemList({ artworks, onToggle }) {
 
 ## Utiliser Immer
 
-Avec Immer, **les mutations comme `artwork.seen = nextSeen` sont permises:**
+- Avec Immer, **les mutations comme `artwork.seen = nextSeen` sont permises:**
 
 ```js
 updateMyTodos((draft) => {
@@ -3863,17 +3977,20 @@ updateMyTodos((draft) => {
 });
 ```
 
-C'est correct ici car on ne mute pas l'état original. On mute un objet spécial `draft`, fourni par Immer. On pourait aussi utiliser `push()` and `pop()` pour modifier `draft`.
-
-Dans les coulisses, Immer construit le prochain objet d'état à partir des mutations de `draft`. Ceci permet d'avoir des gestionnaires d'événemnts plus simples et courts.
+- C'est correct ici car on ne mute pas l'état original
+- On mute un objet spécial `draft`, fourni par Immer
+- On peut aussi utiliser `push()` ou `pop()` pour modifier `draft`.
+- Dans les coulisses, Immer construit le prochain objet d'état à partir des mutations de `draft`
+- Ceci permet d'avoir des gestionnaires d'événemnts plus simples et courts.
 
 ---
 
-## Défi 5
+## Défi 9
 
-Écrivez la logique de `handleIncreaseClick`. Quand on clique "+", cela incrémente le nombre
+- Écrivez la logique de `handleIncreaseClick`.
+- Quand on clique "+", on incrémente le nombre
 
-<Sandpack>
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3930,11 +4047,14 @@ button {
 
 ---
 
-## Défi 6
+## Défi 10
 
-Le bouton "-" ne fait rien. Il faut ajouter un gestionnaire d'événements qui décrémente le `count`du produit. Quand on pèse "-" et que le compte est 1, il faut enlever le produit du panier d'achat. (On ne doit pas afficher 0)
+- Le bouton "-" ne fait rien
+- Il faut ajouter un gestionnaire d'événements qui décrémente le `count`du produit
+- Quand on pèse "-" et que le compte est 1, il faut enlever le produit du panier d'achat
+- On ne doit pas afficher 0
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js
 import { useState } from 'react';
@@ -4005,11 +4125,13 @@ button {
 
 ---
 
-## Défi 7
+## Défi 11
 
-Tous les gestionnaires d'événements de `App.js` utilisent la mutation. L'édition et la supression des todos ne fonctionnent pas. Il faut réécrire `handleAddTodo`, `handleChangeTodo` et `handleDeleteTodo` pour ne plus muter.
+- Tous les gestionnaires d'événements de `App.js` utilisent la mutation
+- L'édition et la supression des todos ne fonctionnent pas
+- Il faut réécrire les 3 handlers pour ne plus muter.
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js src/App.js
 import { useState } from 'react';
@@ -4161,11 +4283,12 @@ li {
 
 ---
 
-## Défi 8
+## Défi 12
 
-Même exemple que précédemment. Cette fois-ci, on répare les mutations en utilisant Immer. `useImmer` est déjà importé.
+- Même exemple que précédemment, mais on répare les mutations en utilisant Immer.
+- `useImmer` est déjà importé.
 
-<Sandpack>
+<Sandpack  s="70">
 
 ```js src/App.js
 import { useState } from 'react';

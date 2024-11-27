@@ -10,9 +10,17 @@
   padding: 0 0.5em;
 }
 
-.my-tbl tr > *:first-child {
+.my-tbl tr > td {
+  border-right: 1px solid;
+}
+
+.my-tbl tr > *:last-child {
+  border-right: none;
+}
+
+/* .my-tbl tr > *:first-child {
   border-right: 1px solid;
 }
 .my-tbl tr > *:last-child {
   border-left: 1px solid;
-}
+} */
