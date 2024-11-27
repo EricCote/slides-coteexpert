@@ -1103,9 +1103,9 @@ import { displayJson } from './display';
 
 const obj1 = { name: 'Donald', age: 79 };
 
-const addProp = { ...obj1 }; //clone
+const addProp = { ...obj1, city: 'Washington' }; //clone
 
-displayJson(arr2);
+displayJson(addProp, 2);
 
 //---------------------
 ```
