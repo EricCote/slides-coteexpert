@@ -334,7 +334,7 @@ body {
 
 </Sandpack>
 
-Ces pages sont nommées "guide de styles dynamiques" et _"storybooks"_.
+- Ces pages sont nommées "guide de styles dynamiques" et _"storybooks"_.
 
 ---
 
@@ -345,7 +345,7 @@ On catégorise les déclencheurs en deux familles:
 - **Événements utilisateurs** : cliquer un bouton, taper dans un champ, naviguer un lien.
 - **Événements techniques** : réponse d'une requête réseau, un délai qui timeout, une image qui complète son chargeement.
 
-Dans les deux cas, **il faut modifier des variables d'état (state) pour mettre à jour l'IU.**
+Dans les deux cas, il faut **modifier l'état (state)** pour mettre à jour l'IU
 
 ---
 
@@ -364,16 +364,16 @@ Pour visualiser ce flot, dessinez les états sur du papier comme des cercles nom
 
 ### Étape 3: **Modéliser** l'état en mémoire avec `useState`
 
-On représente l'état visuel du composant avec `useState`. On garde cela simple.
+- On représente l'état visuel du composant avec des `useState`. On garde cela simple.
 
-On débute avec les états _absolument nécéssaires_. Par exemple, la réponse ou la dernière erreur:
+- On débute avec les états _absolument nécéssaires_. Par exemple, la réponse ou la dernière erreur:
 
 ```js
 const [answer, setAnswer] = useState('');
 const [error, setError] = useState(null);
 ```
 
-Il faut aussi ajouter les variables qui représentent l'état visuel. Ici, 4 valeurs booléennes:
+- On ajoute les variables qui représentent l'état visuel. Ici, 5 valeurs booléennes:
 
 ```js
 const [isEmpty, setIsEmpty] = useState(true);
@@ -383,24 +383,24 @@ const [isSuccess, setIsSuccess] = useState(false);
 const [isError, setIsError] = useState(false);
 ```
 
-Il faut réessayer quelques fois avant d'arriver à un "state" optimal.
+- On doit réessayer quelques fois avant d'arriver à un "state" optimal.
 
 ---
 
 ### Étape 4 : Éliminer toute variable d'état non-nécessaire
 
-On refactorise l'état pour ne garder que l'essentiel.
+- Il faut refactoriser l'état pour ne garder que l'essentiel.
 
-Le but est d'empêcher les cas où l'état ne représente pas une IU valide pour l'utilisateur.
+- On veut empêcher les cas où l'état ne représente pas une IU valide pour l'utilisateur.
 
-Par exemple, si on affiche un message d'erreur, il ne faut pas cacher la boîte de saisie qui provoque le message d'erreur. Il faut que l'utilisateur puisse corriger la saisie.
+- Par exemple, quand on affiche un message d'erreur, il ne faut pas cacher la boîte de saisie qui provoque le message d'erreur. Il faut que l'utilisateur puisse corriger la saisie.
 
 ---
 
-## Exemples de questions à propos de l'état
+## Questions pour optimiser l'état
 
-- **Un état provoque-il un paradoxe?** `isTyping` et `isSubmitting` ne peuvent simultanément être `true`. Un paradoxe indique que l'état manque de contraintes. Il y a 4 cominaisons de 2 booléens, mais seulement 3 états valides. On élimine l'état "impossible", avec un `status` de 3 modes: `'tape'`, `'envoi'`, ou `'succès'`.
-- **La même info est-elle disponible ailleurs dans l'état?** un autre paradoxe: `isEmpty` et `isTyping` ne peuvent être `true` simultanément. On élimine `isEmpty` et on valide si `answer.length === 0`.
+- **Un état provoque-il un paradoxe?** `isTyping` et `isSubmitting` ne peuvent simultanément être `true`. Un paradoxe indique que l'état manque de contraintes. Il y a 4 combinaisons de 2 booléens, mais seulement 3 états valides. Solution: éliminer l'état "impossible", remplacer avec un `status` de 3 modes: `'tape'`, `'envoi'`, ou `'succès'`.
+- **La même info est-elle disponible ailleurs dans l'état?** un autre paradoxe: `isEmpty` et `isTyping` ne peuvent être `true` simultanément. On élimine `isEmpty` et on remplace par `answer.length === 0`.
 - **L'information serait-elle l'inverse d'un autre état?** `isError` n'est pas nécéssaire si on peut plutôt valider `error !== null`
 
 Après le nettoyage, on passe de 7 à 3 variables d'états:
@@ -419,13 +419,13 @@ Ils sont essentiels. On ne pourrait en retirer un sans briser la fonctionnalité
 
 <Alert type="warning">
 
-Certains états intermédiaires ne font pas de sens.
+- Certains états intermédiaires ne font pas de sens.
 
-- Exemple, un état `error` non-null n'est pas simultanément possible avec un `status` de `succès`.
+- Exemple: un état `error` non-null n'est pas simultanément possible avec un `status` de "`succes`".
 
 - Pour mieux modéliser l'état, on pourrait utiliser un **réducteur** (reducer).
 
-Les réducteurs permettent d'unifier plusieurs variables d'état dans un seul objet. Ils consolident toute la logique de modification.
+- Les réducteurs d'unifient de multiples variables d'état dans un seul objet, en consolidant toute la logique de modification.
 
 </Alert>
 
@@ -514,7 +514,8 @@ function submitForm(answer) {
 
 </Sandpack>
 
-Le code semble plus long, mais il est moins fragile que dans l'exemple original. Il est plus facile de modifier ou d'ajouter des états.
+- Plus de code, mais moins fragile que dans l'exemple original
+- Il est maintenant facile de modifier ou d'ajouter des états.
 
 ---
 
@@ -522,14 +523,16 @@ Le code semble plus long, mais il est moins fragile que dans l'exemple original.
 
 #### Ajouter et enlever des classes css
 
-Quand on clique sur l'image, on devrait enlever la classe `background--active` du `<div>` externe, et ajouter le `picture--active` du `<img>`. Cliquer sur le fond devrait restaurer le CSS originel.
-
-Visuellement, cliquer sur l'image devrait enlever le fond mauve et encadrer l'image. Cliquer le fond l'inverse.
+- Quand on clique sur l'image, il faut enlever la classe `background--active` du `<div>` externe, et ajouter le `picture--active` du `<img>`.
+- Cliquer sur le fond devrait restaurer le CSS originel.
 
  <Sandpack s="70">
 
 ```js
+import { useState } from 'react';
+
 export default function Picture() {
+  // const [...] = useState(false)
   return (
     <div className='background background--active'>
       <img
@@ -583,7 +586,7 @@ body {
 
 #### Édition de Profile
 
-Voici un formulaire écrite en JS et DOM. Jouez avec pour comprendre le fonctionnement.
+- Voici un formulaire écrit en JS et DOM, sans React. Jouez avec pour comprendre le fonctionnement.
 
  <Sandpack s="70">
 
@@ -677,17 +680,19 @@ lastNameInput.oninput = handleLastNameChange;
 
 </Sandpack>
 
-Le formulaire bascule entre deux modes: mode Édition, où l'on peut saisir, et le mode Visionnement, où l'on peut consulter les infos. Le bouton change en "Edit" et "Save", dépendant du mode. Le mesage de bienvenue (en bas) se met à jour avec la saisie.
+- Le formulaire bascule entre deux modes:
+  - **mode Édition** où l'on peut saisir
+  - **mode Visionnement** où l'on peut consulter les infos
+- Le bouton change en "Edit" et "Save", dépendant du mode
+- Le mesage de bienvenue (en bas) se met à jour avec la saisie
 
 ---
 
 ## Défi 2b
 
-Réécrivez le code en React. On a déjà converti le HTML en JSX.
+- Réécrivez le code en React. On a déjà converti le HTML en JSX.
 
-Il faut émuler tous les autres comportements.
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 export default function EditProfile() {
@@ -723,11 +728,9 @@ label {
 
 ## Défi 3a
 
-#### Visionnez le code sans React
+Voici le code sans React:
 
-Voici le code sans React
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js src/index.js active
 function handleFormSubmit(e) {
@@ -825,7 +828,7 @@ Modifiez sur la page suivante
 
 ## Défi 3b
 
-Si React n'existait pas, pourrait-on réécrire le code pour que cela ressemble à l'approche de React?
+Si React n'existait pas, peut-on réécrire le code pour que cela ressemble à l'approche de React?
 
 Commencez par la méthode updateDOM
 
@@ -941,9 +944,9 @@ lastNameInput.oninput = handleLastNameChange;
 
 ## Bien structurer l'état
 
-Bien structurer l'état, c'est la différence entre un composant qui est plaisant à modifier et déboguer, et un qui est la source de bogues.
-
-Quelles sont les bonnes pratiques de gérer l'état?
+- Bien structurer l'état, ça simplifie le débogage et la maintenance
+- Mal structurer l'état, c'est la source de bogues
+- Voici les bonnes pratiques pour structurer l'état
 
 ---
 
@@ -955,13 +958,16 @@ Quelles sont les bonnes pratiques de gérer l'état?
 4. **Éliminer la duplication.** Si la même valeur est dupliquée entre différentes variables d'état, ou des objets imbriqués, c'est alors difficile de les garder tous synchronisés.
 5. **Éliminer les objets profondément imbriqués.** Un état profondément hierarchique n'est pas facile à mettre à jour. Privilégiez une structure plate ou peu profonde.
 
-Le but, c'est de _faciliter les mises à jour d'état et d'éviter les erreurs_. Éliminer la redondance assure la cohérence de l'état. (De la même façon qu'on "normalise" une structure de Base de Données). On pourrait modifier la citation d'Albert Einstein: **"Faites que votre état soit le plus simple possible — mais pas plus simple."**
+- Le but est de _faciliter les mises à jour d'état et d'éviter les erreurs_
+- Ceci assure la cohérence de l'état
+  - De la même façon qu'on "normalise" une structure de Base de Données
+- On pourrait modifier la citation d'Albert Einstein: _"Faites que votre état soit le plus simple possible — mais pas plus simple."_
 
 ---
 
 ## Regrouper l'état commun
 
-Deux approches possibles:
+Voici deux approches pour gérer une coordonnée `x, y`
 
 <TwoColumns>
 
@@ -986,13 +992,15 @@ const [position, setPos] = //
 </div>
 </TwoColumns>
 
-Les deux approches sont valables. Mais si des variables sont **toujours modifiées ensemble, on devrait les unifier dans une seule variable d'état.** Alors, on ne pourra pas oublier de les modifier ensemble.
+- Les deux approches sont valables
+- Mais si des variables sont toujours modifiées ensemble, on doit les unifier dans **une seule variable d'état**
+  - On ne pourra pas oublier de les modifier ensemble.
 
 ---
 
 ## Exemple d'état unifié
 
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1043,16 +1051,18 @@ body {
 
 </Sandpack>
 
-Un autre exemple d'unification: un tableau ou objet pour stocker les données d'un formulaire où l'utilisateur ajoute des champs de saisie personnalisés.
+- Autres exemples d'unification:
+  - un tableau ou objet pour stocker les données d'un formulaire
 
 ---
 
 ## Attention aux objets dans l'état
 
 <Alert>
-Si la variable d'état est un objet, il faut cloner l'objet au complet.
 
-On ne pourrait faire `setPosition({ x: 100 })`, car on perdrait alors la valeur de y.
+- Si la variable d'état est un objet, ne pas oublier de copier les propriétés.
+- Si seulement `x` est modifié, on serait tenté par: `setPosition({ x: 100 })`,
+- Mais on perdrait alors la valeur de `y`.
 
 </Alert>
 
@@ -1074,9 +1084,7 @@ setX(100);
 
 ## Éliminez les contradictions
 
-Voici un formulaire de la satisfaction d'un séjour. `isSending` et `isSent` sont les variables d'état:
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -1125,15 +1133,15 @@ function sendMessage(text) {
 
 </Sandpack>
 
-Ce code fonctionne. Mais il laisse la porte ouverte aux états impossibles: si on oublie d'appeler `setIsSent` et `setIsSending` ensemble, on pourrait se trouver dans un monde où `isSending` et `isSent` sont simultanément `true`.
-
-Plus le composant est complexe, plus c'est difficile à prévenir.
+- Ce code laisse la porte ouverte aux états impossibles:
+- Si on oublie d'appeler `setIsSent` et `setIsSending` ensemble, alors `isSending` et `isSent` pourraient être simultanément `true`
+- Plus le composant est complexe, plus la contradiction est difficile à prévenir
 
 ---
 
 ## Refactoriser pour éliminer la contradiction
 
-Puisque `isSending` et `isSent` ne doivent jamais être simultanément à `true`, on devrait remplacer l'état par un `status` ayant l'un des 3 états valables : `'typing'` (initial), `'sending'`, et `'sent'`:
+On remplace l'état par un `status` ayant l'une des 3 valeurs : `'typing'` (initial), `'sending'`, et `'sent'`:
 
  <Sandpack s="70">
 
@@ -1187,12 +1195,12 @@ function sendMessage(text) {
 
 <TwoColumns>
 
+On peut ajouter ces constantes pour aider la lecture. (Ce ne sont pas des variables d'état, nul besoin de craindre un état impossible.)
+
 ```jsx
 const isSending = status === 'sending';
 const isSent = status === 'sent';
 ```
-
-On peut ajouter des constantes pour aider la lecture. Ce ne sont pas des variables d'état, nul besoin de craindre un état impossible.
 
 </TwoColumns>
 
@@ -1200,9 +1208,8 @@ On peut ajouter des constantes pour aider la lecture. Ce ne sont pas des variabl
 
 ## Éliminer la redondance
 
-Si on peut calculer une info à partir de **props** ou de **l'état**, cette info ne devrait **PAS** se trouver dans l'état.
-
-Le formulaire suivant fonctionne, mais possède un état redondant.
+- Si on peut calculer une info à partir de **props** ou **d'état**, ça ne devrait **PAS** se trouver dans l'état.
+- Le formulaire suivant fonctionne, mais possède un état redondant.
 
  <Sandpack s="70">
 
@@ -1228,10 +1235,12 @@ export default function Form() {
     <>
       <h2>Let’s check you in</h2>
       <label>
-        First name: <input value={firstName} onChange={handleFirstNameChange} />
+        First name: <br />
+        <input value={firstName} onChange={handleFirstNameChange} />
       </label>
       <label>
-        Last name: <input value={lastName} onChange={handleLastNameChange} />
+        Last name: <br />
+        <input value={lastName} onChange={handleLastNameChange} />
       </label>
       <p>
         Your ticket will be issued to: <b>{fullName}</b>
@@ -1250,13 +1259,13 @@ label {
 
 </Sandpack>
 
-Ce fomulaire a 3 variable d'états: `firstName`, `lastName`, et `fullName`. Mais `fullName` est redondant. On peut obtenir `fullName` en **combinant** `firstName` et `lastName` pendant le rendu. Il faut l'éliminer de l'état.
+- `fullName` est redondant: on peut l'obtenir en **combinant** `firstName` et `lastName` pendant le rendu
 
 ---
 
 ## Exemple avec la redondance éliminée
 
-Le fomulaire précédent a 3 variable d'états: `firstName`, `lastName`, et `fullName`. Mais `fullName` est redondant. On peut obtenir `fullName` en **combinant** `firstName` et `lastName` pendant le rendu.
+- On élimine l'état `fullName` et on remplace par une variable calculée
 
  <Sandpack s="70">
 
@@ -1281,10 +1290,12 @@ export default function Form() {
     <>
       <h2>Let’s check you in</h2>
       <label>
-        First name: <input value={firstName} onChange={handleFirstNameChange} />
+        First name: <br />
+        <input value={firstName} onChange={handleFirstNameChange} />
       </label>
       <label>
-        Last name: <input value={lastName} onChange={handleLastNameChange} />
+        Last name: <br />
+        <input value={lastName} onChange={handleLastNameChange} />
       </label>
       <p>
         Your ticket will be issued to: <b>{fullName}</b>
@@ -1303,7 +1314,7 @@ label {
 
 </Sandpack>
 
-<TwoColumns>
+<TwoColumns style={{gridTemplateColumns:'22em auto'}}>
 
 `fullName` n'est plus une variable d'état. On recalcule la variable à chaque rendu:
 
@@ -1330,32 +1341,35 @@ Ici, la variable d'état `color` est initialisé à la prop `messageColor`.
 
 **Problème :**
 
-Quand le parent pousse un `messageColor` différent (par exemple, de `'red'` à `'blue'`), l'état `color` n'est pas modifié!
-
-L'état n'est initialisé qu'au premier rendu.
+- Quand le parent pousse un `messageColor` différent (ex: de `'red'` à `'blue'`), l'état n'est pas modifié!
+- L'état n'est initialisé qu'au **premier rendu**
 
 ---
 
 ## Éliminier l'état provenant des props
 
-Utilisez la prop plutôt que l'état.
+**Solution :**
 
-On pourrait lui donner un nom plus court avec une constante:
+- Utilisez la prop plutôt que l'état
+
+- On pourrait lui donner un nom plus court avec une constante (un alias):
 
 ```js
 function Message({ messageColor }) {
   const color = messageColor;
 ```
 
-De cette façon, la couleur sera toujours synchronisé à la valeur passée par le parent.
+- De cette façon, la couleur est toujours synchronisée à la valeur passée par le parent.
 
 ---
 
 ## Dupliquer une prop dans l'état pour une valeur initiale
 
-C'est parfois utile de dupliquer une prop dans l'état. Ex: quand il faut ignorer les mises à jour de ce prop.
+- C'est parfois utile de dupliquer une prop dans l'état
 
-Par convention, on ajoute alors au prop le préfixe `initial` ou `default`.
+- Ex: Quand il faut ignorer les mises à jour du prop
+
+- Par convention, on ajoute alors au prop le préfixe `initial` ou `default:
 
 ```js
 function Message({ initialColor }) {
@@ -1370,7 +1384,7 @@ function Message({ initialColor }) {
 
 ## Évitez la duplication
 
-Cette liste de collations permet de choisir un item de cette collection.
+Cette liste de collations permet de choisir un item de cette collection:
 
  <Sandpack s="70">
 
@@ -1378,9 +1392,9 @@ Cette liste de collations permet de choisir un item de cette collection.
 import { useState } from 'react';
 
 const initialItems = [
-  { title: 'pretzels', id: 0 },
-  { title: 'crispy seaweed', id: 1 },
-  { title: 'granola bar', id: 2 },
+  { id: 0, title: 'pretzels' },
+  { id: 1, title: 'crispy seaweed' },
+  { id: 2, title: 'granola bar' },
 ];
 
 export default function Menu() {
@@ -1418,7 +1432,9 @@ button {
 
 </Sandpack>
 
-Présentement, on stocke la sélection en tant qu'objet dans la variable d'état `selectedItem`. Mais c'est problématique. Le contenu de `selectedItem` est le même que celui contenu dans la liste. Nous avons une **duplication d'information.**
+- Présentement, on stocke la sélection en tant qu'objet dans la variable d'état `selectedItem`
+- Problématique: le contenu de `selectedItem` est le même que celui contenu dans la liste
+- Nous avons une **duplication d'information.**
 
 ---
 
@@ -1432,9 +1448,9 @@ Pourquoi est-ce un problème? C'est clair en ajoutant l'édition :
 import { useState } from 'react';
 
 const initialItems = [
-  { title: 'pretzels', id: 0 },
-  { title: 'crispy seaweed', id: 1 },
-  { title: 'granola bar', id: 2 },
+  { id: 0, title: 'pretzels' },
+  { id: 1, title: 'crispy seaweed' },
+  { id: 2, title: 'granola bar' },
 ];
 
 export default function Menu() {
@@ -1492,15 +1508,15 @@ button {
 
 </Sandpack>
 
-Si on clique "Choose" sur un item, et qu'on le modifie par la suite, l'item de la liste est mis à jour, mais l'item sélectionné en bas de la liste demeure le même. Nous avons avons un état dupliqué, quand on met à jour la liste, `selectedItem` demeure inchangé.
-
-On pourrait mettre à jour `selectedItem`, mais c'est mieux d'éliminer la duplication.
+- Nous avons avons un état dupliqué. Si on modifie la liste, `selectedItem` demeure inchangé.
+- Solutions: 1. mettre à jour `selectedItem`, ou 2. éliminer la duplication. (C'est mieux le second)
 
 ---
 
 ## Éliminer la duplication
 
-Dans cet exemple, plutôt que de stocker un objet `selectedItem` (qui duplique un objet de la liste), nous stockons un `selectedId` dans l'état. Nous obtenons le `selectedItem` en utilisant la méthode `.find()` pour trouver le bon item de la liste.
+- Plutôt que de stocker un objet `selectedItem` (qui duplique un objet de la liste), stockons le `selectedId` dans l'état
+- Nous obtenons le `selectedItem` en utilisant la méthode `.find()` pour trouver le bon item de la liste.
 
  <Sandpack s="70">
 
@@ -1508,9 +1524,9 @@ Dans cet exemple, plutôt que de stocker un objet `selectedItem` (qui duplique u
 import { useState } from 'react';
 
 const initialItems = [
-  { title: 'pretzels', id: 0 },
-  { title: 'crispy seaweed', id: 1 },
-  { title: 'granola bar', id: 2 },
+  { id: 0, title: 'pretzels' },
+  { id: 1, title: 'crispy seaweed' },
+  { id: 2, title: 'granola bar' },
 ];
 
 export default function Menu() {
@@ -1570,7 +1586,7 @@ button {
 
 </Sandpack>
 
-(Alternative: utiliser `selectedIndex` plutôt que `selectedId`, pour retrouver l'item par sa position dans la liste.)
+- Alternative: `selectedIndex` plutôt que `selectedId`, pour retrouver l'item par sa position dans la liste
 
 ---
 

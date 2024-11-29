@@ -106,7 +106,9 @@ function GotoPopup() {
       div.className = 'corner-number';
       div.title = (idx + 1).toString() + t('of') + results.length;
       slide.appendChild(div);
-      div.onclick = () => setShow(true);
+      div.onclick = () => {
+        setShow(true);
+      };
     });
     setMaxPages(results.length);
 
@@ -118,6 +120,7 @@ function GotoPopup() {
 
     const focusedPage: HTMLFormElement = document.querySelector(`#${pageRef}`)!;
     if (focusedPage) {
+      alert('focus to');
       focusedPage.scrollIntoView({ behavior: 'instant' });
       focusedPage?.focus();
     } else {
@@ -127,10 +130,9 @@ function GotoPopup() {
 
   //If we've just started re-rendering after starting to show the popup, set the focus.
   useEffect(() => {
-    const article = document.querySelector('article')!;
-    setNum(Math.round(article.scrollLeft / article.clientWidth) + 1);
-
     if (show) {
+      const article = document.querySelector('article')!;
+      setNum(Math.round(article.scrollLeft / article.clientWidth) + 1);
       txtNombre.current!.focus();
       txtNombre.current!.select();
     }
