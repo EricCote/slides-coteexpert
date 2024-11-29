@@ -120,9 +120,8 @@ function GotoPopup() {
 
     const focusedPage: HTMLFormElement = document.querySelector(`#${pageRef}`)!;
     if (focusedPage) {
-      alert('focus to');
       focusedPage.scrollIntoView({ behavior: 'instant' });
-      focusedPage?.focus();
+      focusedPage.focus();
     } else {
       location.hash = '';
     }
@@ -143,7 +142,12 @@ function GotoPopup() {
   }
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      autoFocus={false}
+      restoreFocus={false}
+    >
       <Form onSubmit={GotoPage}>
         <Modal.Header closeButton>
           <Modal.Title>Menu</Modal.Title>
