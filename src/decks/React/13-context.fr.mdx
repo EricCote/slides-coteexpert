@@ -570,13 +570,13 @@ Mais passer des props peut devenir lourd et répétitif quand on doit passer une
 
 <Diagram name="passing_data_lifting_state" height={120} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in purple. The value flows down to each of the two children, both highlighted in purple." >
 
-Lifting state up
+Remonter l'état
 
 </Diagram>
 
 <Diagram name="passing_data_prop_drilling" height={250}  captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.">
 
-Prop drilling
+Forage de props (Prop drilling)
 
 </Diagram>
 
@@ -770,13 +770,13 @@ Le contexte permet au parent de fournir des données dans l'arborescence dessous
 
 <Diagram name="passing_data_context_close" height={100} width={400} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in orange which projects down to the two children, each highlighted in orange." >
 
-Using context in close children
+Contexte et enfants proches
 
 </Diagram>
 
 <Diagram name="passing_data_context_far" height={200} captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.">
 
-Using context in distant children
+Contexte avec enfants distants
 
 </Diagram>
 

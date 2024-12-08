@@ -1328,7 +1328,7 @@ const fullName = firstName + ' ' + lastName;
 
 ## Ne pas recopier les props dans l'état
 
-Un exemple d'état redondant:
+**Problème :**
 
 ```jsx
 function Message({ messageColor }) {
@@ -1337,39 +1337,32 @@ function Message({ messageColor }) {
 }
 ```
 
-Ici, la variable d'état `color` est initialisé à la prop `messageColor`.
-
-**Problème :**
-
+- La variable d'état `color` est initialisé à la prop `messageColor`. C'est redontant.
 - Quand le parent pousse un `messageColor` différent (ex: de `'red'` à `'blue'`), l'état n'est pas modifié!
 - L'état n'est initialisé qu'au **premier rendu**
 
----
-
-## Éliminier l'état provenant des props
+<hr />
 
 **Solution :**
-
-- Utilisez la prop plutôt que l'état
-
-- On pourrait lui donner un nom plus court avec une constante (un alias):
 
 ```js
 function Message({ messageColor }) {
   const color = messageColor;
 ```
 
-- De cette façon, la couleur est toujours synchronisée à la valeur passée par le parent.
+- Utilisez la prop, éliminez l'état
+- On donne un nom plus court avec une constante (un alias)
+- La couleur est toujours synchronisée à la valeur passée par le parent.
 
 ---
 
-## Dupliquer une prop dans l'état pour une valeur initiale
+## Utiliser prop avec l'état pour valeur initiale
 
 - C'est parfois utile de dupliquer une prop dans l'état
 
-- Ex: Quand il faut ignorer les mises à jour du prop
+- Ex: Quand il faut ignorer les mises à jour du prop provenant du parent
 
-- Par convention, on ajoute alors au prop le préfixe `initial` ou `default:
+- Par convention, on ajoute alors au prop le préfixe `initial` ou `default` :
 
 ```js
 function Message({ initialColor }) {
@@ -1590,29 +1583,32 @@ button {
 
 ---
 
-## Après la modification
+## Avant et Après la duplication
 
-L'état dupliqué
+L'état original (avec duplication):
 
-- `items = [{ id: 0, title: 'pretzels'}, ...]`
-- `selectedItem = {id: 0, title: 'pretzels'}`
+```js
+items = [{ id: 0, title: 'pretzels'}, ...]
+selectedItem = {id: 0, title: 'pretzels'}
+```
 
 L'état optimal:
 
-- `items = [{ id: 0, title: 'pretzels'}, ...]`
-- `selectedId = 0`
+```js
+items = [{ id: 0, title: 'pretzels'}, ...]
+selectedId = 0
+```
 
-Il n'y a plus de duplication, on ne garde que l'état essentiel.
-
-Après la modification de l'item sélectionné, le message en bas est mis à jour immédiatement. C'est qu'avec le re-render, la méthode `items.find(...)` trouve l'item modifié.
-
-Inutile de stocker l'objet sélectionné quand **seul l'id sélectionné suffit**. Le reste de l'objet est retrouvé pendant le rendu.
+- Il n'y a plus de duplication, on ne garde que l'état essentiel.
+- Quand on modifie l'item sélectionné, l'affichage est mis à jour à mesure.
+- À chaque re-rendu, la méthode `items.find(...)` trouve l'item courant.
 
 ---
 
-## Éliminer les objets profondémment imbrqués
+## Éliminer les objets profondémment imbriqués
 
-Imaginez une planification de voyage constitué de planètes, continents et pays. On pourrait structurer l'état en utilisant des objets et tableaux imbriqués multi-niveaux:
+- Imaginons une planification de voyage constitué de planètes, continents et pays.
+- On peut structurer l'état en utilisant des objets et tableaux imbriqués multi-niveaux:
 
  <Sandpack s="70">
 
@@ -1911,19 +1907,21 @@ export const initialTravelPlan = {
 
 </Sandpack>
 
-Imaginez qu'on ajoute un bouton pour éliminer un endroit déjà visité. Comment faire? Mettre à jour notre état imbriqué signifie qu'il faut cloner les différents niveaux d'objets touchés par la modification pour générer de nouvelles références. C'est une copie qui affecte la chaine d'imbrication. C'est du code complexe.
+- On veut un bouton pour éliminer un endroit déjà visité. Comment faire?
+- Mettre à jour l'état imbriqué signifie qu'il faut cloner différents niveaux d'objets
+  - Pour générer de nouvelles références et conserver l'immuabilité de l'état
+- C'est du code complexe et récursif
 
 ---
 
 ## Aplatir la structure
 
-Si l'état est complexe à mettre à jour, on peut modifier l'imbrication et rendre la structure **"plate".**
+- Si l'état est complexe à mettre à jour, on modifie l'imbrication pour rendre la structure **"plate"**
+- Remplaçons la structure d'arborescence par un tableau de _place ID_
+- Ça rappelle une base de données relationnelle
+- Avec la structure **"plate" (ou normalisée)**, les mises à jours sont plus simples
 
-Plutôt qu'une structure d'arborescence où chaque place a un tableau de _places_, on pourrait remplacer par un tableau de _place ID_.
-
-Ce genre de structure sans imbrication (plate) fait penser à une base de données relationnelle.
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2215,18 +2213,15 @@ export const initialTravelPlan = {
 
 </Sandpack>
 
-Avec la structure **"plate" (ou normalisée)**, les mises à jours sont plus simples.
-
 ---
 
 ## La mise à jour est simplifiée
 
-Maitenant, pour enlever une place, on n'a besoin que de mettre à jour deux choses:
+- Pour enlever une place, on n'a besoin que de mettre à jour deux choses:
+  1. On clone le _parent_ en retirant l'ID à éliminer du tableau `childIds`
+  2. On clone la _racine_ modifiant le parent avec le 'clone parent' de l'étape 1
 
-- Nous créons un clone du _parent_ qui exclut l'ID à éliminer du tableau `childIds`
-- On créé un clone de l'objet racine qui intègre le clone du parent ci-haut
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -2560,15 +2555,13 @@ button {
 
 </Sandpack>
 
-On peut imbriquer les objets d'état autant qu'on veut, mais aplatir peut résoudre bien des problèmes. Ça rend l'état plus simple à mettre à jour, et ça évite la duplication de parties de nos objets imbriqués.
-
 ---
 
 ## Optimiser la consommation de la mémoire
 
-Idéalement, on élimine les items effacés (et leurs enfants!) de la "table" pour optimiser la consommation de la mémoire.
-
-On utilise Immer pour simplifier les mises à jour.
+- Idéalement, on élimine les items effacés (et leurs enfants!) de la "table"
+- Cela optimise la consommation de la mémoire
+- On utilise Immer pour simplifier les mises à jour
 
  <Sandpack s="70">
 
@@ -2922,13 +2915,17 @@ button {
 
 </Sandpack>
 
-On peut aussi réduire l'imbrication profonde en déplaçant des morceaux de l'état dans des composants enfants. Ça fonctionne bien pour les états éphémères de l'interface. Ex: un item sur le lequel on place le curseur (hover) qui affiche alors une boîte d'explication (tooltip).
+- Pour réduire l'imbrication profonde, on peut déplacer des morceaux dans des composants enfants.
+- Ça fonctionne bien pour les états éphémères de l'interface.
+- Ex: un item sur le lequel on place le curseur (hover) qui affiche une boîte d'explication (tooltip).
 
 ---
 
-## Défi: Réparer la mise à jour
+## Défi 4: Réparer la mise à jour
 
-La composante `Clock` deçoit deux props: `color` et `time`. Quand on sélectionne une nouvelle couleur, la composante `Clock` reçoit une nouvelle prop `color`. Mais la nouvelle couleur ne s'affiche pas. Pourquoi? Réparez.
+- Le composant `Clock` reçoit deux props: `color` et `time`.
+- Quand on sélectionne une nouvelle couleur, `Clock` reçoit une nouvelle prop `color`.
+- Mais la nouvelle couleur ne s'affiche pas. Pourquoi? Réparez.
 
  <Sandpack s="70">
 
@@ -2979,13 +2976,11 @@ export default function App() {
 
 ---
 
-## Défi: Réparer une liste
+## Défi 5: Réparer une liste
 
-Cette liste d'affaires affiche un pied de page qui indique le nombre d'items dans les bagages, et le nombre d'items total.
-
-Il y a un bogue: Si on marque un item "packed" et qu'on le "delete" après, le compteur sera incorrect.
-
-Y aurait-il un état redondant?
+- Le pied de page qui affiche le nombre d'items dans les bagages, et le nombre d'items total.
+- Il y a un bogue: Si on marque un item "packed" et qu'on le "delete" après, le compteur sera incorrect.
+- Y a-t-il un état redondant?
 
  <Sandpack s="70">
 
@@ -3129,37 +3124,38 @@ li {
 
 ---
 
-## Défi : Réparer la sélection qui disparait
+## Défi 6: Réparer la sélection qui disparait
 
-L'état contient une liste de `letters`. Quand on flotte ou focus sur une lettre, elle est mise en évidence en surligné (highlight). C'est stocké dans la variable d'état `highlightedLetter`. On peut aussi ajouter une "star" et enlever avec "unstar" des lettres individuelles.
+- L'état contient une liste de `emails`
+- Quand on flotte ou focus sur un courriel, il est surligné par l'état `highlightedEmail`
+- Problème: quand on clique sur "Star" ou "Unstar", le surlignage disparait un moment, et réapparait dès qu'on déplace le curseur ou le focus
+- Réparez pour que le surlignage ne disparaisse plus
 
-Le code fonctionne, mais avec un un petit problème: si on clique sur "Star" ou "Unstar", le surlignage disparait un moment. Il réapparaît dès qu'on déplace le curseur ou qu'on déplace le focus avec le clavier. Pourquoi?? Réparez pour que le surlignage ne disparaisse plus.
-
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
-import { initialLetters } from './data.js';
-import Letter from './Letter.js';
+import { initialEmails } from './data.js';
+import Email from './Email.js';
 
 export default function MailClient() {
-  const [letters, setLetters] = useState(initialLetters);
-  const [highlightedLetter, setHighlightedLetter] = useState(null);
+  const [emails, setEmails] = useState(initialEmails);
+  const [highlightedEmail, setHighlightedEmail] = useState(null);
 
-  function handleHover(letter) {
-    setHighlightedLetter(letter);
+  function handleHover(email) {
+    setHighlightedEmail(email);
   }
 
   function handleStar(starred) {
-    setLetters(
-      letters.map((letter) => {
-        if (letter.id === starred.id) {
+    setEmails(
+      emails.map((email) => {
+        if (email.id === starred.id) {
           return {
-            ...letter,
-            isStarred: !letter.isStarred,
+            ...email,
+            isStarred: !email.isStarred,
           };
         } else {
-          return letter;
+          return email;
         }
       })
     );
@@ -3169,11 +3165,11 @@ export default function MailClient() {
     <>
       <h2>Inbox</h2>
       <ul>
-        {letters.map((letter) => (
-          <Letter
-            key={letter.id}
-            letter={letter}
-            isHighlighted={letter === highlightedLetter}
+        {emails.map((email) => (
+          <Email
+            key={email.id}
+            email={email}
+            isHighlighted={email === highlightedEmail}
             onHover={handleHover}
             onToggleStar={handleStar}
           />
@@ -3184,38 +3180,33 @@ export default function MailClient() {
 }
 ```
 
-```js src/Letter.js
-export default function Letter({
-  letter,
-  isHighlighted,
-  onHover,
-  onToggleStar,
-}) {
+```js src/Email.js
+export default function Email({ email, isHighlighted, onHover, onToggleStar }) {
   return (
     <li
       className={isHighlighted ? 'highlighted' : ''}
       onFocus={() => {
-        onHover(letter);
+        onHover(email);
       }}
       onPointerMove={() => {
-        onHover(letter);
+        onHover(email);
       }}
     >
       <button
         onClick={() => {
-          onToggleStar(letter);
+          onToggleStar(email);
         }}
       >
-        {letter.isStarred ? 'Unstar' : 'Star'}
+        {email.isStarred ? 'Unstar' : 'Star'}
       </button>
-      {letter.subject}
+      {email.subject}
     </li>
   );
 }
 ```
 
 ```js src/data.js
-export const initialLetters = [
+export const initialEmails = [
   {
     id: 0,
     subject: 'Ready for adventure?',
@@ -3250,11 +3241,14 @@ li {
 
 ---
 
-## Défi: Implanter une séléction multiple
+## Défi 7: Implanter une séléction multiple
 
-Chaque `Letter` possède une prop `isSelected` et un gestionnaire `onToggle` pour basculer. L'état est conservé dans `selectedId` (soit `null` ou un ID), une seule lettre est sélectionnée à la fois.
-
-Changez la structure de l'état pour permettre la sélection multiple. (Quelle serait la structure? réfléchssez avant de coder.) Chaque boite est indépendante des autres. Cliquer un élément sélectionné enlève la sélection. Le pied de page doit afficher le nombre d'éléments.
+- Chaque `email` possède une prop `isSelected` et un gestionnaire `onToggle` pour basculer.
+- L'état est conservé dans `selectedId` (soit `null` ou un ID), un seul courriel est sélectionné à la fois.
+- Changez la structure de l'état pour permettre la sélection multiple.
+- Quelle serait la structure? réfléchissez avant de coder.
+- Chaque boite est indépendante des autres. Cliquer un élément sélectionné enlève la sélection.
+- Le pied de page doit afficher le nombre d'éléments.
 
 <Hint>
   Plutôt que de stocker un ID, on pourrait stocker un tableau ou un
@@ -3266,8 +3260,8 @@ Changez la structure de l'état pour permettre la sélection multiple. (Quelle s
 
 ```js src/App.js
 import { useState } from 'react';
-import { letters } from './data.js';
-import Letter from './Letter.js';
+import { emails } from './data.js';
+import Email from './Email.js';
 
 export default function MailClient() {
   const [selectedId, setSelectedId] = useState(null);
@@ -3284,20 +3278,20 @@ export default function MailClient() {
     <>
       <h2>Inbox</h2>
       <ul>
-        {letters.map((letter) => (
-          <Letter
-            key={letter.id}
-            letter={letter}
+        {emails.map((email) => (
+          <Email
+            key={email.id}
+            email={email}
             isSelected={
               // TODO: allow multiple selection
-              letter.id === selectedId
+              email.id === selectedId
             }
             onToggle={handleToggle}
           />
         ))}
         <hr />
         <p>
-          <b>You selected {selectedCount} letters</b>
+          <b>You selected {selectedCount} emails</b>
         </p>
       </ul>
     </>
@@ -3305,8 +3299,8 @@ export default function MailClient() {
 }
 ```
 
-```js src/Letter.js
-export default function Letter({ letter, onToggle, isSelected }) {
+```js src/Email.js
+export default function Email({ email, onToggle, isSelected }) {
   return (
     <li className={isSelected ? 'selected' : ''}>
       <label>
@@ -3314,10 +3308,10 @@ export default function Letter({ letter, onToggle, isSelected }) {
           type='checkbox'
           checked={isSelected}
           onChange={() => {
-            onToggle(letter.id);
+            onToggle(email.id);
           }}
         />
-        {letter.subject}
+        {email.subject}
       </label>
     </li>
   );
@@ -3325,7 +3319,7 @@ export default function Letter({ letter, onToggle, isSelected }) {
 ```
 
 ```js src/data.js
-export const letters = [
+export const emails = [
   {
     id: 0,
     subject: 'Ready for adventure?',
@@ -3367,11 +3361,11 @@ label {
 
 ## Partager l'état entre les composants
 
-Pour partager l'état entre deux composants,
+Pour partager l'état entre deux composants:
 
 - Enlever l'état local
 - Remonter l'état au parent commun
-- passer cette valeur via les props
+- Passer cette valeur via les props
 
 Ça se nomme _remonter l'état_
 
@@ -3379,13 +3373,13 @@ Pour partager l'état entre deux composants,
 
 ## L'état non-partagé
 
-Voici un exemple d'un composant `Accordion` parent qui affiche deux `Panel`s:
+Voici un exemple d'un composant `Accordion` parent qui affiche deux `Panel`:
 
 - `Accordion`
   - `Panel`
   - `Panel`
 
-Chaque composant `Panel` possède un état booléen `isActive` qui détermine la visibilité.
+Chaque `Panel` possède un état `isActive` déterminant la visibilité:
 
  <Sandpack s="70">
 
@@ -3448,13 +3442,13 @@ Les deux états sont indépendants. Cliquer l'un n'affecte pas l'autre.
 <TwoColumns>
 <Diagram name="sharing_state_child" height={367} width={477} alt="Diagram showing a tree of three components, one parent labeled Accordion and two children labeled Panel. Both Panel components contain isActive with value false.">
 
-Initially, each `Panel`'s `isActive` state is `false`, so they both appear collapsed
+Initialement, les 2 états sont faux
 
 </Diagram>
 
 <Diagram name="sharing_state_child_clicked" height={367} width={480} alt="The same diagram as the previous, with the isActive of the first child Panel component highlighted indicating a click with the isActive value set to true. The second Panel component still contains value false." >
 
-Clicking either `Panel`'s button will only update that `Panel`'s `isActive` state alone
+Cliquer un bouton met à jour le composant
 
 </Diagram>
 </TwoColumns>
@@ -3463,21 +3457,17 @@ Clicking either `Panel`'s button will only update that `Panel`'s `isActive` stat
 
 ## Un seul panel visible à la fois
 
-Pour n'avoir qu'un seul panel visible à la fois, que faire? (Sélectionner un second panel enlève la sélection précédente.)
+- Sélectionner un second panel devrait enlever la sélection précédente
+- Pour coordonner les 2 panels, il faut **"remonter l'état"** vers un composant parent
+- Le composant `Accordion` devrait gérer l'état pour n'avoir qu'un seul `Panel` visible:
 
-Pour coordonner les 2 panels, il faut **"remonter l'état"** vers un composant parent:
-
-1. **Enlever** l'état des composants enfants.
-2. **Passer** des données du parent commun.
+1. **Enlever** l'état des composants enfants
+2. **Passer** des données du parent commun
 3. **Ajouter** l'état au parent commun et passer cette valeur et les gestionnaires d'états vers les enfants
-
-La composante `Accordion` peut gérer l'état pour n'avoir qu'un seul `Panel` visible.
 
 ---
 
 ## Étape 1: Enlever l'état des composants enfants
-
-Dans les `Panel`s, l'état `isActive` devient la prop `isActive`.
 
 On remplace l'état du `Panel`:
 
@@ -3487,7 +3477,7 @@ const [isActive, setIsActive] = useState(false);
 
 Par une prop:
 
-```js
+```js [[0, 0, "isActive"]]
 function Panel({ title, children, isActive }) {
 ```
 
@@ -3505,13 +3495,14 @@ Pour remonter l'état, il faut trouver le parent commun des composants enfants �
   - `Panel`
   - `Panel`
 
-Dans cet exemple, c'est la composante `Accordion`.
+Dans cet exemple, c'est le composant `Accordion`
 
 ---
 
 ## Pousser des données statiques
 
-On peut passer, du composant `Accordion`, des données statiques pour `isActive` (par exemple: `true`) vers les 2 `Panels`:
+- On peut passer, du composant `Accordion`, des données statiques pour `isActive` (par exemple: `true`) vers les 2 `Panels`
+- Modifiez les valeurs de `isActive` dans `Accordion` et validez l'affichage sur l'écran:
 
  <Sandpack s="70">
 
@@ -3564,15 +3555,13 @@ p {
 
 </Sandpack>
 
-Modifiez les valeurs de `isActive` dans `Accordion` et validez l'affichage sur l'écran.
-
 ---
 
 ## Étape 3: Ajouter l'état au parent commun
 
-Remonter l'état peut modifier la structure des données.
-
-Dans ce cas, il n'y a qu'un seul paneau de visible. Plutôt qu'une valeur booléene, un nombre pourrait stocker l'index (la position) du paneau visible.
+- Remonter l'état peut modifier la structure des données.
+- Dans cet exemple, il n'y a qu'un seul paneau de visible
+- On remplace un booléen par un nombre qui stocke l'index (la position) du paneau visible.
 
 ```js
 const [activeIndex, setActiveIndex] = useState(0);
@@ -3582,7 +3571,9 @@ const [activeIndex, setActiveIndex] = useState(0);
 
 ## Gestionnaires d'événements sont poussés
 
-Cliquer le bouton "Show" dans un `Panel` modifie l'index actif d'`Accordion`. Un `Panel` ne peut modifier `activeIndex` directement, car cet état se trouve dans `Accordion`. La composante `Accordion` doit _explicitement permettre_ la modification de l'état en passant un [gestionnaire d'état en tant que prop](/learn/responding-to-events#passing-event-handlers-as-props):
+- Cliquer le bouton "Show" dans un `Panel` modifie l'index actif d'`Accordion`.
+- Le `Panel` ne peut modifier `activeIndex` directement, car cet état se trouve dans `Accordion`.
+- `Accordion` doit _explicitement permettre_ la modification de l'état en passant un gestionnaire d'état en tant que prop
 
 ```js
 <>
@@ -3601,7 +3592,7 @@ Cliquer le bouton "Show" dans un `Panel` modifie l'index actif d'`Accordion`. Un
 
 Le `<button>` dans le `Panel` utilise la prop `onShow` pour gérer le click:
 
- <Sandpack s="70">
+<Sandpack s="70">
 
 ```js
 import { useState } from 'react';
@@ -3662,19 +3653,18 @@ p {
 ## Diagramme de l'état remonté
 
 - Utiliser l'index actif (plutôt que des valeurs booléenes) assure qu'un seul panneau est affiché à la fois.
-
-- Passer le gestonnaire d'événements aux enfants permet à ces derniers de modifier l'état du parent.
+- Passer le gestionnaire d'événements aux enfants permet à ces derniers de modifier l'état du parent.
 
 <TwoColumns>
 <Diagram name="sharing_state_parent" height={385} width={487} alt="Diagram showing a tree of three components, one parent labeled Accordion and two children labeled Panel. Accordion contains an activeIndex value of zero which turns into isActive value of true passed to the first Panel, and isActive value of false passed to the second Panel." >
 
-Initially, `Accordion`'s `activeIndex` is `0`, so the first `Panel` receives `isActive = true`
+Par défaut, l'état `activeIndex` est `0`, donc le premier `Panel` reçoit `isActive = true`
 
 </Diagram>
 
 <Diagram name="sharing_state_parent_clicked" height={385} width={521} alt="The same diagram as the previous, with the activeIndex value of the parent Accordion component highlighted indicating a click with the value changed to one. The flow to both of the children Panel components is also highlighted, and the isActive value passed to each child is set to the opposite: false for the first Panel and true for the second one." >
 
-When `Accordion`'s `activeIndex` state changes to `1`, the second `Panel` receives `isActive = true` instead
+On change l'état à `1`, le second `Panel` reçoit `isActive = true`
 
 </Diagram>
 </TwoColumns >
@@ -3684,30 +3674,45 @@ When `Accordion`'s `activeIndex` state changes to `1`, the second `Panel` receiv
 ## Composants controllés vs. composants non-controllés (uncontrolled)
 
 <Alert>
- Un composant est **"non-controllé"** quand il se gère lui-même, via un état interne. (Par exemple, le composant `Panel` original, avec son état booléen `isActive`, est non-controllé. Le parent ne peut influencer si le `Panel` est affiché ou non.)
 
-Un composant est **"controllé"** quand l'information importante est gérée par un parent, via des props, plutôt que via son état interne. C'est le parent qui gère le comportement global. (ex: le composant `Panel` final, avec la prop `isActive` controllée par le composant `Accordion`)
+- Un composant est **"non-controllé"** quand il se gère lui-même, via un état interne
+- Le parent ne peut influencer si le `Panel` est affiché ou non
+- Ex: le composant `Panel` original, avec son **état** booléen `isActive`, est non-controllé
+- Un composant est **"controllé"** quand l'information importante est gérée par un parent, via des props (plutôt que son état interne)
+- C'est le parent qui gère le comportement global
+- Ex: le composant `Panel` final, controllé par le composant `Accordion`, via la **prop** `isActive`
 
 </Alert>
 
 <hr />
 
-| Composants non-controllés                   | Composants controllés                                             |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| - Plus simples                              | - Nécessitent l'état dans un parent                               |
-| - Moins de props à passer                   | - Doivent utiliser des props                                      |
-| - Ne peuvent se coordonner entre composants | - Flexibles, car le parent peut coordorner les composants enfants |
+import './table-rows.css';
+
+<div className="my-tbl" >
+
+| Composants non-controllés            | Composants controllés                                             |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| - Plus simples                       | - Nécessitent l'état dans un parent                               |
+| - Moins de props à passer            | - Doivent utiliser des props                                      |
+| - Ne peuvent se coordonner entre eux | - Flexibles, car le parent peut coordonner les composants enfants |
+
+</div>
 
 ---
 
 ## La distinction controllée et non-controllée est floue
 
-- Les termes "controllés" et "non-controllés" ne sont pas des termes techniques stricts.
-- Plusieurs composants mélangent les deux approches, avec de l'état interne, ainsi que des props.
-- Ces termes permettent de décrire comment les composants sont conçus et les capacités qu'ils offrent.
-  <hr />
-- Quand on écrit un composant, il faut réfléchir: quelle information devrait être controllée (via les props) et quelle information devrait être non-controllée (via l'état)?
-- Il est toujours possible de changer d'idée plus tard, en refactorisant les composants.
+- Les termes "controllés" et "non-controllés" ne sont pas des termes techniques stricts
+- Plusieurs composants mélangent les deux approches, avec de **l'état** interne, ainsi que des **props**
+- Ces termes permettent de décrire comment les composants sont conçus et les capacités qu'ils offrent
+
+<hr />
+<hr />
+
+- Quand on écrit un composant, il faut réfléchir:
+  - Quelle information devrait être controllée (via les props)?
+  - Quelle information devrait être non-controllée (via l'état)?
+- Il est toujours possible de changer d'idée plus tard, en refactorisant les composants
 
 ---
 
@@ -3716,18 +3721,17 @@ Un composant est **"controllé"** quand l'information importante est gérée par
 L'état peut :
 
 - soit être stocké près des composants en bas de l'arborescence (ex: un champ de saisie "input")
-- soit être stocké en haut de l'arborescence (ex: le routage client).
+- soit être stocké en haut de l'arborescence (ex: le routage client)
 
-Pour chaque état unique, il faut **choisir** quel composant le stocke. C'est le principe de la ["source de vérité unique".](https://en.wikipedia.org/wiki/Single_source_of_truth)
+Pour chaque état unique, il faut **choisir** quel composant le stocke. C'est le principe de la ["source de vérité unique"](https://en.wikipedia.org/wiki/Single_source_of_truth)
 
-- Ça ne signifie pas que tout l'état est stocké à un seul endroit.
-- Pour chaque morceau d'état, il y a un composant spécifique qui stocke l'information.
-- On déconseille de dupliquer l'état partagé entre les composants,
-- On recommande plutôt de remonter l'état vers un parent commun, et passer l'info vers les enfants via des props.
+- Ça ne signifie **pas** que tout l'état soit stocké à un seul endroit
+- Pour chaque morceau d'état, il y a un composant spécifique qui stocke l'information
+- On déconseille de dupliquer l'état partagé entre les composants
+- On recommande plutôt de remonter l'état vers un parent commun, et passer l'info vers les enfants via des props
+- L'application évolue: l'état se déplace à mesure que l'on complète la solution
 
-L'application évolue à mesure que l'on programme. L'état se déplacera à mesure que l'on complète la solution.
-
-Consultez [Thinking in React.](https://react.dev/learn/thinking-in-react)
+Consultez [Thinking in React](https://react.dev/learn/thinking-in-react)
 
 ---
 
@@ -3736,15 +3740,16 @@ Consultez [Thinking in React.](https://react.dev/learn/thinking-in-react)
 - Pour coordoner deux composants, déplacez leur état vers un parent commun
 - Passez l'info du parent aux enfants via les props
 - Passez des gestionnaires d'événement pour que les enfants puissent modifier l'état du parent
+  <hr />
 - Il y deux approches aux composants:
   - Composants controllés (gérés par des props)
   - Composants non-controllés (gérés par l'état)
 
 ---
 
-## Défi: Inputs synchronisés
+## Défi 8: Champs synchronisés
 
-Ces deux champs de saisis (inputs) sont indépendants. Il faudrait qu'ils soient synchronisés (modifier l'un devrait modifier l'autre) .
+Ces deux champs de saisie (inputs) sont indépendants. Il faut qu'ils soient synchronisés (modifier l'un devrait modifier l'autre) .
 
 <Hint> Il faudra remonter l'état dans le parent. </Hint>
 
@@ -3790,15 +3795,16 @@ label {
 
 ---
 
-## Défi: Filtrer une liste
+## Défi 9: Filtrer une liste
 
-Dans cet exemple, le `SearchBar` a un état `query` controllant le champ de saisie. Le composant parent `FilterableList` affiche une `List` d'items, mais ignore le `query`.
-
-Avec la fonction `filterItems(foods, query)`, filtrez la liste d'après la requête `query`. Pour tester, validez que taper "s" va filtrer "Sushi", "Shish kebab", and "Dim sum".
+- Dans cet exemple, le `SearchBar` a un état `query` controllant le champ de saisie
+- Le composant parent `FilterableList` affiche une `List` d'items, mais ignore le `query`
+- Il faut filtrer la liste d'après la requête `query`, avec la fonction `filterItems(foods, query)`
+- Pour tester, validez que taper "s" affiche: "Sushi", "Shish kebab", and "Dim sum"
 
 <Hint>
-  Il faudra remonter `query` et `handleChange`. Notez que `filterItems` est déjà
-  correctement écrit.
+  Il faudra remonter `query` et `handleChange`. Notons que `filterItems` est
+  déjà correctement écrit.
 </Hint>
 
  <Sandpack s="70">
@@ -3895,37 +3901,26 @@ export const foods = [
 
 ## Préserver et réinitialiser l'état
 
-L'état est isolé entre les composants.
-
-React conserve l'état de chaque composant d'après sa position dans l'arborescence.
-
-Il est possible de controller quand conserver l'état et quand la réinitialiser pour chaque re-rendu.
-
----
-
-## Contenu
-
-- Comment React conserve et réinitialise l'état
-- Comment forcer React à réinitialiser son état
-- Comment la conservation de l'état est affecté par la clé et le type.
+- L'état est isolé entre les composants
+- React conserve l'état de chaque composant d'après sa position dans l'arborescence
+- Il est possible de controller quand conserver l'état et quand la réinitialiser pour chaque re-rendu
 
 ---
 
 ## L'état est lié à une position dans l'arborescence du rendu
 
-React génère une arborescence du rendu pour la structure des composants.
-
-Quand un composant possède un état, on pourrait croire que cet état est stocké dans le composant.
-
-Mais en fait, l'état est stocké par React.
-
-React associe chaque état avec son composant dans l'arborescence, dépendant de sa position.
+- React génère une arborescence du rendu pour la structure des composants
+- Quand un composant possède un état, on pourrait croire que cet état est stocké par le composant
+- Mais en fait, l'état est stocké par React
+- React associe chaque état avec son composant dans l'arborescence, dépendant de sa position.
 
 ---
 
-## Exemple
+## État et arborescence
 
-Dans cet exemple, il n'y a qu'une seule balise JSX `<Counter />`, mais la composante est rendue dans deux endroits différents de l'arborescence. Il y a donc deux états stockés.
+- Dans cet exemple, il n'y a qu'une seule balise JSX `<Counter />`, rendue dans deux endroits de l'arborescence
+- On pourrait croire qu'il n'y a qu'un état commun
+- Mais il y a deux états stockés
 
  <Sandpack s="70">
 
@@ -3995,19 +3990,19 @@ Voici l'arborescence:
 
 <Diagram name="preserving_state_tree" height={248} width={395} alt="Diagram of a tree of React components. The root node is labeled 'div' and has two children. Each of the children are labeled 'Counter' and both contain a state bubble labeled 'count' with value 0.">
 
-React tree
+Arborescence React
 
 </Diagram>
 
-Ce sont deux compteurs indépendants, car chacun est rendu à sa propre position dans l'arborescence.
-
-Chaque composant conserve son propre état isolé. Par exemple, chaque `Counter` possède son propre état `score` et `hover`.
+- Deux compteurs indépendants
+- Chacun est rendu à sa propre position dans l'arborescence
+- Chaque `Counter` possède son propre état `score` et `hover` isolé.
 
 ---
 
 ## L'état des composants est isolé
 
-Cliquez les deux compteurs, ils ne s'affectent pas l'un l'autre.
+- Cliquez les deux compteurs, ils ne s'affectent pas l'un l'autre.
 
  <Sandpack s="70">
 
@@ -4067,15 +4062,16 @@ function Counter() {
 
 ## Explications
 
-Quand un `Counter` est mis à jour, seul son état est affecté.
+Quand un `Counter` est mis à jour, son état est affecté.
 
 <Diagram name="preserving_state_increment" height={248} width={441} alt="Diagram of a tree of React components. The root node is labeled 'div' and has two children. The left child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0. The right child is labeled 'Counter' and contains a state bubble labeled 'count' with value 1. The state bubble of the right child is highlighted in yellow to indicate its value has updated.">
 
-Updating state
+Mettre à jour l'état
 
 </Diagram>
 
-React conserve l'état tant que la composante est générée à la même position dans l'arborescence. Si un composant n'est plus rendu, l'état est éliminé.
+- React conserve l'état tant que la composante est générée à la même position dans l'arborescence
+- Si un composant n'est plus rendu, l'état est éliminé.
 
 ---
 
@@ -4151,7 +4147,8 @@ label {
 
 </Sandpack>
 
-Quand qu'on arrête le rendu du second compteur, son état disparait. Dès que que React enlève un composant, il enlève son état.
+- Quand qu'on arrête le rendu du second compteur, son état disparait.
+- Dès que que React élimine un composant, il élimine aussi son état.
 
 ---
 
@@ -4161,21 +4158,23 @@ Quand qu'on arrête le rendu du second compteur, son état disparait. Dès que q
 <div>
 <Diagram name="preserving_state_remove_component" height={253} width={422} alt="Diagram of a tree of React components. The root node is labeled 'div' and has two children. The left child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0. The right child is missing, and in its place is a yellow 'poof' image, highlighting the component being deleted from the tree.">
 
-Deleting a component
+Éliminer un composant
 
 </Diagram>
 
-React conserve l'état d'un composant tant qu'il est rendu dans l'arborescence. Dès qu'il est enlevé (ou déplacé ailleurs), React perd l'état associé.
+- React conserve l'état du composant tant qu'il est rendu dans l'arborescence
+- Dès qu'il est enlevé (ou déplacé ailleurs), l'état associé est éliminé
 
 </div>
 <div>
 <Diagram name="preserving_state_add_component" height={258} width={500} alt="Diagram of a tree of React components. The root node is labeled 'div' and has two children. The left child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0. The right child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0. The entire right child node is highlighted in yellow, indicating that it was just added to the tree.">
 
-Adding a component
+Ajouter un composant
 
 </Diagram>
 
-Quand on coche "Render the second counter", un nouveau `Counter` est créé, et son état est initialisé (`score = 0`).
+- Quand on coche "Render the second counter", un nouveau `Counter` est créé
+- Son état est initialisé (`score = 0`).
 
 </div>
 </TwoColumns>
@@ -4184,7 +4183,7 @@ Quand on coche "Render the second counter", un nouveau `Counter` est créé, et 
 
 ## Un même composant à la même position conserve l'état
 
-Dans cet exemple, il y a deux balises `Counter`:
+- Dans cet exemple, il y a deux balises `Counter`:
 
  <Sandpack s="70">
 
@@ -4263,25 +4262,28 @@ label {
 
 </Sandpack>
 
-Quand on bascule le checkbox, le compteur n'est pas réinitialisé. Que `isFancy` soit à `true` ou `false`, c'est toujours un `<Counter>` qui est le premier enfant du `div`.
+- Quand on bascule le checkbox, le compteur n'est pas réinitialisé
+- Que `isFancy` soit `true` ou `false`, c'est toujours un `<Counter>` qui est le premier enfant du `div`
 
 ---
 
-## Diagramme de la conservation
+## Diagramme de la conservation de l'état
 
 <Diagram name="preserving_state_same_component" height={461} width={600} alt="Diagram with two sections separated by an arrow transitioning between them. Each section contains a layout of components with a parent labeled 'App' containing a state bubble labeled isFancy. This component has one child labeled 'div', which leads to a prop bubble containing isFancy (highlighted in purple) passed down to the only child. The last child is labeled 'Counter' and contains a state bubble with label 'count' and value 3 in both diagrams. In the left section of the diagram, nothing is highlighted and the isFancy parent state value is false. In the right section of the diagram, the isFancy parent state value has changed to true and it is highlighted in yellow, and so is the props bubble below, which has also changed its isFancy value to true.">
 
-Updating the `App` state does not reset the `Counter` because `Counter` stays in the same position
+Mettre à jour l'état `App` ne réinitialise pas `Counter`, car `Counter` reste à la même position
 
 </Diagram>
 
-C'est le même composant à la même position. Du point de vue de React, c'est donc le même compteur.
+- C'est le même composant à la même position
+- Du point de vue de React, c'est donc le même compteur
 
 ---
 
 ## Attention
 
-C'est la position dans l'arborescence qui importe pour React, pas la position dans le JSX. Ce composant a deux `return` avec des `<Counter>` différents.
+- C'est la position dans l'arborescence qui importe pour React, pas la position dans le JSX
+- Ce composant a deux `return` avec des `<Counter>` différents:
 
  <Sandpack s="70">
 
@@ -4377,13 +4379,14 @@ label {
 
 </Sandpack>
 
-Parce que les deux `<Counter>` sont rendus à la même position, react conserve le state. React ne saisi pas que ces blocks ont été générés dans des blocs `if` séparés.
+- Les deux `<Counter>` sont rendus à la même position, donc React conserve l'état
+- React ne saisit pas que ces blocks ont été générés dans des blocs `if` séparés
 
 ---
 
 ## Différents composants à la même position réinitialisent l'état
 
-Dans cet exemple, cliquer la boîte d'option remplace le `<Counter>` par un `<p>`:
+- Dans cet exemple, cliquer la boîte d'option remplace le `<Counter>` par un `<p>`:
 
  <Sandpack s="70">
 
@@ -4454,7 +4457,9 @@ label {
 
 </Sandpack>
 
-Ici, on bascule entre différents types de composants à la même position. Le premier enfant du `<div>` passe de `<Counter>` à `<p>`, ce qui entraine la perte de l'état du compteur.
+- On bascule entre différents types de composants à la même position
+- Le premier enfant du `<div>` passe de `<Counter>` à `<p>`,
+- On perd l'état du compteur.
 
 ---
 
@@ -4462,13 +4467,13 @@ Ici, on bascule entre différents types de composants à la même position. Le p
 
 <Diagram name="preserving_state_diff_pt1" height={250} width={690} alt="Diagram with three sections, with an arrow transitioning each section in between. The first section contains a React component labeled 'div' with a single child labeled 'Counter' containing a state bubble labeled 'count' with value 3. The middle section has the same 'div' parent, but the child component has now been deleted, indicated by a yellow 'proof' image. The third section has the same 'div' parent again, now with a new child labeled 'p', highlighted in yellow.">
 
-Quand `Counter` change vers `p`, le `Counter` est effacé et `p` est ajouté
+Quand `Counter` change vers `p`, le `Counter` est enlevé et `p` est ajouté
 
 </Diagram>
 
 <Diagram name="preserving_state_diff_pt2" height={290} width={753} alt="Diagram with three sections, with an arrow transitioning each section in between. The first section contains a React component labeled 'p'. The middle section has the same 'div' parent, but the child component has now been deleted, indicated by a yellow 'proof' image. The third section has the same 'div' parent again, now with a new child labeled 'Counter' containing a state bubble labeled 'count' with value 0, highlighted in yellow.">
 
-When switching back, the `p` is deleted and the `Counter` is added
+Quand on revient, le `p` est enlevé et `Counter` est ajouté
 
 </Diagram>
 
@@ -4476,7 +4481,8 @@ When switching back, the `p` is deleted and the `Counter` is added
 
 ## Regénérer la sous-arborescence
 
-Quand on génère le rendu d'un composant différent à la même position, cela réinitialise aussi tous les enfants de la sous-arborescence
+- Quand on génère le rendu d'un composant différent à la même position, ça réinitialise le composant
+- Cela réinitialise aussi TOUS les enfants de la sous-arborescence
 
  <Sandpack s="70">
 
@@ -4563,7 +4569,8 @@ label {
 
 </Sandpack>
 
-L'état de `Counter` est réinitialisé quand on clique la case à cocher. Quand on change du `div` à une `section`, les enfants de l'arborescence en dessous sont détruits aussi.
+- Quand on bascule du `div` à une `section`, les enfants de l'arborescence en dessous sont détruits aussi
+- Incluant `Counter` et son état
 
 ---
 
@@ -4577,17 +4584,18 @@ L'état de `Counter` est réinitialisé quand on clique la case à cocher. Quand
 "Diagram with three sections, with an arrow transitioning each section in between. The first section contains a React component labeled 'div' with a single child labeled 'section', which has a single child labeled 'Counter' containing a state bubble labeled 'count' with value 3. The middle section has the same 'div' parent, but the child components have now been deleted, indicated by a yellow 'proof' image. The third section has the same 'div' parent again, now with a new child labeled 'div', highlighted in yellow, also with a new child labeled 'Counter' containing a state bubble labeled 'count' with value 0, all highlighted in yellow."
 >
 
-When `section` changes to `div`, the `section` is deleted and the new `div` is added
+`section` change vers `div`, `section` est enlevé et `div` est ajouté
 
 </Diagram>
 
 <Diagram name="preserving_state_diff_same_pt2" height={280} width={'100%'} alt="Diagram with three sections, with an arrow transitioning each section in between. The first section contains a React component labeled 'div' with a single child labeled 'div', which has a single child labeled 'Counter' containing a state bubble labeled 'count' with value 0. The middle section has the same 'div' parent, but the child components have now been deleted, indicated by a yellow 'proof' image. The third section has the same 'div' parent again, now with a new child labeled 'section', highlighted in yellow, also with a new child labeled 'Counter' containing a state bubble labeled 'count' with value 0, all highlighted in yellow.">
 
-When switching back, the `div` is deleted and the new `section` is added
+Quand on revient, `div` est enlevé et `section` est ajouté
 
 </Diagram>
 </div>
-En général, **pour conserver les états entre les re-rendus, la structure de l'arboresence doit correspondre** d'un rendu à l'autre. Si la structure est différente, l'état est perdu quand React détruit un composant de l'arborescence
+- Pour **conserver les états** entre les re-rendus, la **structure** de l'arboresence doit **correspondre** d'un rendu à l'autre
+- Si la structure est différente, l'état est perdu quand React détruit un composant de l'arborescence
 
 </TwoColumns>
 
@@ -4595,7 +4603,7 @@ En général, **pour conserver les états entre les re-rendus, la structure de l
 
 ## Ne pas imbriquer des composants
 
-Ici, le composant `MyTextField` est défini _dans_ `MyComponent`:
+**Mauvaise pratique:** le composant `MyTextField` est défini _dans_ `MyComponent`:
 
  <Sandpack s="70">
 
@@ -4628,16 +4636,18 @@ export default function MyComponent() {
 
 </Sandpack>
 
-Chaque fois qu'on clique le bouton, la valeur du champ est perdue. C'est qu'une nouvelle fonction `MyTextField` est créée à chaque rendu de `MyComponent`. Parce que c'est un nouveau composant à la même position, on perd l'état. Ceci entraine des bogues et des problèmes de performances.
-
-Pour éviter ce problème, **déclarez vos composants au top niveau, sans imbriquer dans des fonctions**.
+- C'est qu'une nouvelle fonction `MyTextField` est recréée à chaque rendu de `MyComponent`
+- Parce que c'est un nouveau composant à la même position, on perd l'état
+- Ceci entraine des bogues et des problèmes de performances:
+  - Chaque fois qu'on clique le bouton, la valeur du champ est perdue
+- Pour éviter ce problème, **déclarez vos composants au top niveau, sans les imbriquer** dans des fonctions
 
 ---
 
 ## Réinitialiser l'état à la même position
 
-React conserve l'état d'un composant lorsqu'il reste à la même position. Que faire si on veut réinitaliser l'état?
-Considérons une app qui conserve le pointage:
+- Que faire si on veut réinitaliser l'état en gardant la position?
+- Ici, la réinitialisation ne fonctionne pas:
 
  <Sandpack s="70">
 
@@ -4705,9 +4715,11 @@ h1 {
 
 </Sandpack>
 
-Présentement, quand on change de joueur, le pointage est conservé. Les deux `Counter` apparaissent à la même position, donc React considère que c'est le même `Counter`, avec une prop `person` différente.
+- Quand on change de joueur, le pointage est conservé
+- Ces deux `Counter` apparaissent à la même position
+- React considère que c'est le même `Counter`, avec une prop `person` modifiée.
 
-Mais ça ne devrait pas être le cas. Il y a deux joueurs, donc deux pointages différents.
+Mais ça ne devrait pas être le cas. Il y a deux joueurs, on veut deux pointages différents.
 
 ---
 
@@ -4722,7 +4734,7 @@ Il y a deux approches pour réinitialiser l'état entre les deux joueurs:
 
 ## Approche 1: Afficher les composants dans des positions différentes
 
-Si on désire que les 2 `Counter` soient indépendants, on pourrait faire le rendu dans deux position différentes:
+- Pour que les `Counter` soient indépendants, faire le rendu dans deux position différentes:
 
  <Sandpack s="70">
 
@@ -4791,8 +4803,10 @@ h1 {
 
 </Sandpack>
 
-- Au départ, `isPlayerA` est `true`. La première position contient `Counter`, et la seconde est vide.
-- Quand on clique "Next player", la première position est vidée, et on ajoute un `Counter` à la seconde position.
+- Au départ, `isPlayerA` est `true`
+- La première position contient `Counter`, et la seconde est vide (false).
+- On clique "Next player", `isPlayerA` est `false`
+- La première position est vidée (false), et on génère un `Counter` à la seconde position.
 
 ---
 
@@ -4802,49 +4816,52 @@ h1 {
 
 <Diagram name="preserving_state_diff_position_p1" height={250} width={350} alt="Diagram with a tree of React components. The parent is labeled 'Scoreboard' with a state bubble labeled isPlayerA with value 'true'. The only child, arranged to the left, is labeled Counter with a state bubble labeled 'count' and value 0. All of the left child is highlighted in yellow, indicating it was added.">
 
-Initial state
+État initial
 
 </Diagram>
 
 <Diagram name="preserving_state_diff_position_p2" height={250} width={350} alt="Diagram with a tree of React components. The parent is labeled 'Scoreboard' with a state bubble labeled isPlayerA with value 'false'. The state bubble is highlighted in yellow, indicating that it has changed. The left child is replaced with a yellow 'poof' image indicating that it has been deleted and there is a new child on the right, highlighted in yellow indicating that it was added. The new child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0.">
 
-Clicking "next"
+Cliquer "Next"
 
 </Diagram>
 
 <Diagram name="preserving_state_diff_position_p3" height={250} width={350} alt="Diagram with a tree of React components. The parent is labeled 'Scoreboard' with a state bubble labeled isPlayerA with value 'true'. The state bubble is highlighted in yellow, indicating that it has changed. There is a new child on the left, highlighted in yellow indicating that it was added. The new child is labeled 'Counter' and contains a state bubble labeled 'count' with value 0. The right child is replaced with a yellow 'poof' image indicating that it has been deleted.">
 
-Clicking "next" again
+Cliquer "next" de nouveau
 
 </Diagram>
 
 </aside >
 
-Chaque état du `Counter` se fait détruire chaque fois qu'il est retiré. C'est pourquoi cela réinitialise chaque fois que l'on clique le bouton,
-
-Cette solution est pratique quand on a quelques composants indépendants à afficher.
+- L'état du `Counter` est enlevé quand le composant n'est plus rendu
+- Réinitialisé chaque fois que l'on clique le bouton
+- Solution pratique pour **quelques** composants indépendants à afficher
 
 ---
 
 ### Approche 2: Réinitialiser l'état avec une `key`
 
-Les clés (keys) sont utiles pour le rendu de listes. Mais les clés ne sont pas seulement pour les listes. On peut utiliser des clés pour que React distingue entre les composants.
+- Les clés (keys) sont utiles pour le rendu de listes... Mais pas seulement pour les listes
+- On peut utiliser des clés pour que React distingue entre les composants
 
 <Alert>
-  Par défaut, React utilise le positionnement pour distinguer entre les composants. Mais les clés permettent de distinguer par le `key` plutôt que le positionnment. 
-  
-  Ça permet de gérer le changement d'ordre, l'insertion ou la suppression d'items dans une liste. React se fie sur la clé plutôt que la position quand `key` est spécifié.
+
+- Par défaut, React utilise le positionnement pour distinguer entre les composants
+- Les clés permettent de distinguer par le `key` plutôt que le positionnment
+- `key` permet de gérer le tri, l'insertion ou la suppression d'items dans une liste
+- React se fie sur la clé plutôt que la position quand `key` est spécifié
 
 </Alert>
 
-Dans notre app, plutôt que de distinguer entre le
-Counter de la première position et de la seconde position, on peut maintenant spécifier le counter dans la clé. Par exemple, la clé de _Justin_.
+- On ne veut plus distinguer entre le `Counter` de la première position et de la seconde position
+- On veut plutôt distinguer entre le `Counter` de la clé "`Taylor`" ou de la clé "`Sarah`"
 
 ---
 
 ## Exemple avec `key`
 
-Dans cet exemple, les deux `<Counter />` ne partagent pas d'état, même s'ils ont la même position:
+Les deux `<Counter />` ne partagent plus d'état, même s'ils ont la même position:
 
  <Sandpack s="70">
 
@@ -4932,24 +4949,24 @@ Basculer entre les joueurs ne conserve pas l'état, car la clé `key` est diffé
 }
 ```
 
-Spécifier une clé indique à React d'utiliser la clé comme une partie de la position du composant. Quand la clé change, c'est comme une nouvelle position, et React créé un nouvel état (et perd l'ancien état du composant détruit).
-
-Les clés n'ont pas besoin d'être globalement uniques. Elles doivent seulement être unique **_sous le parent_.**
+- Spécifier une clé indique à React d'utiliser la clé comme une partie de la position du composant
+- Quand la clé change, c'est comme une nouvelle position: React créé un nouvel état (on perd l'ancien)
+- Les clés n'ont pas besoin d'être globalement uniques
+- Elles doivent seulement être unique **_sous le parent_**
 
 ---
 
 ## Réinitialiser un fomulaire avec une clé
 
-Réinitialiser l'état avec un clé est très pratique avec les formulaire
-
-Dans cette application, le composant `<Chat>` contient un champ de saisie controllé par l'état:
+- Réinitialiser l'état avec une clé est très pratique avec les formulaires
+- Dans cette application, le composant `<Chat>` contient un champ de saisie controllé par l'état:
 
  <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
-import Chat from './Chat.js';
-import ContactList from './ContactList.js';
+import Chat from './Chat';
+import ContactList from './ContactList';
 
 export default function Messenger() {
   const [to, setTo] = useState(contacts[0]);
@@ -5037,7 +5054,7 @@ textarea {
 
 </Sandpack>
 
-Mais il y a un bogue: si on change de destinataire, la valeur dans le formulaire est conservée.
+- **Bogue:** si on change de destinataire, la valeur dans le formulaire est conservée
 
 ---
 
@@ -5047,14 +5064,15 @@ Mais il y a un bogue: si on change de destinataire, la valeur dans le formulaire
 <Chat key={to.id} contact={to} />
 ```
 
-Ceci réinitialise l'état du `<Chat>`. Le re-rendu génère le composant `<Chat>` et toute l'arborescence en dessous.
+- Ceci réinitialise l'état du `<Chat>`
+- Le re-rendu génère le composant `<Chat>` et toute l'arborescence en dessous.
 
  <Sandpack s="70">
 
 ```js src/App.js
 import { useState } from 'react';
-import Chat from './Chat.js';
-import ContactList from './ContactList.js';
+import Chat from './Chat';
+import ContactList from './ContactList';
 
 export default function Messenger() {
   const [to, setTo] = useState(contacts[0]);
@@ -5146,26 +5164,28 @@ textarea {
 
 ## Conserver l'état pour les composants enlevés
 
-Comment conserver l'état pour une composante qui n'est plus visible?
+Comment conserver l'état pour un composant qui n'est plus visible?
 
-- On fait un rendu de tous les `<Chat>`, on cache ceux-ci via CSS, sauf celui sélectionné. Les `<chat>` ne sont pas enlevés de l'arborescence, donc leur état local sera préservé. Cette solution fonctionne bien pour une petite interface, mais devient lourde avec une app plus complexe.
-- On prourrait remonter l'état et conserver le message de chaque destinataire dans la composante parent. Quand les composants enfants sont détruits, l'état n'est pas impacté car il est stocké dans le parent. C'est la solution la plus commune.
-- On pourrait stocker les données ailleurs, en plus du state. Par exemple, stocker dans le localStorage du navigateur.
+1. **Invisible via CSS**
+   - Faire rendu avec de tous les composants
+   - Masquer, via des classes CSS, les éléments non-visibles
+   - L'arborescence est stable, les états sont préservés
+   - Ça devient lourd avec beaucoup d'éléments invisibles
+2. **Remonter l'état**
+   - On remonte l'état et on conserve les états dans le composant parent
+   - Quand les composants enfants sont détruits, l'état parent n'est pas impacté
+   - C'est la solution simple
+3. **Stocker les données ailleurs**
+   - On pourrait stocker les données ailleurs
+   - On peut alors soit utiliser `useState` en synchronisant les données externes, soit utiliser `useExternalSyncStore`
+   - localStorage, sessionStorage, cookie, path, hash, web service, database, Redux, Zustand etc.
 
 ---
 
-## Résumé
+## Défi 10: Réparer les champs de saisie
 
-- React conserve l'état tant que le composant est rendu à la même position
-- L'état n'est pas conservé dans le JSX, c'est associé à la position du JSX dans l'arborescence
-- On peut forcer une partie de l'arborescence à réinitialiser l'état en chageant le `key`
-- Ne jamais imbriquer les composant, car cela réinitialise l'état
-
----
-
-## Défi: Réparer les champs de saisie
-
-Cet exemple affiche un message quand on clique le bouton. Mais, cela réinitialise aussi le champ de saisie. Réparez pour que le bouton ne réinitialise pas le champ de saisie.
+- On affiche un message quand on clique le bouton. Mais, cela réinitialise aussi le champ de saisie.
+- Réparez pour que le bouton ne réinitialise pas le champ de saisie.
 
  <Sandpack s="70">
 
@@ -5222,9 +5242,10 @@ textarea {
 
 ---
 
-## Défi: Basculer entre deux champs de saisie
+## Défi 11: Basculer entre deux champs de saisie
 
-On peut inverser l'affichage. Mais il y a un bogue. Le contenu de `<Field>` ne change pas de place, même si le `label` est inversé
+- Il y a un bogue quand on inverse l'affichage.
+- Le contenu de `<Field>` ne change pas de place, même si le `label` est inversé
 
 <Hint>On doit utiliser `key`</Hint>
 
@@ -5291,11 +5312,10 @@ label {
 
 ---
 
-## Défi: Réinitialiser un formulaire de détails
+## Défi 12: Réinitialiser un formulaire de détails
 
-Dans cette de contact, on peut faire "save" pour sauegarder le contact, et "reset" pour ramener le contact à la dernière sauvegarde.
-
-Bogue: Quand on sélectionne un contact différent, l'état change mais le formulaire ne change pas. On doit réparer.
+- "Save" sauvegarde le contact, "reset" ramène le contact à la dernière sauvegarde
+- Bogue: Quand on sélectionne un contact différent, l'état change mais pas le formulaire
 
 <Hint>On doit utiliser `key`</Hint>
 
@@ -5440,11 +5460,16 @@ button {
 
 ---
 
-## Défi: Effacer une image pendant qu'elle charge
+## Défi 13: Effacer une image pendant qu'elle charge
 
-On clique "Next", le navigateur démarre le chargement. Mais pendant le chargement l'ancienne image est toujours affichée, parce qu'on réutilise `<img>`. Ce qu'on préfèrerait, c'est que dès que le nouveau texte apparait, l'image existante disparaisse.
+- On clique "Next", le navigateur démarre le chargement.
+- Pendant le chargement, l'ancienne image est toujours affichée
+- Parce qu'on réutilise `<img>` et on ne change que le `src`.
+- Ce qu'on préfèrerait, c'est que dès que le nouveau texte apparait, l'image existante disparaisse
 
-<Hint>On veut que React remplace le DOM plutôt que de le réutiliser</Hint>
+<Hint>
+  On veut que React remplace le DOM plutôt que de le réutiliser... `key`{' '}
+</Hint>
 
  <Sandpack s="70">
 
@@ -5519,9 +5544,11 @@ img {
 
 ---
 
-## Défi: Réparer un état mal positionné
+## Défi 14: Réparer un état mal positionné
 
-Chaque `Contact` a un état qui indique si on a fait "Show email". Mais si on renverse l'ordre, les noms changent de place, mais pas la position du "Show email". Il faut que les courriels suivent les contacts, quel que soit l'ordre.
+- Chaque `Contact` a un état qui indique si on a fait "Show email"
+- Mais si on renverse l'ordre, les noms changent de place, mais pas la position du "Show email"
+- Il faudrait que les courriels suivent les contacts, quel que soit l'ordre
 
 <Hint>
   La clé est basée sur l'index (la position). Mais on peut faire mieux.

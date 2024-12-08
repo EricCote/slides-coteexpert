@@ -34,6 +34,7 @@ type SandpackProps = {
   bootstrap?: boolean;
   leaflet?: boolean;
   console?: boolean;
+  v18?: boolean;
   v19?: boolean;
 };
 
@@ -99,6 +100,7 @@ function SandpackRoot(props: SandpackProps) {
     daisy = false,
     bootstrap = false,
     v19 = false,
+    v18 = false,
     leaflet = false,
     console = false,
     ...rest

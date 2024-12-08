@@ -28,8 +28,8 @@ root.render(
           eject: 'react-scripts eject',
         },
         dependencies: {
-          react: '^18.0.0',
-          'react-dom': '^18.0.0',
+          react: '^19.0.0',
+          'react-dom': '^19.0.0',
           'react-scripts': '^5.0.0',
         },
       },
@@ -53,6 +53,33 @@ root.render(
   },
 };
 
+export const templateV18 = {
+  ...template,
+  '/package.json': {
+    hidden: true,
+    code: JSON.stringify(
+      {
+        name: 'reactacademy.live',
+        version: '0.0.0',
+        main: '/src/index.js',
+        scripts: {
+          start: 'react-scripts start',
+          build: 'react-scripts build',
+          test: 'react-scripts test --env=jsdom',
+          eject: 'react-scripts eject',
+        },
+        dependencies: {
+          react: '^18.0.0',
+          'react-dom': '^18.0.0',
+          'react-scripts': 'latest',
+        },
+      },
+      null,
+      2
+    ),
+  },
+};
+
 export const templateV19 = {
   ...template,
   '/package.json': {
@@ -69,8 +96,8 @@ export const templateV19 = {
           eject: 'react-scripts eject',
         },
         dependencies: {
-          react: 'rc',
-          'react-dom': 'rc',
+          react: '^19.0.0',
+          'react-dom': '^19.0.0',
           'react-scripts': 'latest',
         },
       },
