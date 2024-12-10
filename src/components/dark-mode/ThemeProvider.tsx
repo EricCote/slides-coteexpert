@@ -12,7 +12,7 @@ import {
 
 interface ThemeItem {
   name: string;
-  icon: ElementType<any> | string;
+  icon: string;
 }
 interface ThemeContextType {
   theme: string;
