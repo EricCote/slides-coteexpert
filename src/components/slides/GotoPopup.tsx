@@ -46,7 +46,7 @@ function GotoPopup() {
   const [show, setShow] = useState<boolean>(false);
   const [num, setNum] = useState<number>(+location.hash?.slice(2) || 1);
   const [maxPages, setMaxPages] = useState<number>(100);
-  const txtNombre = useRef<HTMLInputElement>();
+  const txtNombre = useRef<HTMLInputElement>(undefined);
   let [lang] = useLanguage();
 
   function handleClose() {
@@ -142,7 +142,7 @@ function GotoPopup() {
   }
 
   return (
-    <Modal
+    (<Modal
       show={show}
       onHide={handleClose}
       autoFocus={false}
@@ -160,7 +160,7 @@ function GotoPopup() {
           <hr />
           <Form.Control
             type='number'
-            ref={txtNombre as RefObject<HTMLInputElement>}
+            ref={txtNombre as RefObject<HTMLInputElement | null>}
             placeholder={t('slideNum')}
             //defaultValue={location.hash?.slice(2) || '1'}
             value={num}
@@ -182,7 +182,7 @@ function GotoPopup() {
           </Button>
         </Modal.Footer>
       </Form>
-    </Modal>
+    </Modal>)
   );
 }
 

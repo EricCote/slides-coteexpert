@@ -10,7 +10,7 @@ export const StylesCSSPath = `/src/styles.css`;
 
 export const createFileMap = (codeSnippets: any) => {
   const myres = codeSnippets.reduce(
-    (result: Record<string, SandpackFile>, codeSnippet: React.ReactElement) => {
+    (result: Record<string, SandpackFile>, codeSnippet: React.ReactElement<any>) => {
       if (codeSnippet.type !== 'pre') {
         return result;
       }

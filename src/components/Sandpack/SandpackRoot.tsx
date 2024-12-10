@@ -160,7 +160,7 @@ function SandpackRoot(props: SandpackProps) {
     ...myOptions,
   };
 
-  const codeSnippets = Children.toArray(children) as ReactElement[];
+  const codeSnippets = Children.toArray(children) as ReactElement<any>[];
   let files = createFileMap(codeSnippets);
 
   if (additionalFiles) {

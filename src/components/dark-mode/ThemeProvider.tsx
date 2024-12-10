@@ -12,7 +12,7 @@ import {
 
 interface ThemeItem {
   name: string;
-  icon: string;
+  icon: ReactNode;
 }
 interface ThemeContextType {
   theme: string;
