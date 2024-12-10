@@ -101,9 +101,9 @@ export default function ThemeProvider({
   }
 
   return (
-    <ThemeContext.Provider value={{ theme: mode, setTheme, themes }}>
+    <ThemeContext value={{ theme: mode, setTheme, themes }}>
       {children}
-    </ThemeContext.Provider>
+    </ThemeContext>
   );
 }
 

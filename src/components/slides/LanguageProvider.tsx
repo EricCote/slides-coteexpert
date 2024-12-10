@@ -40,7 +40,7 @@ export default function LanguageProvider({
   }, [currentLanguage]);
 
   return (
-    <LanguageContext.Provider
+    <LanguageContext
       value={{
         currentLanguage,
         languageList,
@@ -49,7 +49,7 @@ export default function LanguageProvider({
       }}
     >
       {children}
-    </LanguageContext.Provider>
+    </LanguageContext>
   );
 }
 
