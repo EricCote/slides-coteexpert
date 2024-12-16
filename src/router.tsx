@@ -69,11 +69,7 @@ const components = {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <>
-        <Outlet />
-      </>
-    ),
+    element: <Outlet />,
     //errorElement: <ErrorBoundary />,
 
     children: [
