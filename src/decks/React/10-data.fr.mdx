@@ -2065,7 +2065,7 @@ input {
 
 Ici, on fait un suspense au niveau du routage complet. Mais la transition n'est pas fluide.
 
-<Sandpack v19>
+<Sandpack>
 
 ```js src/App.js
 import { Suspense, useState } from 'react';
@@ -2367,9 +2367,9 @@ main {
 
 ## StartTransition à la rescousse
 
-StartTransition indique un changement de State non-bloquant, qui n'est pas urgent. Si un autre événement lance un setState, le rendu de transition est interrompu (et redémarré plus tard, un fois le traitement de l'événement terminé).
+StartTransition indique un changement de State non-bloquant, dont le rendu n'est pas urgent. Ne provoque pas un suspense parent. Si un autre événement lance un setState, le rendu de transition est interrompu (et redémarré plus tard, une fois le traitement de l'événement terminé).
 
-<Sandpack v19>
+<Sandpack>
 
 ```js src/App.js
 import { Suspense, startTransition, useState } from 'react';
@@ -2675,7 +2675,7 @@ main {
 
 Permet d'avoir accès à startTransition, ainsi que son état `isPending`.
 
-<Sandpack v19>
+<Sandpack >
 
 ```js src/App.js
 import { Suspense, useState, useTransition } from 'react';

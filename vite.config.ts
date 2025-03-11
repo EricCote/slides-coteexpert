@@ -13,6 +13,7 @@ import { readdir, writeFile } from 'node:fs/promises';
 
 interface FileName {
   filename: string;
+  date: string;
 }
 
 const files = await readdir('src/decks', {
@@ -20,18 +21,29 @@ const files = await readdir('src/decks', {
   withFileTypes: true,
 });
 
-let results = [];
+let results: FileName[] = [] as FileName[];
 for (const file of files.filter((f) => f.isDirectory() === false)) {
   const f = await read('src/decks/' + file.name);
   matter(f);
 
   (f.data.matter as FileName).filename = file.name;
-  results.push(f.data.matter);
+
+  results.push(f.data.matter as FileName);
 }
 
-writeFile('src/slidedecks.json', JSON.stringify(results, null, 2));
+const sortedResults = results
+  .toSorted(function compareFn(a, b) {
+    if (!a.date || a.date < b.date) {
+      return -1;
+    } else if (a.date > b.date) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  })
+  .toReversed();
 
-//console.log(file.data.matter);
+writeFile('src/slidedecks.json', JSON.stringify(sortedResults, null, 2));
 
 // https://vitejs.dev/config
 export default defineConfig(

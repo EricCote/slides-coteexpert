@@ -245,7 +245,14 @@ export default function multiply(a, b) {
 
 - `let/const` ne pollue jamais l'objet global, et ne remonte pas (pas de hoist)
 - C'est limité à la portée du bloc, permettant d'isoler `let/const` dans un bloc `if`, `switch`, `while`, `for`, `try` ou `catch`
-- Avec `let`, on peut réassigner une variable. Avec `const`, il n'est pas possible de réassigner une variable. ATTENTION : On peut toujours modifier un objet ou un tableau par mutation.
+- Avec `let`, on peut réassigner une variable. Avec `const`, il n'est pas possible de réassigner une variable.
+- ATTENTION : On peut toujours modifier un objet ou un tableau par mutation.
+- En 2025, on utilise la notation de _tuple_ ou de _record_ pour créer des tableaux et objets immuables:
+
+```
+const record = #{ a: 1, b: 2 }; // Record
+const tuple = #[1, 2, 3];       // Tuple
+```
 
 ---
 
@@ -310,10 +317,10 @@ for (let i = 0; i < 10; i++) {
 ```js
 import { displayJson } from './display';
 
-const obj = { nom: 'Donald', age: 79 };
+const obj = { nom: 'Tom', age: 55 };
 
 //Ceci échoue, pas de réassignation avec const
-//obj = { nom: 'Kamala', age: 60 };
+//obj = { nom: 'John', age: 42 };
 
 //on permet la mutation
 obj.age += 1;
@@ -428,6 +435,11 @@ function evaluate(str) {
 
 </Sandpack>
 
+- et `&&`
+- ou `||`
+- coalesce `??`
+- ternaire `e ? t : f`
+
 ---
 
 ## Déclarer fonctions
@@ -479,7 +491,7 @@ f4();
 ## Syntaxe fonction flèche avec `return` implicite
 
 - Si la fonction flèche ne possède qu'une instruction `return`
-- On peut érire la fonction flèche avec un `return` implicite en retirant les accolades `{}`
+- Le `return` est implicite en retirant les accolades `{}`
 
 <Sandpack s="70" html>
 
@@ -487,12 +499,12 @@ f4();
 import display from './display';
 
 //prettier-ignore
-const explicitFunction = (a, b) => { return a + b; };
-const implicitFunction = (a, b) => a + b; //equivalent
+const addExplicitReturn = (a, b) => { return a + b; };
+const addImplicitReturn = (a, b) => a + b; //equivalent
 
 function testAdd() {
-  const txt1 = display('explicitFunction(4,5) ==> ' + explicitFunction(4, 5));
-  const txt2 = display('implicitFunction(4,5) ==> ' + implicitFunction(4, 5));
+  const txt1 = display('explicitFunction(4,5) ==> ' + addExplicitReturn(4, 5));
+  const txt2 = display('implicitFunction(4,5) ==> ' + addImplicitReturn(4, 5));
 }
 
 testAdd();
@@ -512,9 +524,9 @@ testAdd();
 ```js
 import { displayJson } from './display';
 
-const person1 = { name: 'Donald', age: 77, age: 78, age: 79 };
+const person1 = { name: 'Tom', age: 55, age: 56, age: 57 };
 
-displayJson(person1); //{ name: 'Donald', age: 79 };
+displayJson(person1); //{ name: 'Tom', age: 57 };
 
 //---------------------
 ```
@@ -766,11 +778,11 @@ displayJson(clonedNumbers);
 ```js
 import { displayJson } from './display';
 
-const person1 = { name: 'Donald', age: 79 }; // { name: 'Donald', age: 79 }
-const clonedPerson = { ...person1 }; // { name: 'Donald', age: 79 }
-const person2 = { city: 'NY', ...person1 }; // { city: 'NY', name: 'Donald', age: 79 }
-const person3 = { city: 'NY', ...person1, city: 'DC' }; // { city: 'DC', name: 'Donald', age: 79 }
-const person4 = { ...person2, ...person3 }; //{ city: 'DC', name: 'Donald', age: 79 }
+const person1 = { name: 'Tom', age: 55 }; // { name: 'Tom', age: 55 }
+const clonedPerson = { ...person1 }; // { name: 'Tom', age: 55 }
+const person2 = { city: 'LA', ...person1 }; // { city: 'LA', name: 'Tom', age: 55 }
+const person3 = { city: 'NY', ...person1, city: 'DC' }; // { city: 'DC', name: 'Tom', age: 55 }
+const person4 = { ...person2, ...person3 }; //{ city: 'DC', name: 'Tom', age: 55 }
 
 displayJson(person1);
 displayJson(clonedPerson);
@@ -971,7 +983,7 @@ displayJson(arr4);
 
 //---------------------
 
-const obj1 = { name: 'Donald', address: { city: 'Washington', state: 'DC' } };
+const obj1 = { name: 'Tom', address: { city: 'Los Angeles', state: 'CA' } };
 
 const obj2 = Object.assign({}, obj1);
 const obj3 = { ...obj1 };
@@ -1012,7 +1024,7 @@ displayJson(arr3);
 
 //---------------------
 
-const obj1 = { name: 'Donald', address: { city: 'Washington', state: 'DC' } };
+const obj1 = { name: 'Tom', address: { city: 'Los Angeles', state: 'CA' } };
 
 const obj2 = { ...obj1, address: { ...obj1.address } };
 const obj3 = structuredClone(obj1);
@@ -1046,13 +1058,13 @@ displayJson(arr2);
 
 //---------------------
 
-const obj1 = { name: 'Donald', age: 79 };
+const obj1 = { name: 'Tom', age: 55 };
 
 const obj2 = { ...obj1 }; //clone
 
-obj2.age = 80; // modify age property
-obj2['age'] = 81; // use bracket notation
-Object.assign(obj2, { age: 82 }); // Mutates the obj2 object
+obj2.age = 56; // modify age property
+obj2['age'] = 57; // use bracket notation
+Object.assign(obj2, { age: 58 }); // Mutates the obj2 object
 obj2.vip = true; // add a new property
 delete obj2.vip; // removes a property
 
@@ -1101,9 +1113,9 @@ displayJson(arr2);
 ```js
 import { displayJson } from './display';
 
-const obj1 = { name: 'Donald', age: 79 };
+const obj1 = { name: 'Tom', age: 55 };
 
-const addProp = { ...obj1, city: 'Washington' }; //clone
+const addProp = { ...obj1, city: 'Los Angeles' }; //clone
 
 displayJson(addProp, 2);
 
