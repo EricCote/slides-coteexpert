@@ -142,7 +142,7 @@ function GotoPopup() {
   }
 
   return (
-    (<Modal
+    <Modal
       show={show}
       onHide={handleClose}
       autoFocus={false}
@@ -154,8 +154,18 @@ function GotoPopup() {
         </Modal.Header>
         <Modal.Body>
           <div className='d-flex flex-row'>
-            {t('dark')}
-            <DarkModeMenu className='ms-3' onChanged={handleClose} />
+            <Button
+              variant='secondary'
+              onClick={() => {
+                document.documentElement.requestFullscreen();
+              }}
+            >
+              Full Screen Mode
+            </Button>
+            <div className='ms-auto align-self-center d-flex flex-row'>
+              {t('dark')}
+              <DarkModeMenu className='ms-3' onChanged={handleClose} />
+            </div>
           </div>
           <hr />
           <Form.Control
@@ -182,7 +192,7 @@ function GotoPopup() {
           </Button>
         </Modal.Footer>
       </Form>
-    </Modal>)
+    </Modal>
   );
 }
 

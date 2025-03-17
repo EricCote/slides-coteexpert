@@ -1,0 +1,477 @@
+---
+route: 1-intro
+title: Introduction à .NET et REST
+description: Introduction à .NET et REST
+language: fr
+---
+
+# Introduction à .NET et REST
+
+Éric Côté
+
+---
+
+## Eric Côté
+
+<img
+  src='https://www.reactacademy.live/static/20616643d8afc491bd4c1817ae69db63/5a6cd/Eric_Cote.webp'
+  alt='Eric Côté'
+  title='Eric Côté'
+  width='400px'
+/>
+
+- Débute avec les machines 8 bits (Commodore 64)
+- Formateur informatique depuis 2001 (.NET, C#, ASP.NET MVC, Sql Server, Azure)
+- Formateur en développement Open Source depuis 2018
+  - Javascript, TypeScript, React, GitHub, REST, Node, Express, Next, Remix, etc.
+- Formateur-Propriétaire de React Academy Live
+
+---
+
+## React Academy Live
+
+import Logo from '@react-academy-live/logo';
+
+<div style={{height: "350px"}}>
+
+<Logo />
+
+</div>
+
+Formations en entreprise, ainsi qu'en virtuel
+pour apprendre et maîtriser les technologies web modernes:
+**React, TypeScript, Next** et **Remix**.
+
+Offre de la formation depuis 2018.
+
+**Nouveau:** Nous avons remplacé CRA (Create-React-App) par **Vite**
+
+---
+
+## Présentations
+
+- Nom
+- Travail (compagnie, poste, type de travail)
+- Expérience en technologie
+- Type de PC (Mac, Windows, Linux)
+- Langages de programmation (C#? JavaScript? Python? autres?)
+- Expérience Web (Débutant? Avancé?)
+- Expérience Backend (REST? Azure Functions? AWS Lambda? Python Flask? PHP Laravel? Node Express? Autre?)
+- Attentes pour la formation
+
+---
+
+## Pourquoi un API?
+
+**CLI** (Command-Line Interface): Humain interagit avec du texte sur l'écran (ex: terminal)
+
+**GUI** (Graphical User Interface): Humain interagit avec une souris sur l'écran (ex: navigateur)
+
+**API** (Application Programming Interface): Application interagit avec un autre programme en utilisant un protocole de communication (Ex: REST)
+
+<hr />
+
+- Exemples de protocoles spécialisés:
+  - HTTPS (web)
+  - FTP (fichiers)
+  - SMTP (courriel)
+  - IRC (clavardage)
+  - RCS (messages)
+  - TDS (base de données)
+
+---
+
+## APIs pour des appels locaux
+
+- **DLL** (Dynamic Link Library)
+  - Bibliothèque qui expose des fonctionnalités à d'autres programmes via une API locale
+  - Plusieurs formats possibles: binaire en code machine natif (x86, amd64, ARM) ou en code .NET (IL: Intermediate Language)
+
+<hr />
+
+- **Package** X (Java, Node, Python, PHP, .NET, Rust)
+  - Bibliothèque qui expose des fonctionnalités à des programmes X en mode
+
+&nbsp;
+
+- **Package manager** X : Permet de gérer la version des packages (télécharger la dernière version, revenir à la version précédente, etc)
+  - npm (Node)
+  - Maven or Gradle (Java)
+  - Composer (PHP)
+  - UV or pip (Python)
+  - Nuget (.NET)
+  - Cargo (Rust)
+
+---
+
+## APIs pour appels distants (Remote procedure call)
+
+- Premiers essais: Corba, COM, DCOM, Java RMI (1995-2001)
+  - Bloqués par la plupart des firewalls
+- Basés sur HTTP et XML: SOAP, DISCO, WS-\*, XML Web Services, WCF (2001-2010)
+  - Pas facilement supportés sur les appareils mobiles
+
+<hr />
+
+- Basés sur HTTPS et JSON: REST, OpenAPI (2011 +)
+  - Facile à consommer par une page web
+- Basés sur HTTPS et binaire: gRPC (2016 +)
+  - Le format binaire est 7x plus rapide que le format json
+  - Plus complexe à utiliser
+
+---
+
+## Abstractions (1/2)
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+  }}
+>
+<img alt="electricite" src="/img/WebApi/01_01.png" />
+
+</div>
+
+---
+
+## Abstractions (2/2)
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+  }}
+>
+<img alt="electricite" src="/img/WebApi/01_02.png"  />
+
+</div>
+
+---
+
+## REST: Qu'est-ce que c'est
+
+REST est tiré du [doctorat](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) de Roy Fielding en 2000.
+
+**REST** est le _REpresentational State Transfer_
+
+- "Transfer" indique qu'il y a une communication entre un client-server (HTTP ou autre)
+- "State" indique qu'il y a des données à transférer
+- "Representational" indique que les données sont formattées d'après une représentation (JSON, XML, jpg, pdf)
+
+---
+
+## Caractéristiques de REST
+
+**Resource:** représente un objet, une donnée ou un service.
+
+**Identifiant:** un URI unique pour identifier une ressource. `https://server.com/orders/1`
+
+**Représentation:** Formatte la ressources (souvent en JSON). `{"orderId":1,"orderValue":99.90,"productId":1,"quantity":1}`
+
+**Interface uniforme** et standardisée: utilise un verbe HTTP pour gérer les opérations (GET, POST, PUT, PATCH et DELETE)
+
+import '../React/table-rows.css';
+
+<div className="my-tbl">
+
+| Opération    | Verbe SQL | Verbe HTTP   |
+| ------------ | --------- | ------------ |
+| Lecture      | SELECT    | GET          |
+| Modification | UPDATE    | PUT ou PATCH |
+| Ajout        | INSERT    | POST         |
+| Retrait      | DELETE    | DELETE       |
+
+</div>
+
+---
+
+## REST utilise l'architecture client-serveur
+
+Le client (consommateur) est distinct du serveur (fournisseur).
+
+Le client ne se préoccupe pas du stockage, le serveur ne se préoccupe pas de l'affichage.
+
+Les données sont portables et peuvent être utilisés par divers clients
+
+Les serveurs sont simples et échelonables.
+
+---
+
+## REST est Stateless
+
+En **Stateful**, un serveur peut reconnaitre le client (via une session). Le client spécifie dans un premier appel ses préférences, le pays, la langue ou la devise monétaire. Dans les appels suivants, le serveur reconnait le client et ses préférences.
+
+En **Stateless**, le serveur ne reconnait pas le client. Le client doit spécifier ses préférences à toutes les requêtes. (via URL, Query params, body ou header)
+
+REST se veut _Stateless_.
+
+---
+
+## Liens hypermédias
+
+On recommande d'ajouter des "liens hypermédia" pour documenter des opérations additionnelles possibles. Aussi nommé **HATEOAS** (Hypermedia as the Engine of Application State)
+
+```json
+{
+  "orderID": 3,
+  "productID": 2,
+  "quantity": 4,
+  "orderValue": 16.6,
+  "links": [
+    {
+      "rel": "product",
+      "href": "https://adventure-works.com/customers/3",
+      "action": "GET"
+    },
+    {
+      "rel": "product",
+      "href": "https://adventure-works.com/customers/3",
+      "action": "PUT"
+    }
+  ]
+}
+```
+
+---
+
+## Caractéristiques de REST
+
+- REST est **Cachable**
+  - Les clients peuvent conserver les réponses dans une cache
+  - Améliore les perfomances, car le serveur n'a pas besoin d'être solicité à chaque fois.
+
+<hr />
+
+- REST est un système en **couches** (layered system)
+  - Un appel vers un service REST peut déclencher des appels vers d'autres services
+
+---
+
+## Niveau de maturité REST
+
+Niveau 0 : Toutes les opérations sont des requêtes POST envoyées à un seul URI.
+Niveau 1 : URIs distincts pour chaque ressource individuelle.
+Niveau 2 : Verbes HTTP pour définir les opérations sur les ressources.
+Niveau 3 : Utilisation de l’hypermédia (HATEOAS)
+
+La plupart des services sont au niveau 2.
+
+---
+
+## Monolithique vs Micro-Service
+
+- **Monolithique**
+  - Regroupe plusieurs services REST dans un seul projet livrable.
+  - Plus simple à programmer, déployer et déboguer
+- **Micro-service**
+  - Divise les servies REST en petits projets livrables
+  - Isole les services entre eux
+  - Permet un échelonnage à la pièce
+  - Plus flexible
+  - Plus complexe à déployer et déboguer
+
+<hr />
+
+Librairies: [dapr](https://dapr.io/), [abp](https://abp.io/), [Awesome Microservices](https://github.com/mjebrahimi/Awesome-Microservices-DotNet?tab=readme-ov-file#tools-and-libraries)
+
+Références: [.NET Microservices](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) [Building Microservices](https://www.amazon.ca/dp/1492034029)
+
+---
+
+## API Gateway
+
+Devant nos services REST, on peut créer un service de API Gateway
+
+- .NET: [Ocelot](https://github.com/ThreeMammals/Ocelot), [YARP](https://github.com/dotnet/yarp)
+- AWS: [API Gateway](https://aws.amazon.com/api-gateway/)
+- Azure: [API Management](https://azure.microsoft.com/products/api-management)
+
+<hr />
+
+Permet d'ajouter des fonctionalités devant nos services
+
+- Throttling (limite le nombre de requêtes par secondes)
+- Caching côté serveur
+- Résilience (retries)
+- Authentication (identification) et autorisation
+- Logging et Monitoring
+- Transformation
+- Formattage (XML, Json, YAML)
+
+---
+
+## Format de données
+
+CSV, XML, JSON et YAML sont des formats compatibles REST.
+
+**JSON** est le plus populaire.
+
+---
+
+## .NET
+
+- .NET est un framework multiplateforme et open source
+- Permet de générer des applications Desktop, Mobile, Web, AI, IOT et Cloud
+- Roule sur MacOS, Windows, Linux.
+- Génère aussi des apps pour iPhoneOS, iPadOS, Android, Azure, XBox, WebAssembly, Cloud
+- Supporte différents langages: C#, F#, Visual Basic
+
+---
+
+## Différents téléchargements pour .NET
+
+- **SDK** (Software Development Kit): inclut deux choses: l'environnement d'exécution (runtime, librairies) et les outils CLI pour les Devs (compilateurs, debogueur, hot-reload, browser refresh, Aspire, analyseurs) (281 MB)
+  - Utile pour les devs
+    <hr />
+- **ASP.NET Core Runtime**: Environnement d'exécution (runtime, libs) pour les apps Web ou CLI (46MB)
+- **.NET Desktop Runtime**: Environnement d'exécution (runtime, libs) pour les apps Windows ou CLI (57MB)
+- **.NET Runtime 9.0.3**: Environnement d'exécution (runtime, libs) pour les apps CLI (34MB)
+
+---
+
+## Historique du .NET Runtime
+
+- **.NET Framework**: 2002 à 2015.
+- Propriétaire
+- seulement sur Windows
+- Versions 1.0 à 4.8.
+- Installé par le setup de Windows, supporté par le OS
+- Mis à jour par Windows Update (encore aujourd'hui)
+- Pas de mise à jour majeure
+
+<hr />
+
+- **.NET**: 2015 à aujourd'hui
+- Open Source
+- Multi-plateforme (Linux, Windows, MacOS)
+- Standard ISO
+- Originalement nommé **.NET Core** avant la version 5, maintenant c'est juste **.NET**
+- Versions **LTS** (Long Term Suport) sont paires, supportées pour [3 années](https://dotnet.microsoft.com/platform/support/policy)
+- Versions **STS** (Standard Term Support) sont impaires, suportées pour 1.5 années
+- .NET 9 est sorti en novembre 2024
+- .NET 10 est en preview. Sortie prévue pour novembre 2025
+
+---
+
+## ASP.NET Core
+
+- Ensemble de librairies pour développer des applications serveur web en .NET.
+- Il y a plusieurs sous-technologies:
+  - **Forms** (2002-2015) : pages web .ASPX (.NET Framework seulement)
+  - **MVC** (2009+):applications Web Server avec l'approche Model-View-Controller
+  - **Web API** (2010+): services REST
+  - **Web Pages** (Razor) (2012+): Pages web avec la syntaxe Razor (permet le C# dans le Html)
+  - **SignalR** (2013+): communication via WebSocket
+  - **Blazor**: Apps web interactives en C#
+    - **Blazor Server** (2019-2023): interactions exécutées sur le serveur. Fragment est retourné au client via Web Socket
+    - **Blazor WebAssembly (WASM)** (2021+): interactions exécutées sur le client, .NET est chargé sur le navigateur avec fichiers
+    - **Blazor Hybrid** (2023+): App native (desktop ou mobile MAUI). Affiche un WebView. Roule du .NET plutôt que WASM.
+    - **Blazor WebApp** (2024+): Interactions flexibles. Ex: Interactions sur le serveur d'abord, bascule sur le client après chargement du WASM
+
+---
+
+## Compilation et exécution .NET
+
+- **Compilation**: Le code source C# est compilé vers des DLL avec du code IL (Intermediate Language) plutôt que du code Natif (x86, AMD64, ARM)
+  - **C#->IL**
+
+<hr />
+
+- **Exécution**: Les DLL .NET sont compilées par l'environnement .NET
+  - **IL->Natif**
+  - L'environnement ne compile PAS la DLL au complet. On ne compile qu'au moment d'appeler une méthode non-compilée
+  - À mesure que l'exécution se poursuit, le code devient de plus en plus compilé en Natif
+  - Compilé en mémoire, pas écrit dans un fichier
+  - Nommé compilation **JIT** (Just-in-time)
+
+<hr />
+
+- Nouveauté: les versions .NET 6+ permettent de précompiler les DLLs en code natif. Ça se nomme le **AOT** (Ahead Of Time)
+  - **C#->Natif**
+
+---
+
+## Top Level Statements
+
+Instructions au top niveau
+
+- En C# classique, tout est orienté-objet, même le point de départ du programme.
+- C'est une méthode statique nommée `Main()`, dans une classe de l'application
+- S'il y a plusieurs classes avec `Main()`, on ajoute un paramètre `StartupObject` à la compilation
+- Depuis 2020, avec la sortie de .NET 5, il est possible de remplacer la méthode main par des instructions au top niveau
+
+<TwoColumns top>
+
+**Méthode Main**
+
+**Instructions Top Niveau**
+
+```c#
+namespace Compagnie.Projet
+{
+  class App
+  {
+    static void Main()
+    {
+      Console.WriteLine("Méthode Main")
+    }
+  }
+}
+```
+
+```c#
+Console.WriteLine("Top Niveau");
+```
+
+</TwoColumns>
+
+---
+
+## Serverless
+
+Il est possible de créer des services REST **Serverless**, sans utiliser Web API
+
+On peut utiliser **Azure Functions**, ou **AWS Lambdas**
+
+Possible d'utiliser C# ou d'autres langages
+
+Plutôt de payer des serveurs 24/7, on paye plutôt à l'usage
+
+Le nombre d'instances est élastique. Quand il y a beaucoup de demande, le nombre augmente. Quand la demande diminue, le nombre redescend
+
+Quand il n'y a pas de demande, Serverless peut descendre à 0 instances
+
+---
+
+## Lab 1
+
+Démarrez machine virtuelle
+
+Personnalisez la machine. (On peut changer la langue, on peut changer le mode "dark")
+
+Lancez _Visual Studio Code_ (icône bleu) et démarrez une fenêtre de terminal (menu "..." -> Terminal -> New Terminal)
+
+Lancez commande `dotnet --list-sdks` (le SDK 9.x est installé)
+
+Lancez commande `dotnet --list-runtimes` (les runtimes ASP.NET Core, .NET Core et Desktop sont installés pour 8.x et 9.y)
+
+Dans la barre d'activité (barre verticale d'icônes), choisir _Extensions_ (blocs empilés) et rechercher "C# Dev Kit". Installez le "C# Dev Kit"
+
+Créez un certificat local pour le developpement https. Lancez commande `dotnet dev-certs https -t`
+
+Fermez VSCode
+
+Démarrez Visual Studio 2022 (Icône magenta).
+
+Quand on demande de vous identifier, vous pouvez faire "skip"
+
+Pour l'écran de personnalisation, vous pouvez garder les défauts (General et thème Dark)
+
+Pour l'écran de démmarage, sélectionnez "create a new Project"
+
+Sélectionnez un projet Web API en .NET 8, choisir les défauts
+
+Testez le projet en mode déboggage, visitez `/weatherforecast`, visitez `/swagger`
