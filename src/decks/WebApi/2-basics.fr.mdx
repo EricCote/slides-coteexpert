@@ -10,3 +10,921 @@ language: fr
 Éric Côté
 
 ---
+
+## Web API
+
+##### Wikipedia:
+
+- Une API Web côté serveur est une interface de programmation
+  - exposée par un ou plusieurs points d'accès (endpoint) géré par messages (requête-réponse)
+  - messages sont formattés en JSON ou XML
+  - exposée sur le web via un server web https
+
+<hr />
+
+- Inspiré par diverses technologies
+  - Achitecture REST
+  - Format JSON
+  - Références HATEOAS
+
+---
+
+## HTTP
+
+- Hypertext Transfer Protocol
+
+![request](https://miro.medium.com/v2/resize:fit:927/1*blskBv2znoWBmDhIKz9dFA.png)
+
+---
+
+## Service Web
+
+- Dans une interaction web avec navigateur
+  - Navigateur envoit une requête au serveur
+  - On reçoit un document HTML (ou CSS, ou JavaScript...)
+- Dans une interaction avec client API
+  - Client envoit une requête REST au serveur
+  - Serveur retourne un document JSON (ou XML)
+
+<hr />
+
+- Souvent utilisé dans un SPA (Single Page Application)
+  - React, Angular, Vue, Svelte, Solid, Blazor WebAssembly
+
+---
+
+## Patron REST
+
+{/* prettier-ignore */}
+- Representational State Transfer (REST)
+- Approche architecturale pour bâtir des services Web.
+- Requêtes REST utilisent le protocole HTTP (ou HTTPS).
+- Utilise les verbes HTTP :
+  - `GET`: Obtenir des données
+  - `POST`: Créer une donnée
+  - `PUT`: Mettre à jour une donnée
+  - `PATCH`: Mise à jour partielle d'une donnée
+  - `DELETE`: Éliminer une donnée
+
+<hr />
+
+- Un service qui respecte REST se nomme un **RESTful API**. Il supporte :
+  - un URI de base
+  - des méthodes HTTP comme GET, POST, PUT, PATCH, ou DELETE
+  - Des formats (media type) pour les données, tel que JSON ou XML
+
+---
+
+## Controllers VS Minimal APIs
+
+-Il y a 2 paradigmes: **Controllers** et **Minimal APIs**
+
+import '../React/table-rows.css';
+
+<div className="my-tbl">
+
+| Comparer                      | Controllers                      | Minimal API                                |
+| ----------------------------- | -------------------------------- | ------------------------------------------ |
+| Orientation                   | Orienté-Objet                    | Orienté-Extensions                         |
+| Où                            | Classe dérivée de ControllerBase | Methodes d'extensions avec classes cachées |
+| Action                        | via Méthode                      | via lambda                                 |
+| Injection de dépendances (DI) | via constructeur                 | via Fournisseur de service                 |
+| Configuration                 | par attributs                    | par Fournisseur de service                 |
+| Maturité                      | existe depuis 2012               | existe depuis 2021                         |
+
+</div>
+
+---
+
+## Routage REST
+
+- Un API doit fournir différents services
+- On utilise le routage pour créer des divisions locales dans notre code.
+- Les requêtes seront dirigées au bon contrôleur
+  - https://localhost:5000/pizza est dirigé à `PizzaController`
+  - https://localhost:5000/order est dirigé à `OrderController`
+
+---
+
+## Services de ASP.NET
+
+- **Sérialisation automatique**, en JSON. Les endpoints peuvent sérialiser les objets en JSON, sans configuration. On peut aussi personnaliser manuellement ([custom serialization](https://learn.microsoft.com/en-us/aspnet/core/web-api/advanced/custom-formatters))
+- **Authentification et autorisation.** Les endpoints sont sécurisés via des _JSON Web Tokens_ (JWT). Des règles de contrôle d'accès fournissent l'authorisation.
+- **Routage spécifié dans le code.** On déclare nos routes et verbes dans des attributs qui décorent notre code. Les paramètres de nos méthodes peuvent spécifier leur provenance via un attribut: un élément du chemin, le _query string_ ou le _request body_.
+- **HTTPS est configuré facilement.** La sécurité est primordiale. ASP.NET peut générer des certificats de test pour activer le HTTPS local.
+
+---
+
+## Tester Web APIs
+
+- On peut utiliser la page web **Open API / Swagger**
+- On peut utiliser un outil tier-parti tel que **Postman**
+- On peut utiliser l'outil **.NET HTTP REPL**
+- On peut utiliser l'extension **.http**
+  - Utilise l'extension "Rest Client" en VS Code
+
+---
+
+## Créer projet avec VS Code
+
+- **"Contoso Pizza"** désire une application d'inventaire en Service REST en utilisant les verbes standards (GET, POST, PUT et DELETE)
+- Ouvrir un nouveau dossier nommé ContosoPizza
+- Ouvrir le terminal
+
+```bash
+dotnet new webapi --use-controllers -o ContosoPizza
+
+```
+
+- webapi est le nom du gabarit (_template_)
+- `-f` est la version du framework
+- `-o` pour le nom de dossier généré `output`
+
+---
+
+### Contenu de l'app
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Controllers/</td>
+      <td>Classes et méthodes exposées par le routage en endpoints HTTP</td>
+    </tr>
+    <tr>
+      <td>ContosoPizza.csproj</td>
+      <td>Configuration du projet (compilation, dépendances, version fx...)</td>
+    </tr>
+    <tr>
+      <td>Properties/</td>
+      <td>Configuration du serveur web en dev et debug</td>
+    </tr>
+    <tr>
+      <td>appsettings.json</td>
+      <td>Configuration de l'exécution</td>
+    </tr>
+    <tr>
+      <td>appsettings.Development.json</td>
+      <td>Configuration de l'exécution dans l'environnement dev</td>
+    </tr>
+    <tr>
+      <td>obj/</td>
+      <td>fichiers binaires et compilation intermédiaire</td>
+    </tr>
+    <tr>
+      <td>bin/</td>
+      <td>fichiers binaires et compilation finale</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Commandes dotnet
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Commande</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>dotnet restore</td>
+      <td>Restaurer les dépendances (Nuget)</td>
+    </tr>
+    <tr>
+      <td>dotnet clean</td>
+      <td>Effacer les fichiers binaires de compilation</td>
+    </tr>
+    <tr>
+      <td>dotnet build</td>
+      <td>Générer les binaires de compilation</td>
+    </tr>
+    <tr>
+      <td>dotnet add &lt;pkg></td>
+      <td>Ajoute une dépendance au projet</td>
+    </tr>
+    <tr>
+      <td>dotnet remove &lt;pkg></td>
+      <td>Enlève une dépendance au projet</td>
+    </tr>
+    <tr>
+      <td>dotnet run --launch-profile &lt;http></td>
+      <td>Exécute une application asp.net</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Démarrer l'app
+
+```bash
+dotnet run --launch-profile https
+```
+
+- Restaure les dépendances (au besoin)
+- Recompile (rebuild) (au besoin)
+
+Visitez: `https://localhost:{PORT}/weatherforecast`
+
+---
+
+## Résultat
+
+```json
+[
+  {
+    "date": "2021-11-09T20:36:01.4678814+00:00",
+    "temperatureC": 33,
+    "temperatureF": 91,
+    "summary": "Scorching"
+  },
+  {
+    "date": "2021-11-09T20:36:01.4682337+00:00",
+    "temperatureC": -8,
+    "temperatureF": 18,
+    "summary": "Cool"
+  }
+  // ...
+]
+```
+
+---
+
+---
+
+## Tester avec .NET HTTP REPL
+
+- C'est un outil pratique et simple pour naviguer un Web API
+
+```bash
+dotnet tool install -g Microsoft.dotnet-httprepl
+```
+
+- `-g` signifie une installation globale (par opposition au projet courant)
+
+- Pour se connecter au démarrage:
+
+```bash
+httprepl https://localhost:{PORT}
+```
+
+- Ou pendant l'utilisation de l'outil
+
+```bash
+connect https://localhost:{PORT}
+```
+
+---
+
+## Naviguer avec httprepl
+
+```bash
+https://localhost:{PORT}/> ls
+.                 []
+WeatherForecast   [GET]
+```
+
+- On peut se déplacer:
+
+```bash
+https://localhost:{PORT}/> cd WeatherForecast
+/WeatherForecast    [GET]
+```
+
+---
+
+## Appeler un service avec get
+
+<div style={{fontSize: "0.75em"}}>
+```json
+get
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Fri, 02 Apr 2021 17:31:43 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+[
+{
+"date": 4/3/2021 10:31:44 AM,
+"temperatureC": 13,
+"temperatureF": 55,
+"summary": "Sunny"
+},
+// ...
+]
+
+````
+</div>
+
+---
+
+## Exit httprepl
+
+```bash
+exit
+````
+
+---
+
+## Code du contrôleur
+
+<div style={{fontSize: "1em"}}>
+
+```cs {12}
+using Microsoft.AspNetCore.Mvc;
+
+namespace ContosoPizza.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class WeatherForecastController : ControllerBase
+{
+  private static readonly string[] Summaries = new[] {
+    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot"
+  };
+  // constructeur et get
+}
+
+```
+
+</div>
+
+---
+
+## Constructeur
+
+```cs
+    //
+    private readonly ILogger<WeatherForecastController> _logger;
+
+    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    {
+        _logger = logger;
+    }
+
+```
+
+---
+
+## Verbe get
+
+```cs
+//
+    [HttpGet(Name = "GetWeatherForecast")]
+    public IEnumerable<WeatherForecast> Get()
+    {
+        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = DateTime.Now.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+        })
+        .ToArray();
+    }
+```
+
+---
+
+## ControllerBase
+
+- Le contrôleur posssède une ou plusieurs méthodes, nommées _action_
+- Par convention, c'est dans le dossier Controller
+- Les endpoints sont exposés via le routage
+- On dérive de `ControllerBase`
+  - En MVC, on hérite de `Controller`, car cela gère les vues
+  - En Web API, il n'y a pas de vue, il faut donc utiliser `ControllerBase`
+
+---
+
+## Attributs
+
+```cs
+[ApiController]
+[Route("[controller]")]
+public class WeatherForecastController : ControllerBase
+```
+
+- `[ApiController]` permet des comportements additionnels:
+
+  - Inférence des paramètres
+  - Routage via attributs obligatoire
+  - Validation et gestion d'erreur du modèle
+
+<hr />
+
+- `[Route]` offre le routage `[controller]`
+- Utilise le nom de la classe (sans le suffixe `Controller`)
+- Ce conrôleur gère https://localhost:{PORT}/weatherforecast.
+- Dépendant des conventions, on voit souvent le routage `api/[controller]`
+
+---
+
+## Get et les autres verbes
+
+- Le CRUD est géré par les verbes http: `GET PUT POST DELETE`
+- Routage `[HttpGet("{id}")]` permet d'obtenir un objet unique
+
+---
+
+## Ajouter Modèle
+
+- Ajouter dossier `Models`
+- Ajouter classe `Pizza.cs`
+
+```cs
+namespace ContosoPizza.Models;
+
+public class Pizza
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public bool IsGlutenFree { get; set; }
+}
+```
+
+---
+
+## Ajouter un Service de Données
+
+- Ajouter dossier `Services`, ajouter classe `PizzaService.cs`
+
+<div style={{fontSize: ".75em"}}>
+
+```cs
+using ContosoPizza.Models;
+
+namespace ContosoPizza.Services;
+
+public static class PizzaService
+{
+  static List<Pizza> Pizzas { get; }
+  static int nextId = 3;
+  static PizzaService() {/* ... */}
+
+  public static List<Pizza> GetAll() => Pizzas;
+
+  public static Pizza? Get(int id) => Pizzas.FirstOrDefault(p => p.Id == id);
+
+  public static void Add(Pizza pizza) {/* ... */}
+
+  public static void Delete(int id) {/* ... */}
+
+  public static void Update(Pizza pizza) {/* ... */}
+}
+
+```
+
+</div>
+
+---
+
+## Constructeur
+
+```cs
+static PizzaService()
+{
+    Pizzas = new List<Pizza>
+    {
+        new Pizza { Id = 1, Name = "Classic Italian", IsGlutenFree = false },
+        new Pizza { Id = 2, Name = "Veggie", IsGlutenFree = true }
+    };
+}
+```
+
+---
+
+## Add et Delete
+
+```cs
+public static void Add(Pizza pizza)
+{
+    pizza.Id = nextId++;
+    Pizzas.Add(pizza);
+}
+
+public static void Delete(int id)
+{
+    var pizza = Get(id);
+    if(pizza is null)
+        return;
+    Pizzas.Remove(pizza);
+}
+```
+
+---
+
+## Update
+
+```cs
+public static void Update(Pizza pizza)
+{
+    var index = Pizzas.FindIndex(p => p.Id == pizza.Id);
+    if(index == -1)
+        return;
+    Pizzas[index] = pizza;
+}
+```
+
+- Le service est conservé en mémoire, dans une liste
+- On réinitialize à chaque redémarrage de l'application
+- 2 pizzas sont initialisées
+
+---
+
+## Bâtir
+
+```bash
+dotnet build
+```
+
+---
+
+## Ajouter le contrôleur
+
+- Dans le dossier `Controllers`, ajouter le fichier `PizzaController.cs`
+- Par convention, le suffixe détermine un contrôleur
+
+<div style={{fontSize:"0.7em"}}>
+
+```cs
+using ContosoPizza.Models;
+using ContosoPizza.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ContosoPizza.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class PizzaController : ControllerBase
+{
+    public PizzaController() {
+      // Constructor
+    }
+
+    // GET all action
+    // GET by Id action
+    // POST action
+    // PUT action
+    // DELETE action
+}
+```
+
+</div>
+
+---
+
+## Get all
+
+```cs
+[HttpGet]
+public ActionResult<List<Pizza>> GetAll() =>
+    PizzaService.GetAll();
+```
+
+- Gère le verbe HTTP `GET`, grâce à l'attribut `[HttpGet]`
+- Retourne une instance `ActionResult` de type `List<Pizza>`
+- `ActionResult` est la classe de base pour les résultats d'action
+- Appelle le service pour retourner toutes les pizzas
+- Retourne les données avec `Content-Type` à `application/json`
+
+---
+
+## Get d'une seule pizza
+
+```cs
+[HttpGet("{id}")]
+public ActionResult<Pizza> Get(int id)
+{
+    var pizza = PizzaService.Get(id);
+    if(pizza == null)
+        return NotFound();
+    return pizza;
+}
+```
+
+- Gère le verbe HTTP `GET` via l'attribut `[HttpGet]`
+- Le paramètre `id` fait partie du routage, de la partie du URL après `pizza/`.
+- L'attribut `[Route]` décrit le patron de base du contrôleur: `pizza/`
+- Recherche dans la BD pour retourner la bonne pizza
+
+---
+
+## Valeurs de retour
+
+Chaque `ActionResult` retourne un code d'erreur
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Résultat</th>
+      <th>Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`Ok` (implicite)</td>
+      <td>200</td>
+      <td>Produit `id` est trouvé et retourné, format spécifié par `Accept`</td>
+    </tr>
+    <tr>
+      <td>`NotFound`</td>
+      <td>404</td>
+      <td>Le produit `id` spécifié n'existe pas dans la BD</td>
+    </tr>
+
+  </tbody>
+</table>
+
+---
+
+## Exécuter et Tester
+
+```bash
+dotnet run
+```
+
+```bash
+httprepl https://localhost:{PORT}
+ls
+```
+
+```bash
+ .                 []
+ Pizza             [GET]
+ WeatherForecast   [GET]
+```
+
+```bash
+https://localhost:{PORT}/> cd Pizza
+/Pizza    [GET]
+```
+
+---
+
+### Lecture des données via Get
+
+```bash
+get
+
+get 1
+
+get 5
+
+```
+
+---
+
+## Actions CRUD pour REST
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Verbe HTTP</th>
+      <th>Opération CRUD</th>
+      <th>Attribut ASP.NET</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>Read</td>
+      <td>[HttpGet]</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>Create</td>
+      <td>[HttpPost]</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>Update</td>
+      <td>[HttpPut]</td>
+    </tr>
+    <tr>
+      <td>DELETE</td>
+      <td>Delete</td>
+      <td>[HttpDelete]</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## POST
+
+```cs
+[HttpPost]
+public IActionResult Create(Pizza pizza)
+{
+    // This code will save the pizza and return a result
+}
+```
+
+- ASP.NET va convertir le JSON du corps de la requête en objet `Pizza`
+- Retourne une réponse `IActionResult`
+
+---
+
+## Réponses d'un Create
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Résultat</th>
+      <th>Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`CreatedAtAction`</td>
+      <td>201</td>
+      <td>`Pizza` est créée, retourné dans le corps, format spécifié par `Accept`</td>
+    </tr>
+    <tr>
+      <td>`BadRequest` (implicite)</td>
+      <td>400</td>
+      <td>L'objet `Pizza` passé dans la requête est invalide</td>
+    </tr>
+
+  </tbody>
+</table>
+
+---
+
+## PUT
+
+```cs
+[HttpPut("{id}")]
+public IActionResult Update(int id, Pizza pizza)
+{
+    // This code will update the pizza and return a result
+}
+```
+
+- Il faut un paramètre `ID` pour spécifier quel élément modifier.
+
+---
+
+## Réponses d'une modification
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Résultat</th>
+      <th>Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`NoContent`</td>
+      <td>204</td>
+      <td>`Pizza` est modifiée dans la BD mémoire</td>
+    </tr>
+    <tr>
+      <td>`BadRequest`</td>
+      <td>400</td>
+      <td>La valeur `id` du routage et de l'objet `Pizza` ne correpond pas</td>
+    </tr>
+    <tr>
+      <td>`BadRequest` (implicite)</td>
+      <td>400</td>
+        <td>L'objet `Pizza` passé dans la requête est invalide</td>
+    </tr>
+
+  </tbody>
+</table>
+
+---
+
+## DELETE
+
+```cs
+[HttpDelete("{id}")]
+public IActionResult Delete(int id)
+{
+    // This code will delete the pizza and return a result
+}
+```
+
+---
+
+## Réponses d'un delete
+
+<table className='table align-middle table-striped'>
+  <thead>
+    <tr>
+      <th>Résultat</th>
+      <th>Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`NoContent`</td>
+      <td>204</td>
+      <td>`Pizza` est enlevée la BD mémoire</td>
+    </tr>
+    <tr>
+      <td>`NotFound`</td>
+      <td>404</td>
+      <td>La valeur `id` n'est pas trouvée dans la BD mémoire</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Créer une pizza
+
+```cs
+[HttpPost]
+public IActionResult Create(Pizza pizza)
+{
+    PizzaService.Add(pizza);
+    return CreatedAtAction(nameof(Get), new { id = pizza.Id }, pizza);
+}
+```
+
+- Contrôleur utilise l'Attribut `[ApiController]`, cela assume que le paramètre pizza sera trouvé dans le corps de la requête
+- `CreatedAtAction` retourne un URL dans entête `Location` qui réfère à l'objet Pizza que l'on vient de créer.
+- Utilise les règles de routage pour générer cet URL
+
+---
+
+## Modifier Pizza
+
+```cs
+[HttpPut("{id}")]
+public IActionResult Update(int id, Pizza pizza)
+{
+    if (id != pizza.Id)
+        return BadRequest();
+
+    var existingPizza = PizzaService.Get(id);
+    if(existingPizza is null)
+        return NotFound();
+
+    PizzaService.Update(pizza);
+
+    return NoContent();
+}
+```
+
+---
+
+## Enlever Pizza
+
+```cs
+[HttpDelete("{id}")]
+public IActionResult Delete(int id)
+{
+    var pizza = PizzaService.Get(id);
+
+    if (pizza is null)
+        return NotFound();
+
+    PizzaService.Delete(id);
+
+    return NoContent();
+}
+```
+
+---
+
+## Tester
+
+```bash
+dotnet run
+```
+
+```bash
+httprepl https://localhost:{PORT}
+cd Pizza
+ls
+
+post -c "{"name":"Hawaii", "isGlutenFree":false}"
+
+put 3 -c  "{"id": 3, "name":"Hawaiian", "isGlutenFree":false}"
+
+get 3
+
+delete 3
+
+get
+```
+
+---

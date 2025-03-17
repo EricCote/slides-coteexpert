@@ -1,0 +1,27 @@
+## Lab 1
+
+1. Démarrez machine virtuelle
+
+1. Personnalisez la machine. (On peut changer la langue, on peut changer le mode "dark")
+
+1. Lancez _Visual Studio Code_ (icône bleu) et démarrez une fenêtre de terminal (menu "..." -> Terminal -> New Terminal)
+
+1. Lancez commande `dotnet --list-sdks` (le SDK 9.x est installé)
+
+1. Lancez commande `dotnet --list-runtimes` (les runtimes ASP.NET Core, .NET Core et Desktop sont installés pour 8.x et 9.y)
+
+1. Dans la barre d'activité (barre verticale d'icônes), choisir _Extensions_ (blocs empilés) et rechercher "C# Dev Kit". Installez le "C# Dev Kit"
+
+1. Créez un certificat local pour le developpement https. Lancez commande `dotnet dev-certs https --trust`
+
+1. Fermez VSCode
+
+1. Démarrez Visual Studio 2022 (Icône magenta).
+
+1. Quand on demande de vous identifier, vous pouvez faire "skip"
+
+1. Pour l'écran de personnalisation, vous pouvez garder les défauts (`General` et thème `Dark`)
+
+1. Pour l'écran de démmarage, sélectionnez "create a new Project"
+1. Sélectionnez un projet Web API en .NET 8, choisir les défauts
+1. Testez le projet en mode déboggage, visitez `/weatherforecast`, visitez `/swagger`

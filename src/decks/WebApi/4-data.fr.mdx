@@ -10,3 +10,51 @@ language: fr
 Éric Côté
 
 ---
+
+## Entity Framework
+
+Entity Framework (EF) est un ORM (object-relational mapper).
+
+**Relie bases de données et code** : On utilise des objets .NET pour représenter la BD, éliminant ainsi la majorité du code SQL
+
+**Prise en charge de plusieurs bases de données** : Il fonctionne avec divers systèmes de base de données comme _SQL Server_, _MySQL_, _PostgreSQL_, etc
+
+**Code-First ou Database-First** : génére la base de données à partir du code (Code-First) ou à partir d'une base de données existante (Database-First)
+
+**Gère les relations complexes** : EF gère efficacement les relations entre les modèles de données (ex. : un-à-un, un-à-plusieurs)
+
+**Intégration avec LINQ** : Permet d'interroger les bases de données en utilisant LINQ, une syntaxe puissante et type-safe
+
+**Suivi des modifications** : Suit automatiquement les modifications des entités. Peut les enregistrer dans la base de données
+
+---
+
+## OData
+
+**OData** (Open Data Protocol) est un protocole web standardisé utilisé pour interroger et manipuler des données. Développé par Microsoft, il permet une communication fluide entre applications, API et services.
+
+**Protocole basé sur REST** : OData s'appuie sur les principes de REST, ce qui le rend simple et efficace à utiliser avec HTTP.
+
+**Requêtes standardisées** : fournit un format standard d'interogation en utilisant des conventions d'URL pour filtrer, trier, paginer, etc.
+
+**Interopérabilité** : En tant que norme ouverte, OData est pris en charge par divers outils et plateformes, ce qui facilite l'intégration et le partage de données.
+
+**Métadonnées** : OData inclut des métadonnées qui décrivent le modèle de données, permettant aux clients de comprendre la structure des données avec lesquelles ils interagissent.
+
+**Extensibilité** : Les développeurs peuvent étendre les services OData pour répondre à des besoins spécifiques tout en restant conformes à la norme.
+
+---
+
+## Validation
+
+Il existe des attributs pour aider la validation des données.
+
+Cela se nomme **Data Annotations**
+
+Par emxemple: [Required], [StringLength], [Range], [EmailAddress], ...
+
+---
+
+## Lab 4
+
+[Faire le tutoriel](https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api?view=aspnetcore-9.0&tabs=visual-studio)

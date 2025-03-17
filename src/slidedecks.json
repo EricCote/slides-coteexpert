@@ -7,7 +7,7 @@
     "title": "ASP.NET Web API",
     "description": "Formation ASP.NET Web API",
     "language": "fr",
-    "filename": "WebApi/menu.fr.mdx"
+    "filename": "aspnetwebapi.fr.mdx"
   },
   {
     "route": "blazor",
