@@ -3,11 +3,11 @@
     "filename": ".DS_Store"
   },
   {
-    "route": "aspnetwebapi",
+    "route": "WebApi/menu",
     "title": "ASP.NET Web API",
     "description": "Formation ASP.NET Web API",
-    "language": "es",
-    "filename": "aspnetwebapi.fr.mdx"
+    "language": "fr",
+    "filename": "WebApi/menu.fr.mdx"
   },
   {
     "route": "blazor",
