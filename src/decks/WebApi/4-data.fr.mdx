@@ -55,6 +55,30 @@ Par emxemple: [Required], [StringLength], [Range], [EmailAddress], ...
 
 ---
 
+## Scaffolding (Reverse Engineering)
+
+On peut générer des classes pour modéliser la BD à partir de SQL Server avec un outil de scaffolding.
+
+```sh
+dotnet ef dbcontext scaffold "Data Source=(localdb);Initial Catalog=AdventureWorks2022LT" Microsoft.EntityFrameworkCore.SqlServer
+```
+
+```sh
+dotnet ef dbcontext scaffold ... --table Products --table Categories
+```
+
+Consultez: https://learn.microsoft.com/ef/core/managing-schemas/scaffolding/
+
+---
+
+## Migration
+
+Outils permettant aux programmeurs de générer la BD à partir des classes du modèle.
+
+Voir: https://learn.microsoft.com/ef/core/managing-schemas/migrations
+
+---
+
 ## Lab 4
 
 [Faire le tutoriel](https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api?view=aspnetcore-9.0&tabs=visual-studio)

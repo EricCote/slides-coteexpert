@@ -10,3 +10,132 @@ language: fr
 Éric Côté
 
 ---
+
+## Swagger
+
+**Swagger** est une technologie basée sur le standard **OpenAPI** pour documenter les Web API REST
+
+On documente les différents services via un document JSON qui sera consommé par les outils clients
+
+Il y a aussi un site web qui permet de documenter et tester les différents services, consommé par des êtres humains
+
+---
+
+## SwashBuckle
+
+C'est une librairie qui permet aux applications .NET de générer la documentation pour Swagger
+
+Cette technologie Open Source n'est pas créée par Microsoft, mais par un tier-parti
+
+Malheureusement, les personnes qui maintiennent le système ne font pas de mis à jour pendant plusieurs mois. Ce qui signifie que les applications qui utilisent les nouveautés de .NET 8 ont des erreurs en utilisant Swashbuckle.
+
+Microsoft décide que pour .NET 9 Swashbuckle sera remplacé par quelque chose de plus moderne
+
+Microsoft a donc créé `Microsoft.AspNetCore.OpenApi`.
+
+<hr />
+
+**Note**: cette librairie ne génère que la documentation JSON, pas le site web.
+
+Pour générer le site web de documentation et test, on faut plutôt utiliser la librairie `SwashBuckle`, `NSwag.AspNetCore` ou `Scalar.AspNetCore`.
+
+---
+
+## Personnaliser la documentation
+
+Il est possible de personnaliser la documentation avec un contact, une licence d'utilisation, un contrat de service, etc.
+
+```cs
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Version = "9.9";
+        document.Info.Title = "Demo .NET 9 API";
+        document.Info.Description = "This API demonstrates OpenAPI customization in a .NET 9 project.";
+        document.Info.TermsOfService = new Uri("https://codewithmukesh.com/terms");
+        document.Info.Contact = new OpenApiContact
+        {
+            Name = "Mukesh Murugan",
+            Email = "mukesh@codewithmukesh.com",
+            Url = new Uri("https://codewithmukesh.com")
+        };
+        document.Info.License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        };
+        return Task.CompletedTask;
+    });
+});
+```
+
+---
+
+## Personnaliser un Endpoint
+
+```cs
+app.MapGet("/{name}",
+    (
+        [Description("Your Name.")]
+        [DefaultValue("mukesh")]
+        string name
+    ) => Results.Ok(new { Message = $"Hello {name}!" })
+    )
+    .WithName("GetGreeting")  // Assigns an operation ID
+    .WithSummary("Greet the user by name")  // Provides a short summary for the endpoint
+    .WithDescription("This endpoint takes a name as input and returns a personalized greeting.")  // Longer description
+    .WithTags("Greetings")  // Adds tags to categorize the endpoint
+    .Produces(200, typeof(object))  // Defines a successful response with the expected type
+    .Produces(400)  // Defines possible HTTP 400 responses
+    .ProducesProblem(500)  // Defines a problem details response for failures
+    .RequireAuthorization();  // Requires authentication for the endpoint
+```
+
+---
+
+## Lire des données sur un client .NET
+
+```cs
+using System.Net.Http.Headers;
+var client = new HttpClient();
+var request = new HttpRequestMessage
+{
+    Method = HttpMethod.Get,
+    RequestUri = new Uri("https://localhost:7196/weatherforecast"),
+};
+using (var response = await client.SendAsync(request))
+{
+    response.EnsureSuccessStatusCode();
+    var body = await response.Content.ReadAsStringAsync();
+    Console.WriteLine(body);
+}
+
+```
+
+---
+
+## Pooling des connexion sur HttpClient
+
+Il y a un pooling de connexion derrière HttpClient.
+
+Il y a des avantages de recycler une connexion plutôt que de fermer et réouvrir les connexions.
+
+1. C'est plus rapide, car on est déjà connecté. Pas de _Handshake_
+1. Il est possible qu'une connexion ne ferme pas immédiatement, mais plus tard
+1. Ouvrir de multiples connexions vers un serveur est permis, mais seulement jusqu'à un certain point. On pourrait alors se retrouver en pénurie de connexions
+
+Le désavantage de recycler la connexion, c'est que le DNS n'est pas rafraichi
+
+On peut utiliser `PooledConnectionLifetime` pour que le pool soit vidé après 2 minutes ou 15 minutes
+
+---
+
+## Javascript
+
+```js
+const res = await fetch('https://localhost:7196/weatherforecast');
+const data = await res.json();
+
+console.log(data);
+```
