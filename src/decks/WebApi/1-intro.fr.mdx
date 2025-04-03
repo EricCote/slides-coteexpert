@@ -83,18 +83,30 @@ Offre de la formation depuis 2018.
 
 ## APIs pour des appels locaux
 
-- **DLL** (Dynamic Link Library)
+- **Packages** (paquets)
   - Bibliothèque qui expose des fonctionnalités à d'autres programmes via une API locale
-  - Plusieurs formats possibles: binaire en code machine natif (x86, amd64, ARM) ou en code .NET (IL: Intermediate Language)
 
 <hr />
 
-- **Package** X (Java, Node, Python, PHP, .NET, Rust)
-  - Bibliothèque qui expose des fonctionnalités à des programmes X en mode
+- Les **DLL** sont des bibliothèques qui exposent des fonctionnalités via un contrat binaire en code machine natif
+  - x86 (ou x32), x64 (ou AMD), ARM (ou ARM64)
+- Le code natif est généré par un compilateur de langage (ex: C, C++, Rust, Go) et exécuté par la plateforme
 
-&nbsp;
+<hr />
 
-- **Package manager** X : Permet de gérer la version des packages (télécharger la dernière version, revenir à la version précédente, etc)
+- Le **code intermédiaire** est généré par un compilateur de langage (Java, Kotlin, Scala, C#, F#) et exécuté par un _runtime environment_ (environnement d'exécution) (JVM, .NET)
+  - .NET nomme ses packages avec l'extension `.dll`, Java avec `.class`
+
+<hr />
+
+- Le **code interprété** est généré par un humain dans un langage (JavaScript, Python, PHP, Perl) et exécuté par un runtime compatible (Node.js, Deno, Bun)
+  - Des "transpilateurs" peuvent "compiler" du code (TypeScript, Dart, Scala) vers d'autres langages interprétés (JavaScript)
+
+---
+
+## Package manager
+
+- Permet de gérer la version des packages (télécharger la dernière version, revenir à la version précédente, etc)
   - npm (Node)
   - Maven or Gradle (Java)
   - Composer (PHP)
