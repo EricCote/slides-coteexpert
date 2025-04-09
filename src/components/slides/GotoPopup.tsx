@@ -4,6 +4,7 @@ import {
   ChangeEvent,
   FormEvent,
   RefObject,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -27,6 +28,7 @@ const textes: TranslationObject = {
     cancel: 'Annuler',
     goto: 'Aller à la diapositive',
     of: ' de ',
+    full: 'Mode plein écran',
   },
   en: {
     dark: 'Dark Mode',
@@ -34,6 +36,7 @@ const textes: TranslationObject = {
     cancel: 'Cancel',
     goto: 'Go to Slide',
     of: ' of ',
+    full: 'Full Screen Mode',
   },
 };
 
@@ -63,6 +66,13 @@ function GotoPopup() {
     // is done. A delay of 500 ms is good enough
     setTimeout(() => changePage(`#s${page}`), 500);
   }
+
+  const t = useCallback(
+    (str: string) => {
+      return textes[lang!][str];
+    },
+    [lang]
+  );
 
   function changePage(page: string) {
     location.assign(page);
@@ -125,7 +135,7 @@ function GotoPopup() {
     } else {
       location.hash = '';
     }
-  }, []);
+  }, [t]);
 
   //If we've just started re-rendering after starting to show the popup, set the focus.
   useEffect(() => {
@@ -136,10 +146,6 @@ function GotoPopup() {
       txtNombre.current!.select();
     }
   }, [show]);
-
-  function t(str: string) {
-    return textes[lang!][str];
-  }
 
   return (
     <Modal
@@ -160,7 +166,7 @@ function GotoPopup() {
                 document.documentElement.requestFullscreen();
               }}
             >
-              Full Screen Mode
+              {t('full')}
             </Button>
             <div className='ms-auto align-self-center d-flex flex-row'>
               {t('dark')}
