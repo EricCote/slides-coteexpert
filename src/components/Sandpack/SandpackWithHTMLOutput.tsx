@@ -49,8 +49,8 @@ function ShowRenderedHTML({ children }) {
 const packageJSON = `
 {
   "dependencies": {
-    "react": "rc",
-    "react-dom": "rc",
+    "react": "latest",
+    "react-dom": "latest",
     "react-scripts": "^5.0.0",
     "prettier": "^3.3.3"
   },
