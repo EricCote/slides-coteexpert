@@ -54,5 +54,12 @@
     "description": "this is a test",
     "language": "es",
     "filename": "test.en.mdx"
+  },
+  {
+    "route": "test",
+    "title": "Test",
+    "description": "this is a test",
+    "language": "fr",
+    "filename": "test.fr.mdx"
   }
 ]

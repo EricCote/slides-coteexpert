@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import path from 'path';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
+import rehypeMdxImportMedia from 'rehype-mdx-import-media';
 import rehypePretty from './src/components/Codeblock-pretty/rehype-pretty';
 import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides';
 import { read } from 'to-vfile';
@@ -60,6 +61,14 @@ export default defineConfig(
             [remarkMdxFrontmatter],
           ],
           rehypePlugins: [
+            [
+              rehypeMdxImportMedia,
+              //   // {
+              //   //   attributes: {
+              //   //     img: ['src', 'srcset'],
+              //   //   },
+              //   // },
+            ],
             [
               rehypePretty,
               {
