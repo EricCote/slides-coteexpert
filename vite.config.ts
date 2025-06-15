@@ -11,6 +11,7 @@ import { rehypeSimpleSlides } from './src/components/slides/rehype-simple-slides
 import { read } from 'to-vfile';
 import { matter } from 'vfile-matter';
 import { readdir, writeFile } from 'node:fs/promises';
+import { rehypeImgToElement } from './src/components/slides/rehype-img-to-element';
 
 interface FileName {
   filename: string;
@@ -54,21 +55,17 @@ export default defineConfig(
       {
         enforce: 'pre',
         ...mdx({
-          // development: command === 'serve',
+          // development: true,
+          //  format: 'mdx',
+          //     remarkRehypeOptions: { allowDangerousHtml: true },
           remarkPlugins: [
             remarkGfm,
             [remarkFrontmatter],
             [remarkMdxFrontmatter],
           ],
           rehypePlugins: [
-            [
-              rehypeMdxImportMedia,
-              //   // {
-              //   //   attributes: {
-              //   //     img: ['src', 'srcset'],
-              //   //   },
-              //   // },
-            ],
+            rehypeImgToElement,
+            rehypeMdxImportMedia,
             [
               rehypePretty,
               {

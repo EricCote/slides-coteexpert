@@ -1,5 +1,4 @@
 import Home from './homepage/Home';
-
 import Sandpack from './components/Sandpack';
 import SandpackWithHTMLOutput from './components/Sandpack/SandpackWithHTMLOutput';
 import Diagram from './components/slides/Diagram';
@@ -7,8 +6,7 @@ import Illustration from './components/slides/Illustration';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import GotoPopup from './components/slides/GotoPopup';
-
-import Status from './decks/React/0-javascript.fr.mdx';
+import Status from './decks/test.fr.mdx';
 import { useLanguage } from './components/slides/LanguageProvider';
 
 const components = {
