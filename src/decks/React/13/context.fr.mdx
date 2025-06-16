@@ -568,13 +568,19 @@ Mais passer des props peut devenir lourd et répétitif quand on doit passer une
 
 <TwoColumns>
 
-<Diagram name="passing_data_lifting_state" height={120} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in purple. The value flows down to each of the two children, both highlighted in purple." >
+import light1 from './passing_data_lifting_state.png';
+import dark1 from './passing_data_lifting_state.dark.png';
+
+<Diagram  imgLight={light1} imgDark={dark1} height={120} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in purple. The value flows down to each of the two children, both highlighted in purple." >
 
 Remonter l'état
 
 </Diagram>
 
-<Diagram name="passing_data_prop_drilling" height={250}  captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.">
+import light2 from './passing_data_prop_drilling.png';
+import dark2 from './passing_data_prop_drilling.dark.png';
+
+<Diagram  imgLight={light2} imgDark={dark2} height={250}  captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.">
 
 Forage de props (Prop drilling)
 
@@ -768,13 +774,19 @@ Le contexte permet au parent de fournir des données dans l'arborescence dessous
 
 <TwoColumns>
 
-<Diagram name="passing_data_context_close" height={100} width={400} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in orange which projects down to the two children, each highlighted in orange." >
+import light3 from './passing_data_context_close.png';
+import dark3 from './passing_data_context_close.dark.png';
+
+<Diagram imgLight={light3} imgDark={dark3} height={100} width={400} captionPosition="top" alt="Diagram with a tree of three components. The parent contains a bubble representing a value highlighted in orange which projects down to the two children, each highlighted in orange." >
 
 Contexte et enfants proches
 
 </Diagram>
 
-<Diagram name="passing_data_context_far" height={200} captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.">
+import light4 from './passing_data_context_far.png';
+import dark4 from './passing_data_context_far.dark.png';
+
+<Diagram imgLight={light4} imgDark={dark4} height={200} captionPosition="top" alt="Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.">
 
 Contexte avec enfants distants
 

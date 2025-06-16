@@ -463,11 +463,11 @@ Ne pas oublier d'adapter l'importation avec la commande import
 <img
   height='400'
   style={{ marginTop: -40 }}
-  src='/img/react/i_import-export.svg'
+  src='./i_import-export.svg'
   alt='Default and named exports'
 />
 
-import './table-rows.css';
+import '../table-rows.css';
 
 <div className="my-tbl" >
 
@@ -2609,17 +2609,22 @@ li {
 
 Une "arborescence de rendu" représente les relations entre les composants parents et enfants
 
-<Diagram name="generic_render_tree" height={250} width={500} alt="">
+import light1 from './generic_render_tree.png';
+import dark1 from './generic_render_tree.dark.png';
+
+<Diagram imgLight={light1} imgDark={dark1} height={250} width={500} alt="">
 
 Une arborescence de rendu
 
 </Diagram>
 
-- Les composants en haut, près de la racine, sont des composant de "top-niveau" (parfois: "container" )
-- Les composants en bas, sans enfants, sont des composants "feuilles" (parfois: "presentation")
+- Les composants en haut:
+  - **top-niveau** ou **container**
+- Les composants en bas, sans enfants:
+  - **feuilles**, **leaf** ou **présentation**
 - Catégoriser est utile:
-  - Permet de comprendre le flot de données
-  - Permet de d'analyser la performance du rendu
+  - pour comprendre le flot de données
+  - pour analyser la performance du rendu
 
 ---
 
@@ -2627,7 +2632,10 @@ Une arborescence de rendu
 
 L'arborescence de dépendances de modules visualise la relation entre les fichiers JavaScript
 
-<Diagram name="generic_dependency_tree" height={250} width={500} alt="A tree graph with five nodes. Each node represents a JavaScript module. The top-most node is labelled 'RootModule.js'. It has three arrows extending to the nodes: 'ModuleA.js', 'ModuleB.js', and 'ModuleC.js'. Each arrow is labelled as 'imports'. 'ModuleC.js' node has a single 'imports' arrow that points to a node labelled 'ModuleD.js'.">
+import light2 from './generic_dependency_tree.png';
+import dark2 from './generic_dependency_tree.dark.png';
+
+<Diagram  imgLight={light2} imgDark={light2} height={250} width={500} alt="A tree graph with five nodes. Each node represents a JavaScript module. The top-most node is labelled 'RootModule.js'. It has three arrows extending to the nodes: 'ModuleA.js', 'ModuleB.js', and 'ModuleC.js'. Each arrow is labelled as 'imports'. 'ModuleC.js' node has a single 'imports' arrow that points to a node labelled 'ModuleD.js'.">
 
 Une arborescence de dépendances de modules
 

@@ -4,7 +4,7 @@ description: Introduction à React Router
 language: fr
 ---
 
-import './react-router.css';
+import '../react-router.css';
 
 # React Router: l'état des lieux
 
@@ -70,7 +70,7 @@ Offre de la formation depuis 2018.
 
 ---
 
-import Code1 from './8-react-router/code1.fr.mdx';
+import Code1 from './code1.fr.mdx';
 
 <Code1 components={props.components} />
 
@@ -172,13 +172,13 @@ switch (page) {
 
 ---
 
-import Code2 from './8-react-router/code2.en.mdx';
+import Code2 from './code2.en.mdx';
 
 <Code2 components={props.components} />
 
 ---
 
-import Code2b from './8-react-router/code2b.en.mdx';
+import Code2b from './code2b.en.mdx';
 
 <Code2b components={props.components} />
 
@@ -187,7 +187,7 @@ import Code2b from './8-react-router/code2b.en.mdx';
 ## Mais...
 
 <div >
-<img  src='/img/AngryCat.jpeg' style={{ marginInlineStart: 30, width: 300, float: 'right' }} />
+<img  src='./AngryCat.jpeg' style={{ marginInlineStart: 30, width: 300, float: 'right' }} />
 
 Le menu possède des liens réguliers: `<a href="page1">Page un</a>`
 
@@ -206,7 +206,7 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
 3. Navigation Api
 
 <img
-  src='/img/spa-day.jpeg'
+  src='./spa-day.jpeg'
   style={{ width: '300px', marginLeft: 'auto', marginRight: 'auto' }}
 />
 
@@ -217,7 +217,7 @@ Il faut donc remplacer les liens normaux par des liens qui ne téléchargent pas
 <div>
 
 <img
-  src='/img/homer-question.png'
+  src='./homer-question.png'
   style={{ marginInlineEnd: 30, width: 300, float: 'left' }}
 />
 
@@ -249,19 +249,19 @@ Ceci modifiant le DOM, il faut donc lier le gestionnaire d'événement dans un `
 
 ---
 
-import Code3 from './8-react-router/code3.en.mdx';
+import Code3 from './code3.en.mdx';
 
 <Code3 components={props.components} />
 
 ---
 
-import Code3b from './8-react-router/code3b.en.mdx';
+import Code3b from './code3b.en.mdx';
 
 <Code3b components={props.components} />
 
 ---
 
-import Code3c from './8-react-router/code3c.en.mdx';
+import Code3c from './code3c.en.mdx';
 
 <Code3c components={props.components} />
 
@@ -270,7 +270,7 @@ import Code3c from './8-react-router/code3c.en.mdx';
 ## Mais...
 
 <img
-  src='/img/hashpath.jpeg'
+  src='./hashpath.jpeg'
   style={{
     marginInlineStart: 30,
     marginBottom: 30,
@@ -329,13 +329,13 @@ function clickHandler(evt) {
 
 ---
 
-import Code4 from './8-react-router/code4.en.mdx';
+import Code4 from './code4.en.mdx';
 
 <Code4 components={props.components} />
 
 ---
 
-import Code4b from './8-react-router/code4b.en.mdx';
+import Code4b from './code4b.en.mdx';
 
 <Code4b components={props.components} />
 
@@ -349,7 +349,7 @@ import Code4b from './8-react-router/code4b.en.mdx';
 - Simplifie le _History API_ pour le SPA. Aucun besoin de programmer les clics des liens.
 
 <img
-  src='/img/new-shiny.jpeg'
+  src='./new-shiny.jpeg'
   width='300'
   style={{ marginLeft: 'auto', marginRight: 'auto' }}
 />
@@ -375,13 +375,13 @@ window.navigation.addEventListener('navigate', (evt) => {
 
 ---
 
-import Code5 from './8-react-router/code5.en.mdx';
+import Code5 from './code5.en.mdx';
 
 <Code5 components={props.components} />
 
 ---
 
-import Code5b from './8-react-router/code5b.en.mdx';
+import Code5b from './code5b.en.mdx';
 
 <Code5b components={props.components} />
 
@@ -392,7 +392,7 @@ import Code5b from './8-react-router/code5b.en.mdx';
 <div>
 
 <img
-  src='/img/trends.png'
+  src='./trends.png'
   style={{ width: '50%', float: 'Right', marginLeft: 50 }}
 />
 
@@ -521,7 +521,7 @@ createBrowserRouter(
 <iframe
   src='https://remix.run/_docs/routing'
   scrolling='no'
-  width='100%'
+  width='100%' 
   height='800'
   style={{ overflow: 'hidden' }}
 />
@@ -539,19 +539,19 @@ On peut aussi partager cet url, ou créer un favori ou un raccourci.
 
 ---
 
-import Code6 from './8-react-router/code6.en.mdx';
+import Code6 from './code6.en.mdx';
 
 <Code6 components={props.components} />
 
 ---
 
-import Code7 from './8-react-router/code7.en.mdx';
+import Code7 from './code7.en.mdx';
 
 <Code7 components={props.components} />
 
 ---
 
-import Code7b from './8-react-router/code7b.en.mdx';
+import Code7b from './code7b.en.mdx';
 
 <Code7b components={props.components} />
 
@@ -657,7 +657,7 @@ Si on utilise `defer({data})`, on peut alors utiliser `<Suspense fallback={plach
 
 **Suspense** affiche un _fallback_ tant que **Await** n'est pas _résolu_.
 
-<img src='/img/wait.gif' width='100px' />
+<img src='./wait.gif' width='100px' />
 
 ---
 
