@@ -1,8 +1,5 @@
 [
   {
-    "filename": ".DS_Store"
-  },
-  {
     "route": "WebApi/menu",
     "title": "ASP.NET Web API",
     "description": "Formation ASP.NET Web API",

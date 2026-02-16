@@ -1,5 +1,4 @@
 //This theme provider adds dark mode to react-bootstrap.
-/* global __DEV__ */
 
 import {
   useState,

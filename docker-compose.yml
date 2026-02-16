@@ -1,0 +1,24 @@
+services:
+
+  slides-coteexpert:
+    image: slides-coteexpert:latest
+    container_name: slides-coteexpert
+    restart: unless-stopped
+    expose:
+      - "80"
+    labels:
+      - traefik.enable=true
+      # HTTPS router
+      - traefik.http.routers.slides-coteexpert.rule=Host(`slides.coteexpert.com`)
+      - traefik.http.routers.slides-coteexpert.entrypoints=websecure
+      - traefik.http.routers.slides-coteexpert.tls.certresolver=letsencrypt
+      - traefik.http.services.slides-coteexpert.loadbalancer.server.port=80
+    networks:
+      - stack_backend
+
+
+networks:
+  stack_backend:
+    external: true
+
+
