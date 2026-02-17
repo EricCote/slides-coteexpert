@@ -7,7 +7,7 @@ import GotoPopup from './components/slides/GotoPopup';
 import { useLanguage } from './components/slides/LanguageProvider';
 
 
-const Status = lazy(() => import('./decks/AspNetWebApi/api1.fr.mdx'));
+const Status = lazy(() => import('./decks/WebApi/api1.fr.mdx'));
 const Sandpack = lazy(() => import('./components/Sandpack'));
 const SandpackWithHTMLOutput = lazy(() => import('./components/Sandpack/SandpackWithHTMLOutput'));
 
